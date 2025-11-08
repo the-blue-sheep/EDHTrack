@@ -1,20 +1,22 @@
 package org.example.edhtrack.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.Data;
 
-@Getter //Getter for id and name
+import java.util.List;
+
+
+@Data
 @Entity
+@Table(name = "players")
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    @Setter //Setter only for name because id is autoincrement
+    private int playerId;
+    @Column(unique = true)
     private String name;
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Deck> decks;
 
     public Player() {}
 

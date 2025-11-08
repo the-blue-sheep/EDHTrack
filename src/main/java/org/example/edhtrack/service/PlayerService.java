@@ -20,16 +20,22 @@ public class PlayerService {
     public PlayerResponseDTO createPlayer(PlayerCreateDTO dto) {
         Player player = new Player(dto.getName());
         Player saved = playerRepository.save(player);
-        return new PlayerResponseDTO(saved.getId(), saved.getName());
+        return new PlayerResponseDTO(saved.getPlayerId(), saved.getName());
     }
 
     public List<PlayerResponseDTO> getAllPlayers() {
         return playerRepository.findAll().stream()
-                .map(p -> new PlayerResponseDTO(p.getId(), p.getName()))
+                .map(p -> new PlayerResponseDTO(p.getPlayerId(), p.getName()))
                 .collect(Collectors.toList());
     }
 
     public void deletePlayer(int id) {
         playerRepository.deleteById(id);
+    }
+
+    public PlayerResponseDTO updatePlayer(PlayerCreateDTO dto) {
+        Player player = new Player(dto.getName());
+        Player saved = playerRepository.save(player);
+        return new PlayerResponseDTO(saved.getPlayerId(), saved.getName());
     }
 }
