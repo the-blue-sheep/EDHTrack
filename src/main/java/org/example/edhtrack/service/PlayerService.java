@@ -1,7 +1,7 @@
 package org.example.edhtrack.service;
 
-import org.example.edhtrack.dto.PlayerCreateDTO;
-import org.example.edhtrack.dto.PlayerResponseDTO;
+import org.example.edhtrack.dto.player.PlayerCreateDTO;
+import org.example.edhtrack.dto.player.PlayerResponseDTO;
 import org.example.edhtrack.entity.Player;
 import org.example.edhtrack.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
@@ -37,5 +37,9 @@ public class PlayerService {
         Player player = new Player(dto.getName());
         Player saved = playerRepository.save(player);
         return new PlayerResponseDTO(saved.getPlayerId(), saved.getName());
+    }
+
+    public Player getPlayerById(int playerId) {
+        return playerRepository.findById(playerId).get();
     }
 }

@@ -1,8 +1,10 @@
 package org.example.edhtrack.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 @Table(name = "game_participants")
 public class GameParticipant {
     @Id
@@ -15,11 +17,10 @@ public class GameParticipant {
 
     @ManyToOne
     @JoinColumn(name="player_id")
-    private Player participants;
+    private Player player;
 
     @ManyToOne
     @JoinColumn(name="deck_id")
     private Deck deckId;
-
 
 }

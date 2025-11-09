@@ -14,7 +14,7 @@ public class Deck {
     @Column(nullable=false)
     private String Commander;
 
-    private String colorId;
+    private String colors;
     private String deckName;
     private String bracket;
 
