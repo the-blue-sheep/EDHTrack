@@ -39,7 +39,7 @@ public class GameService {
                     GameParticipant gp = new GameParticipant();
                     gp.setGame(savedGame);
                     gp.setPlayer(playerRepository.findById(g.playerId()).orElseThrow());
-                    gp.setDeckId(deckRepository.findById(g.deckId()).orElseThrow());
+                    gp.setDeck(deckRepository.findById(g.deckId()).orElseThrow());
                     return gp;
                 }).toList();
 

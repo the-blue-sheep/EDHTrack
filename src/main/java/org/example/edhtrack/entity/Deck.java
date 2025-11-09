@@ -9,17 +9,17 @@ import lombok.Data;
 public class Deck {
     @Id
     @GeneratedValue
-    private int DeckId;
+    private int deckId;
 
     @Column(nullable=false)
-    private String Commander;
+    private String commander;
 
     private String colors;
     private String deckName;
     private String bracket;
 
     @ManyToOne
-    @JoinColumn(name = "playerID", nullable=false)
+    @JoinColumn(name = "player", nullable=false)
     private Player player;
 
 }

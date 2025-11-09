@@ -12,4 +12,10 @@ public final class Utils {
                 .count();
     }
 
+    public enum LeaderboardType {
+        PLAYER,
+        COMMANDER,
+        COLOR
+    }
+
 }

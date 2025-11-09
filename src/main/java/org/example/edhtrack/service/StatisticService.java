@@ -5,27 +5,21 @@ import org.example.edhtrack.dto.stats.*;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.GameParticipant;
 import org.example.edhtrack.entity.Player;
-import org.example.edhtrack.repository.DeckRepository;
 import org.example.edhtrack.repository.GameParticipantRepository;
-import org.example.edhtrack.repository.GameRepository;
-import org.example.edhtrack.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
 public class StatisticService {
-    private final DeckRepository deckRepository;
-    private final PlayerRepository playerRepository;
-    private final GameRepository gameRepository;
     private final GameParticipantRepository gameParticipantRepository;
 
-    public StatisticService(DeckRepository deckRepository, PlayerRepository playerRepository, GameRepository gameRepository, GameParticipantRepository gameParticipantRepository) {
-        this.deckRepository = deckRepository;
-        this.playerRepository = playerRepository;
-        this.gameRepository = gameRepository;
+    public StatisticService(GameParticipantRepository gameParticipantRepository) {
         this.gameParticipantRepository = gameParticipantRepository;
     }
 
@@ -40,7 +34,7 @@ public class StatisticService {
     }
 
     public CommanderWinRateDTO getWinRateByCommander(Deck deck) {
-        List<GameParticipant> participants = gameParticipantRepository.findByDeckId(deck);
+        List<GameParticipant> participants = gameParticipantRepository.findByDeck(deck);
         int gamesIn = participants.size();
 
         int gamesWon = Utils.countWins(participants);
@@ -123,4 +117,40 @@ public class StatisticService {
         return new CommanderStatDTO(commanderName, totalGames,totalPlayers,gamesWon, winRate);
     }
 
+    public List<LeaderboardEntryDTO> getLeaderboard(Utils.LeaderboardType type) {
+        List<GameParticipant> participants = gameParticipantRepository.findAll();
+        Map<String, List<GameParticipant>> grouped;
+
+        switch (type) {
+            case PLAYER -> grouped = participants.stream()
+                    .collect(Collectors.groupingBy(p -> p.getPlayer().getName()));
+
+            case COMMANDER -> grouped = participants.stream()
+                    .collect(Collectors.groupingBy(p -> p.getDeck().getCommander()));
+
+            case COLOR -> grouped = participants.stream()
+                    .collect(Collectors.groupingBy(p -> p.getDeck().getColors()));
+
+            default -> throw new IllegalArgumentException("Unsupported leaderboard type: " + type);
+        }
+
+
+        return grouped.entrySet().stream()
+                .map(entry -> {
+                    String key = entry.getKey();
+                    List<GameParticipant> games = entry.getValue();
+
+                    int totalGames = games.size();
+                    int wins = (int) games.stream()
+                            .filter(p -> p.getGame().getWinner() != null &&
+                                    p.getGame().getWinner().equals(p.getPlayer()))
+                            .count();
+                    double winRate = totalGames == 0 ? 0 : (double) wins / totalGames;
+
+                    return new LeaderboardEntryDTO(key, totalGames, wins, winRate);
+                })
+                .sorted(Comparator.comparingDouble(LeaderboardEntryDTO::winRate).reversed())
+                .toList();
+
+    }
 }

@@ -12,15 +12,15 @@ public class GameParticipant {
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "game_id")
+    @JoinColumn(name = "game")
     private Game game;
 
     @ManyToOne
-    @JoinColumn(name="player_id")
+    @JoinColumn(name="player")
     private Player player;
 
     @ManyToOne
-    @JoinColumn(name="deck_id")
-    private Deck deckId;
+    @JoinColumn(name="deck")
+    private Deck deck;
 
 }

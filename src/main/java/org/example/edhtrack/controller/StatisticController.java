@@ -1,5 +1,6 @@
 package org.example.edhtrack.controller;
 
+import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.stats.*;
 import org.example.edhtrack.service.DeckService;
 import org.example.edhtrack.service.PlayerService;
@@ -39,7 +40,7 @@ public class StatisticController {
 
     @GetMapping("/commander-stats")
     public CommanderStatDTO getCommanderStats(@RequestParam String commanderName){
-        return statisticService.getCommanderStatsForAll(deckService.getDeckByCommanderName(commanderName));
+        return statisticService.getCommanderStatsForAll(commanderName);
     }
 
     @GetMapping("/commander-amounts")
@@ -60,5 +61,10 @@ public class StatisticController {
     @GetMapping("/winrate-by-player")
     public WinrateByPlayerDTO getWinrateByPlayer(@RequestParam int playerId){
         return statisticService.getWinRateByPlayer(playerService.getPlayerById(playerId));
+    }
+
+    @GetMapping("/leaderboard")
+    public List<LeaderboardEntryDTO> getLeaderboard(@RequestParam Utils.LeaderboardType type){
+        return statisticService.getLeaderboard(type);
     }
 }

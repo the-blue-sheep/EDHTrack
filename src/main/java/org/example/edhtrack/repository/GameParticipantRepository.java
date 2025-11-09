@@ -14,7 +14,7 @@ public interface GameParticipantRepository extends JpaRepository<GameParticipant
 
     List<GameParticipant> findByDeck_ColorsContaining(String colors);
 
-    List<GameParticipant> findByDeckId(Deck deckId);
+    List<GameParticipant> findByDeck(Deck deck);
 
     List<GameParticipant> findByDeck_CommanderContaining(String commanderName);
 }

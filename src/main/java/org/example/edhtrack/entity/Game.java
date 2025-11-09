@@ -16,7 +16,7 @@ public class Game {
     private LocalDate date;
 
     @OneToOne
-    @JoinColumn(name = "winner_id")
+    @JoinColumn(name = "winner")
     private Player winner;
 
     private String notes;
