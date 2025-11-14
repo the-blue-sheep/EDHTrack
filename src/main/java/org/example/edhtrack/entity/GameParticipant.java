@@ -2,6 +2,8 @@ package org.example.edhtrack.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -12,15 +14,14 @@ public class GameParticipant {
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "game")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Game game;
 
     @ManyToOne
-    @JoinColumn(name="player")
     private Player player;
 
     @ManyToOne
-    @JoinColumn(name="deck")
     private Deck deck;
 
 }

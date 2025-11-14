@@ -45,7 +45,7 @@ public class GameService {
 
         gameParticipantRepository.saveAll(gameParticipants);
 
-        savedGame.setParticipants(gameParticipants);
+        savedGame.setPlayers(gameParticipants);
 
         return savedGame;
     }

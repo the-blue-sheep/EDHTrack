@@ -31,6 +31,11 @@ public class PlayerController {
         return playerService.updatePlayer(dto);
     }
 
+    @PostMapping("/retire")
+    public PlayerResponseDTO setIsRetiredPlayer(@RequestBody PlayerCreateDTO dto,  boolean isRetired) {
+        return playerService.setIsRetiredPlayer(dto, isRetired);
+    }
+
     @GetMapping
     public List<PlayerResponseDTO> findAll() {
         return playerService.getAllPlayers();

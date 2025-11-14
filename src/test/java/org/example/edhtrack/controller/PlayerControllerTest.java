@@ -55,7 +55,7 @@ class PlayerControllerTest {
     void addPlayer_shouldAddPlayer_whenCalled() throws Exception {
         //GIVEN
         Player savedPlayer = new Player("Harald");
-        savedPlayer.setPlayerId(1);
+        savedPlayer.setId(1);
         when(playerRepository.save(any(Player.class))).thenReturn(savedPlayer);
         //WHEN
         mockMvc.perform(MockMvcRequestBuilders.post("/api/players")

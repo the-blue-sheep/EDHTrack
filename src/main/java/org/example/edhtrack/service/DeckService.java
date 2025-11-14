@@ -19,7 +19,7 @@ public class DeckService {
     }
 
     public List<Deck> getDecksByPlayerId(int playerId) {
-        return deckRepository.findByPlayer_PlayerId(playerId);
+        return deckRepository.findByPlayer_Id(playerId);
     }
 
     public Deck createDeck(Player player, Deck deck) {
@@ -44,5 +44,11 @@ public class DeckService {
                 .filter(deck -> deck.getCommander().equals(commanderName))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public Deck setRetiredDeckStatus(Deck deck, boolean isRetired) {
+        deck.setRetired(isRetired);
+        return deckRepository.save(deck);
+
     }
 }

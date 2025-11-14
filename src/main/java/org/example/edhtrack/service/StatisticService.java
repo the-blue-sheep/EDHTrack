@@ -37,7 +37,7 @@ public class StatisticService {
         List<GameParticipant> participants = gameParticipantRepository.findByDeck(deck);
         int gamesIn = participants.size();
 
-        int gamesWon = Utils.countWins(participants);
+        int gamesWon = Utils.countCommanderWins(participants, deck.getCommander());
 
         double winRate = gamesIn == 0 ? 0 : (double) gamesWon / gamesIn;
         return new CommanderWinRateDTO(deck.getCommander(), gamesIn, gamesWon, winRate);
@@ -56,10 +56,10 @@ public class StatisticService {
     public WinrateAgainstAnotherPlayer getWinRateAgainstOtherPlayer(Player player1, Player player2) {
         List<GameParticipant> participants1 = gameParticipantRepository.findByPlayer(player1);
         List<GameParticipant> participants2 =  gameParticipantRepository.findByPlayer(player2);
-        List<GameParticipant> participants = List.of();
+        List<GameParticipant> participants = new ArrayList<>();
         for (GameParticipant p1 : participants1) {
             for (GameParticipant p2 : participants2) {
-                if (p1.getId() == p2.getId()) {
+                if (p1.getGame().equals(p2.getGame())) {
                     participants.add(p1);
                 }
             }
@@ -117,7 +117,7 @@ public class StatisticService {
         return new CommanderStatDTO(commanderName, totalGames,totalPlayers,gamesWon, winRate);
     }
 
-    public List<LeaderboardEntryDTO> getLeaderboard(Utils.LeaderboardType type) {
+    public List<LeaderboardEntryDTO> getLeaderboard(Utils.DeterminedType type) {
         List<GameParticipant> participants = gameParticipantRepository.findAll();
         Map<String, List<GameParticipant>> grouped;
 

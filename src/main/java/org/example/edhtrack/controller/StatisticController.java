@@ -64,7 +64,7 @@ public class StatisticController {
     }
 
     @GetMapping("/leaderboard")
-    public List<LeaderboardEntryDTO> getLeaderboard(@RequestParam Utils.LeaderboardType type){
+    public List<LeaderboardEntryDTO> getLeaderboard(@RequestParam Utils.DeterminedType type){
         return statisticService.getLeaderboard(type);
     }
 }

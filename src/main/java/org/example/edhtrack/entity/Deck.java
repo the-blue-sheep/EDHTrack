@@ -17,9 +17,9 @@ public class Deck {
     private String colors;
     private String deckName;
     private String bracket;
+    public boolean isRetired = false;
 
     @ManyToOne
-    @JoinColumn(name = "player", nullable=false)
     private Player player;
 
 }

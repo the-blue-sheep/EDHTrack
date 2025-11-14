@@ -26,5 +26,10 @@ public class DeckController {
         return deckService.getDecksByPlayerId(playerId);
     }
 
+    @PostMapping("/retire")
+    public Deck setRetiredDeckStatus(@RequestBody Deck deck, boolean isRetired) {
+        return deckService.setRetiredDeckStatus(deck, isRetired);
+    }
+
 
 }
