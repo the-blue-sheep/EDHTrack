@@ -64,7 +64,12 @@ public class StatisticController {
     }
 
     @GetMapping("/leaderboard")
-    public List<LeaderboardEntryDTO> getLeaderboard(@RequestParam Utils.DeterminedType type){
-        return statisticService.getLeaderboard(type);
+    public List<LeaderboardEntryDTO> getLeaderboard(
+            @RequestParam Utils.DeterminedType type,
+            @RequestParam(defaultValue = "0") int minGames,
+            @RequestParam(defaultValue = "false") boolean hideRetiredPlayers,
+            @RequestParam(defaultValue = "false") boolean hideRetiredDecks
+    ){
+        return statisticService.getLeaderboard(type, minGames, hideRetiredPlayers, hideRetiredDecks);
     }
 }

@@ -21,5 +21,4 @@ public class Deck {
 
     @ManyToOne
     private Player player;
-
 }

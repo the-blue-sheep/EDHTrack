@@ -117,10 +117,28 @@ public class StatisticService {
         return new CommanderStatDTO(commanderName, totalGames,totalPlayers,gamesWon, winRate);
     }
 
-    public List<LeaderboardEntryDTO> getLeaderboard(Utils.DeterminedType type) {
-        List<GameParticipant> participants = gameParticipantRepository.findAll();
-        Map<String, List<GameParticipant>> grouped;
+    public List<LeaderboardEntryDTO> getLeaderboard(
+            Utils.DeterminedType type,
+            int minGames,
+            boolean hideRetiredPlayers,
+            boolean hideRetiredDecks
+    ) {
 
+        List<GameParticipant> participants = gameParticipantRepository.findAll();
+
+        participants = participants.stream()
+                .filter(p -> {
+                    if (hideRetiredPlayers && p.getPlayer().isRetired()) {
+                        return false;
+                    }
+                    if (hideRetiredDecks && p.getDeck() != null && p.getDeck().isRetired()) {
+                        return false;
+                    }
+                    return true;
+                })
+                .toList();
+
+        Map<String, List<GameParticipant>> grouped;
         switch (type) {
             case PLAYER -> grouped = participants.stream()
                     .collect(Collectors.groupingBy(p -> p.getPlayer().getName()));
@@ -149,6 +167,7 @@ public class StatisticService {
 
                     return new LeaderboardEntryDTO(key, totalGames, wins, winRate);
                 })
+                .filter(dto -> dto.totalGames() >= minGames)
                 .sorted(Comparator.comparingDouble(LeaderboardEntryDTO::winRate).reversed())
                 .toList();
 

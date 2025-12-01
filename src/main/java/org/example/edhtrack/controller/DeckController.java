@@ -1,5 +1,6 @@
 package org.example.edhtrack.controller;
 
+import org.example.edhtrack.dto.DeckDTO;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.Player;
 import org.example.edhtrack.service.DeckService;
@@ -22,7 +23,7 @@ public class DeckController {
     }
 
     @GetMapping
-    public List<Deck> getDecks(int playerId) {
+    public List<DeckDTO> getDecks(int playerId) {
         return deckService.getDecksByPlayerId(playerId);
     }
 

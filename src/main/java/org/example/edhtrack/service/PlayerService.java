@@ -2,6 +2,8 @@ package org.example.edhtrack.service;
 
 import org.example.edhtrack.dto.player.PlayerCreateDTO;
 import org.example.edhtrack.dto.player.PlayerResponseDTO;
+import org.example.edhtrack.dto.player.PlayerSetRetiredDTO;
+import org.example.edhtrack.dto.player.PlayerUpdateDTO;
 import org.example.edhtrack.entity.Player;
 import org.example.edhtrack.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
@@ -20,12 +22,12 @@ public class PlayerService {
     public PlayerResponseDTO createPlayer(PlayerCreateDTO dto) {
         Player player = new Player(dto.getName());
         Player saved = playerRepository.save(player);
-        return new PlayerResponseDTO(saved.getId(), saved.getName());
+        return new PlayerResponseDTO(saved.getId(), saved.getName(), saved.isRetired());
     }
 
     public List<PlayerResponseDTO> getAllPlayers() {
         return playerRepository.findAll().stream()
-                .map(p -> new PlayerResponseDTO(p.getId(), p.getName()))
+                .map(p -> new PlayerResponseDTO(p.getId(), p.getName(), p.isRetired()))
                 .collect(Collectors.toList());
     }
 
@@ -33,22 +35,25 @@ public class PlayerService {
         playerRepository.deleteById(id);
     }
 
-    public PlayerResponseDTO updatePlayer(PlayerCreateDTO dto) {
-        Player player = new Player(dto.getName());
+    public PlayerResponseDTO updatePlayer(PlayerUpdateDTO dto) {
+        Player player = playerRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Id not found: " + dto.getId()));
+        player.setName(dto.getNewName());
+
         Player saved = playerRepository.save(player);
-        return new PlayerResponseDTO(saved.getId(), saved.getName());
+        return new PlayerResponseDTO(saved.getId(), saved.getName(), saved.isRetired());
     }
 
     public Player getPlayerById(int playerId) {
         return playerRepository.findById(playerId).get();
     }
 
-    public PlayerResponseDTO setIsRetiredPlayer(PlayerCreateDTO dto, boolean isRetired) {
+    public PlayerResponseDTO setIsRetiredPlayer(PlayerSetRetiredDTO dto) {
         Player player = playerRepository.findByName(dto.getName())
                 .orElseThrow(() -> new RuntimeException("Player not found: " + dto.getName()));
 
-        player.setRetired(isRetired);
+        player.setRetired(dto.isRetired());
         Player saved = playerRepository.save(player);
-        return new PlayerResponseDTO(saved.getId(), saved.getName());
+        return new PlayerResponseDTO(saved.getId(), saved.getName(), saved.isRetired());
     }
 }

@@ -1,5 +1,6 @@
 package org.example.edhtrack.service;
 
+import org.example.edhtrack.dto.DeckDTO;
 import org.example.edhtrack.dto.stats.CommanderAmountStatDTO;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.Player;
@@ -18,8 +19,17 @@ public class DeckService {
         this.deckRepository = deckRepository;
     }
 
-    public List<Deck> getDecksByPlayerId(int playerId) {
-        return deckRepository.findByPlayer_Id(playerId);
+    public List<DeckDTO> getDecksByPlayerId(int playerId) {
+        return deckRepository.findByPlayer_Id(playerId)
+                .stream()
+                .map(deck -> new DeckDTO(
+                        deck.getDeckId(),
+                        deck.getCommander(),
+                        deck.getDeckName(),
+                        deck.getColors(),
+                        deck.isRetired()
+                ))
+                .toList();
     }
 
     public Deck createDeck(Player player, Deck deck) {

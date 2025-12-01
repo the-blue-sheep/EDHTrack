@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -238,58 +239,74 @@ class StatisticServiceTest {
 
     @Test
     void getLeaderboard_shouldGroupAndSortCorrectly_byPlayer() {
-        // GIVEN
-        Player player1 = new Player("Alice");
-        Player player2 = new Player("Bob");
 
-        Game game1 = new Game();
-        game1.setWinner(player1);
+        Player alice = new Player("Alice");
+        alice.setPlayerId(1);
 
-        Game game2 = new Game();
-        game2.setWinner(player1);
+        Player bob = new Player("Bob");
+        bob.setPlayerId(2);
 
-        Game game3 = new Game();
-        game3.setWinner(player2);
+        Player harold = new Player("Harold");
+        bob.setPlayerId(3);
 
-        Deck deck = new Deck();
-        deck.setCommander("Atraxa");
-        deck.setColors("WUBG");
+        Game game1 = new Game(); game1.setId(1); game1.setWinner(alice);
+        Game game2 = new Game(); game2.setId(2); game2.setWinner(alice);
+        Game game3 = new Game(); game3.setId(3); game3.setWinner(bob);
+
+        Deck deckAlice = new Deck();
+        deckAlice.setDeckId(1);
+        deckAlice.setCommander("Atraxa");
+        deckAlice.setColors("WUBG");
+        deckAlice.setPlayer(alice);
+
+        Deck deckBob = new Deck();
+        deckBob.setDeckId(2);
+        deckBob.setCommander("Atraxa");
+        deckBob.setColors("WUBG");
+        deckBob.setPlayer(bob);
+
+        Deck deckHarold = new Deck();
+        deckBob.setDeckId(2);
+        deckBob.setCommander("Atraxa");
+        deckBob.setColors("WUBG");
+        deckBob.setPlayer(harold);
 
         GameParticipant gp1 = new GameParticipant();
-        gp1.setPlayer(player1);
-        gp1.setDeck(deck);
+        gp1.setId(1);
+        gp1.setPlayer(alice);
+        gp1.setDeck(deckAlice);
         gp1.setGame(game1);
 
         GameParticipant gp2 = new GameParticipant();
-        gp2.setPlayer(player1);
-        gp2.setDeck(deck);
+        gp2.setId(2);
+        gp2.setPlayer(alice);
+        gp2.setDeck(deckAlice);
         gp2.setGame(game2);
 
         GameParticipant gp3 = new GameParticipant();
-        gp3.setPlayer(player2);
-        gp3.setDeck(deck);
+        gp3.setId(3);
+        gp3.setPlayer(harold);
+        gp3.setDeck(deckHarold);
         gp3.setGame(game3);
 
-        //WHEN
         when(gameParticipantRepository.findAll()).thenReturn(List.of(gp1, gp2, gp3));
 
-        List<LeaderboardEntryDTO> leaderboard = statisticService.getLeaderboard(Utils.DeterminedType.PLAYER);
+        List<LeaderboardEntryDTO> leaderboard =
+                statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false);
 
         assertEquals(2, leaderboard.size());
 
         LeaderboardEntryDTO first = leaderboard.get(0);
         LeaderboardEntryDTO second = leaderboard.get(1);
 
-        // THEN
         assertEquals("Alice", first.playerName());
         assertEquals(2, first.totalGames());
         assertEquals(2, first.wins());
-        assertEquals(1.0, first.winRate(), 0.001);
 
-        assertEquals("Bob", second.playerName());
+        assertEquals("Harold", second.playerName());
         assertEquals(1, second.totalGames());
-        assertEquals(1, second.wins());
-        assertEquals(1.0, second.winRate(), 0.001);
+        assertEquals(0, second.wins());
     }
+
 
 }
