@@ -1,3 +1,3 @@
 package org.example.edhtrack.dto;
 
-public record GameParticipantDTO(int playerId, int deckId) {}
+public record GameParticipantDTO(int playerId, int deckId, boolean isWinner) {}

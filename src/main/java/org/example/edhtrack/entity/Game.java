@@ -18,13 +18,14 @@ public class Game {
     private LocalDate date;
     private String notes;
 
-    @ManyToOne
-    @JoinColumn(name = "winner_id")
-    private Player winner;
-
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<GameParticipant> players;
 
+    public List<GameParticipant> getWinners() {
+        return players.stream()
+                .filter(GameParticipant::isWinner)
+                .toList();
+    }
 }

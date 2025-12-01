@@ -32,7 +32,6 @@ public class GameImportService {
                 Row row = rowIterator.next();
                 Game game = new Game();
                 List<GameParticipant> participants = new ArrayList<>();
-                Player winner = null;
 
                 for (int i = 0; i < playerNames.size(); i++) {
                     Cell cell = row.getCell(i);
@@ -45,19 +44,18 @@ public class GameImportService {
                     GameParticipant gp = new GameParticipant();
                     gp.setGame(game);
                     gp.setPlayer(player);
-                    participants.add(gp);
 
                     CellStyle style = cell.getCellStyle();
                     Font font = workbook.getFontAt(style.getFontIndexAsInt());
-                    if (font.getBold()) {
-                        winner = player;
-                    }
+                    gp.setWinner(font.getBold());
+
+                    participants.add(gp);
                 }
 
-                game.setWinner(winner);
                 game.setPlayers(participants);
                 gameRepository.save(game);
             }
         }
     }
+
 }

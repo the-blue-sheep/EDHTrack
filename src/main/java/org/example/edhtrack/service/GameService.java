@@ -27,21 +27,23 @@ public class GameService {
     }
 
     public Game createGame(CreateGameDTO dto) {
+
         Game game = new Game();
-        game.setDate(dto.date()==null ? LocalDate.now() : dto.date());
+        game.setDate(dto.date() == null ? LocalDate.now() : dto.date());
         game.setNotes(dto.notes());
-        game.setWinner(playerRepository.findById(dto.winnerId()).orElse(null));
 
         Game savedGame = gameRepository.save(game);
 
         List<GameParticipant> gameParticipants = dto.participants().stream()
-                .map(g -> {
+                .map(p -> {
                     GameParticipant gp = new GameParticipant();
                     gp.setGame(savedGame);
-                    gp.setPlayer(playerRepository.findById(g.playerId()).orElseThrow());
-                    gp.setDeck(deckRepository.findById(g.deckId()).orElseThrow());
+                    gp.setPlayer(playerRepository.findById(p.playerId()).orElseThrow());
+                    gp.setDeck(deckRepository.findById(p.deckId()).orElseThrow());
+                    gp.setWinner(p.isWinner());   // <--- NEU
                     return gp;
-                }).toList();
+                })
+                .toList();
 
         gameParticipantRepository.saveAll(gameParticipants);
 
@@ -49,4 +51,5 @@ public class GameService {
 
         return savedGame;
     }
+
 }

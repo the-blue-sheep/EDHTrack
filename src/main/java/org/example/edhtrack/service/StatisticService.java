@@ -75,11 +75,11 @@ public class StatisticService {
     public StreakDTO getStreaksByPlayer(Player player){
         List<GameParticipant> participants = gameParticipantRepository.findByPlayer(player);
         List<Boolean> results = participants.stream()
-                .map(p -> p.getGame().getWinner() != null && p.getGame().getWinner().equals(player))
+                .map(GameParticipant::isWinner)
                 .toList();
 
         List<Integer> streaks = new ArrayList<>();
-        boolean current = results.get(0);
+        boolean current = results.getFirst();
         int count = 1;
 
         for (int i = 1; i < results.size(); i++) {
@@ -104,8 +104,7 @@ public class StatisticService {
                 .distinct()
                 .count());
         int totalPlayers = Math.toIntExact(participants.stream()
-                .filter(p -> p.getGame().getWinner() != null &&
-                        p.getGame().getWinner().equals(p.getPlayer()))
+                .filter(GameParticipant::isWinner)
                 .map(GameParticipant::getGame)
                 .distinct()
                 .count());
@@ -160,8 +159,7 @@ public class StatisticService {
 
                     int totalGames = games.size();
                     int wins = (int) games.stream()
-                            .filter(p -> p.getGame().getWinner() != null &&
-                                    p.getGame().getWinner().equals(p.getPlayer()))
+                            .filter(GameParticipant::isWinner)
                             .count();
                     double winRate = totalGames == 0 ? 0 : (double) wins / totalGames;
 

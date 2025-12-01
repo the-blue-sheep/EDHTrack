@@ -250,7 +250,6 @@ public class ExcelImportRunner implements CommandLineRunner {
         String filePath = "src/main/resources/spiele.xlsx";
         System.out.println("📄 Importing games from: " + filePath);
 
-
         try (FileInputStream fis = new FileInputStream(filePath);
              Workbook workbook = WorkbookFactory.create(fis)) {
 
@@ -274,7 +273,6 @@ public class ExcelImportRunner implements CommandLineRunner {
 
                 Game game = new Game();
                 List<GameParticipant> participants = new ArrayList<>();
-                Player winner = null;
 
                 for (int j = 0; j < playerNames.size(); j++) {
                     Cell cell = row.getCell(j);
@@ -305,16 +303,13 @@ public class ExcelImportRunner implements CommandLineRunner {
 
                     CellStyle style = cell.getCellStyle();
                     Font font = workbook.getFontAt(style.getFontIndexAsInt());
-                    if (font.getBold()) {
-                        winner = player;
-                    }
+                    participant.setWinner(font.getBold());
 
                     participants.add(participant);
                 }
 
                 if (!participants.isEmpty()) {
                     game.setPlayers(participants);
-                    game.setWinner(winner);
                     gameRepository.save(game);
                     importedGames++;
                 }
