@@ -8,10 +8,7 @@ import org.example.edhtrack.entity.Player;
 import org.example.edhtrack.repository.GameParticipantRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -33,14 +30,18 @@ public class StatisticService {
         return new WinrateByPlayerDTO(player, gamesIn, gamesWon, winRate);
     }
 
-    public CommanderWinRateDTO getWinRateByCommander(Deck deck) {
-        List<GameParticipant> participants = gameParticipantRepository.findByDeck(deck);
+    public CommanderWinRateDTO getWinRateByCommander(String commanderName) {
+        List<GameParticipant> participants = gameParticipantRepository.findAll();
         int gamesIn = participants.size();
 
-        int gamesWon = Utils.countCommanderWins(participants, deck.getCommander());
+        int gamesWon = (int) participants.stream()
+                .filter(GameParticipant::isWinner)
+                .filter(p -> p.getDeck().getCommanders().stream()
+                        .anyMatch(c -> c.getName().equalsIgnoreCase(commanderName)))
+                .count();
 
         double winRate = gamesIn == 0 ? 0 : (double) gamesWon / gamesIn;
-        return new CommanderWinRateDTO(deck.getCommander(), gamesIn, gamesWon, winRate);
+        return new CommanderWinRateDTO(commanderName, gamesIn, gamesWon, winRate);
     }
 
     public ColorStatDTO getWinrateByColor(String colors) {
@@ -97,24 +98,28 @@ public class StatisticService {
     }
 
     public CommanderStatDTO getCommanderStatsForAll(String commanderName) {
-        List<GameParticipant> participants = gameParticipantRepository.findByDeck_CommanderContaining(commanderName);
-        int gamesIn = participants.size();
-        int totalGames = Math.toIntExact(participants.stream()
-                .map(GameParticipant::getGame)
+        List<GameParticipant> participants = gameParticipantRepository
+                .findByDeck_Commanders_NameIgnoreCase(commanderName);
+
+        int totalGames = (int) participants.stream()
+                .map(gp -> gp.getGame().getId())
                 .distinct()
-                .count());
-        int totalPlayers = Math.toIntExact(participants.stream()
+                .count();
+
+        int totalPlayers = (int) participants.stream()
+                .map(GameParticipant::getPlayer)
+                .distinct()
+                .count();
+
+        int totalWins = (int) participants.stream()
                 .filter(GameParticipant::isWinner)
-                .map(GameParticipant::getGame)
-                .distinct()
-                .count());
+                .count();
 
-        int gamesWon = Utils.countWins(participants);
+        double winRate = totalGames == 0 ? 0 : (double) totalWins / totalGames;
 
-        double winRate = gamesIn == 0 ? 0 : (double) gamesWon / gamesIn;
-
-        return new CommanderStatDTO(commanderName, totalGames,totalPlayers,gamesWon, winRate);
+        return new CommanderStatDTO(commanderName, totalGames, totalPlayers, totalWins, winRate);
     }
+
 
     public List<LeaderboardEntryDTO> getLeaderboard(
             Utils.DeterminedType type,
@@ -143,7 +148,10 @@ public class StatisticService {
                     .collect(Collectors.groupingBy(p -> p.getPlayer().getName()));
 
             case COMMANDER -> grouped = participants.stream()
-                    .collect(Collectors.groupingBy(p -> p.getDeck().getCommander()));
+                    .flatMap(p -> p.getDeck().getCommanders().stream()
+                            .map(c -> new AbstractMap.SimpleEntry<>(c.getName(), p)))
+                    .collect(Collectors.groupingBy(Map.Entry::getKey,
+                            Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
 
             case COLOR -> grouped = participants.stream()
                     .collect(Collectors.groupingBy(p -> p.getDeck().getColors()));

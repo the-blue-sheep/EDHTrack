@@ -1,12 +1,7 @@
 package org.example.edhtrack.controller;
 
 import org.example.edhtrack.dto.CreateGameDTO;
-import org.example.edhtrack.dto.GameParticipantDTO;
-import org.example.edhtrack.dto.player.PlayerSetRetiredDTO;
-import org.example.edhtrack.entity.Deck;
-import org.example.edhtrack.entity.Game;
-import org.example.edhtrack.entity.GameParticipant;
-import org.example.edhtrack.entity.Player;
+import org.example.edhtrack.entity.*;
 import org.example.edhtrack.service.GameService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +12,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.print.attribute.standard.Media;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,12 +44,16 @@ class GameControllerTest {
 
         Deck deckAlice = new Deck();
         deckAlice.setDeckId(10);
-        deckAlice.setCommander("Atraxa");
+        Commander commanderAlice = new Commander();
+        commanderAlice.setName("Atraxa");
+        deckAlice.setCommanders(List.of(commanderAlice));
         deckAlice.setPlayer(alice);
 
         Deck deckBob = new Deck();
         deckBob.setDeckId(11);
-        deckBob.setCommander("Krenko");
+        Commander commanderBob = new Commander();
+        commanderBob.setName("Krenko");
+        deckBob.setCommanders(List.of(commanderBob));
         deckBob.setPlayer(bob);
 
         GameParticipant gp1 = new GameParticipant();

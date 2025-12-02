@@ -17,15 +17,18 @@ public class ExcelImportRunner implements CommandLineRunner {
     private final GameRepository gameRepository;
     private final GameParticipantRepository gameParticipantRepository;
     private final DeckRepository deckRepository;
+    private final CommanderRepository commanderRepository;
 
     public ExcelImportRunner(PlayerRepository playerRepository,
                              GameRepository gameRepository,
                              GameParticipantRepository gameParticipantRepository,
-                             DeckRepository deckRepository) {
+                             DeckRepository deckRepository,
+                             CommanderRepository commanderRepository) {
         this.playerRepository = playerRepository;
         this.gameRepository = gameRepository;
         this.gameParticipantRepository = gameParticipantRepository;
         this.deckRepository = deckRepository;
+        this.commanderRepository = commanderRepository;
     }
 
     private static final Map<String, String> COMMANDER_NAME_MAP = Map.ofEntries(
@@ -248,22 +251,15 @@ public class ExcelImportRunner implements CommandLineRunner {
     @Transactional
     public void importGames() throws Exception {
         String filePath = "src/main/resources/spiele.xlsx";
-        System.out.println("📄 Importing games from: " + filePath);
-
         try (FileInputStream fis = new FileInputStream(filePath);
              Workbook workbook = WorkbookFactory.create(fis)) {
 
             Sheet sheet = workbook.getSheetAt(0);
             Row headerRow = sheet.getRow(0);
-            if (headerRow == null) {
-                System.out.println("❌ Header row missing!");
-                return;
-            }
+            if (headerRow == null) return;
 
             List<String> playerNames = new ArrayList<>();
-            for (Cell cell : headerRow) {
-                playerNames.add(cell.getStringCellValue().trim());
-            }
+            for (Cell cell : headerRow) playerNames.add(cell.getStringCellValue().trim());
 
             int importedGames = 0;
 
@@ -278,34 +274,48 @@ public class ExcelImportRunner implements CommandLineRunner {
                     Cell cell = row.getCell(j);
                     if (cell == null || cell.getCellType() == CellType.BLANK) continue;
 
-                    String playerName = playerNames.get(j).trim();
+                    String playerName = playerNames.get(j);
                     Player player = playerRepository.findByName(playerName)
                             .orElseGet(() -> playerRepository.save(new Player(playerName)));
 
-                    String commanderName = cell.getStringCellValue().trim();
-                    String mappedCommander = COMMANDER_NAME_MAP.getOrDefault(commanderName, commanderName);
+                    String commanderCell = cell.getStringCellValue().trim();
+                    if (commanderCell.isEmpty()) continue;
 
-                    if (commanderName.isEmpty()) continue;
+                    List<String> commanderNames = Arrays.stream(commanderCell.split("&"))
+                            .map(String::trim)
+                            .map(n -> COMMANDER_NAME_MAP.getOrDefault(n, n))
+                            .toList();
 
-                    Deck deck = deckRepository.findByPlayerAndCommander(player, mappedCommander)
+                    String deckNameOrCommanders = cell.getStringCellValue().trim();
+
+                    Deck deck = deckRepository.findByPlayer_IdAndDeckName(player.getId(), deckNameOrCommanders)
                             .orElseGet(() -> {
                                 Deck newDeck = new Deck();
                                 newDeck.setPlayer(player);
-                                newDeck.setCommander(mappedCommander);
-                                newDeck.setDeckName(mappedCommander);
+                                newDeck.setDeckName(deckNameOrCommanders);
                                 return deckRepository.save(newDeck);
                             });
 
-                    GameParticipant participant = new GameParticipant();
-                    participant.setPlayer(player);
-                    participant.setDeck(deck);
-                    participant.setGame(game);
+                    List<Commander> commanders = new ArrayList<>();
+                    for (String name : commanderNames) {
+                        Commander c = commanderRepository.findByNameIgnoreCase(name)
+                                .orElseGet(() -> commanderRepository.save(new Commander(name)));
+                        commanders.add(c);
+                    }
+                    deck.setCommanders(commanders);
+                    deckRepository.save(deck);
+
+                    // 4) GameParticipant
+                    GameParticipant gp = new GameParticipant();
+                    gp.setGame(game);
+                    gp.setPlayer(player);
+                    gp.setDeck(deck);
 
                     CellStyle style = cell.getCellStyle();
                     Font font = workbook.getFontAt(style.getFontIndexAsInt());
-                    participant.setWinner(font.getBold());
+                    gp.setWinner(font.getBold());
 
-                    participants.add(participant);
+                    participants.add(gp);
                 }
 
                 if (!participants.isEmpty()) {
@@ -315,8 +325,7 @@ public class ExcelImportRunner implements CommandLineRunner {
                 }
             }
 
-            System.out.println("✅ Import finished successfully!");
-            System.out.println("Imported " + importedGames + " games.");
+            System.out.println("✅ Imported " + importedGames + " games");
         }
     }
 }

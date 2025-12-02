@@ -3,6 +3,8 @@ package org.example.edhtrack.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
 @Table(name = "decks")
@@ -11,9 +13,6 @@ public class Deck {
     @GeneratedValue
     private int deckId;
 
-    @Column(nullable=false)
-    private String commander;
-
     private String colors;
     private String deckName;
     private String bracket;
@@ -21,4 +20,12 @@ public class Deck {
 
     @ManyToOne
     private Player player;
+
+    @ManyToMany
+    @JoinTable(
+            name = "deck_commanders",
+            joinColumns = @JoinColumn(name = "deck_id"),
+            inverseJoinColumns = @JoinColumn(name = "commander_id")
+    )
+    private List<Commander> commanders;
 }

@@ -1,5 +1,6 @@
 package org.example.edhtrack.repository;
 
+import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.GameParticipant;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -23,7 +25,14 @@ class GameParticipantRepositoryTest {
     @Test
     void findByDeck_ColorsContaining_shouldReturnCorrectEntries() {
         Deck deck = new Deck();
-        deck.setCommander("Atraxa");
+        List<Commander>  commanders = new ArrayList<>();
+        Commander commander = new Commander();
+        commander.setName("Atraxa");
+
+        commanders.add(commander);
+        deck.setCommanders(List.of(commander));
+        entityManager.persist(commander);
+
         deck.setColors("WUBG");
         entityManager.persist(deck);
 

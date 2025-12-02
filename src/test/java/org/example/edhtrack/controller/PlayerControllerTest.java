@@ -148,9 +148,9 @@ class PlayerControllerTest {
     void findDecks_shouldReturnListOfDecks_whenCalled() throws Exception {
         int playerId = 10;
 
-        DeckDTO atraxa = new DeckDTO(1, "Atraxa, Praetor's Voice", "Atraxa Superfriends", "WUBG", false );
+        DeckDTO atraxa = new DeckDTO(1, List.of("Atraxa, Praetor's Voice"), "Atraxa Superfriends", "WUBG", false );
 
-        DeckDTO krenko = new DeckDTO(2, "Krenko, Mob Boss", "krenko Goblinhorde", "R", false );
+        DeckDTO krenko = new DeckDTO(2, List.of("Krenko, Mob Boss"), "krenko Goblinhorde", "R", false );
 
         List<DeckDTO> decks = List.of(
                 atraxa,
@@ -164,10 +164,10 @@ class PlayerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].deckId").value(1))
-                .andExpect(jsonPath("$[0].commander").value("Atraxa, Praetor's Voice"))
+                .andExpect(jsonPath("$[0].commanders[0]").value("Atraxa, Praetor's Voice"))
                 .andExpect(jsonPath("$[0].colors").value("WUBG"))
                 .andExpect(jsonPath("$[1].deckId").value(2))
-                .andExpect(jsonPath("$[1].commander").value("Krenko, Mob Boss"))
+                .andExpect(jsonPath("$[1].commanders[0]").value("Krenko, Mob Boss"))
                 .andExpect(jsonPath("$[1].colors").value("R"));
 
         verify(deckService).getDecksByPlayerId(playerId);

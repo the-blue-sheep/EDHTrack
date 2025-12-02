@@ -16,6 +16,6 @@ public interface GameParticipantRepository extends JpaRepository<GameParticipant
 
     List<GameParticipant> findByDeck(Deck deck);
 
-    List<GameParticipant> findByDeck_CommanderContaining(String commanderName);
+    List<GameParticipant> findByDeck_Commanders_NameIgnoreCase(String commanderName);
 
 }

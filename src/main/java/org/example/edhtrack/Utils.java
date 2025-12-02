@@ -1,5 +1,6 @@
 package org.example.edhtrack;
 
+import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.GameParticipant;
 
@@ -20,9 +21,15 @@ public final class Utils {
             case PLAYER -> participants.stream()
                     .collect(Collectors.groupingBy(p -> p.getPlayer().getName()));
             case COMMANDER -> participants.stream()
-                    .collect(Collectors.groupingBy(p -> Optional.ofNullable(p.getDeck())
-                            .map(Deck::getCommander)
-                            .orElse("Unknown")));
+                    .collect(Collectors.groupingBy(p ->
+                            String.valueOf(Optional.ofNullable(p.getDeck())
+                                    .map(d -> d.getCommanders()
+                                            .stream()
+                                            .map(Commander::getName)
+                                            .sorted()
+                                            .toList()
+                                    ).orElse(List.of("Unknown")))
+                    ));
             case COLOR -> participants.stream()
                     .collect(Collectors.groupingBy(p -> Optional.ofNullable(p.getDeck())
                             .map(Deck::getColors)
@@ -48,13 +55,17 @@ public final class Utils {
                 .filter(GameParticipant::isWinner)
                 .map(GameParticipant::getDeck)
                 .filter(Objects::nonNull)
-                .map(Deck::getCommander)
+                .map(Deck::getCommanders)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .map(Commander::getName)
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .map(String::toLowerCase)
-                .filter(cmd -> cmd.equals(search))
+                .filter(name -> name.equals(search))
                 .count();
     }
+
 
 
     public enum DeterminedType {

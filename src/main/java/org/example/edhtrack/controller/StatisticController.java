@@ -30,7 +30,7 @@ public class StatisticController {
 
     @GetMapping("/commander-winrate")
     public CommanderWinRateDTO getCommanderWinRate(@RequestParam String commanderName){
-        return statisticService.getWinRateByCommander(deckService.getDeckByCommanderName(commanderName));
+        return statisticService.getWinRateByCommander(commanderName);
     }
 
     @GetMapping("/color-winrate")

@@ -2,6 +2,7 @@ package org.example.edhtrack.service;
 
 import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.stats.*;
+import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.Game;
 import org.example.edhtrack.entity.GameParticipant;
@@ -14,11 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,19 +29,44 @@ class StatisticServiceTest {
     @InjectMocks
     private StatisticService statisticService;
 
+    // ---------- Helpers ----------
+
+    private Player player(String name) {
+        Player p = new Player();
+        p.setName(name);
+        return p;
+    }
+
+    private Commander commander(String name) {
+        return new Commander(name);
+    }
+
+    private Deck deck(String commanderName) {
+        Deck deck = new Deck();
+        deck.setDeckName(commanderName);
+        deck.setCommanders(List.of(commander(commanderName))); // Multi-Commander-ready
+        return deck;
+    }
+
+    private GameParticipant gp(Game game, Player player, Deck deck, boolean winner) {
+        GameParticipant gp = new GameParticipant();
+        gp.setGame(game);
+        gp.setPlayer(player);
+        gp.setDeck(deck);
+        gp.setWinner(winner);
+        return gp;
+    }
+
+    // ---------- Tests ----------
+
     @Test
     void getWinRateByPlayer_shouldCalculateCorrectly() {
-        Player player = new Player("Max");
+        Player player = player("Max");
+        Deck deck = deck("Atraxa");
+
         Game game = new Game();
-        game.setWinner(player);
-
-        Deck deck = new Deck();
-        deck.setCommander("Atraxa");
-
-        GameParticipant participant = new GameParticipant();
-        participant.setGame(game);
-        participant.setPlayer(player);
-        participant.setDeck(deck);
+        GameParticipant participant = gp(game, player, deck, true);
+        game.setPlayers(List.of(participant));
 
         when(gameParticipantRepository.findByPlayer(player))
                 .thenReturn(List.of(participant));
@@ -54,19 +78,11 @@ class StatisticServiceTest {
 
     @Test
     void countCommanderWins_shouldReturn1_whenCommanderWins() {
-        Player winner = new Player("Maxim");
-        Deck deck = new Deck();
-        deck.setCommander("Atraxa");
+        Player winner = player("Maxim");
+        Deck deck = deck("Atraxa");
 
         Game game = new Game();
-        game.setWinner(winner);
-
-        GameParticipant participant = new GameParticipant();
-        participant.setPlayer(winner);
-        participant.setDeck(deck);
-        participant.setGame(game);
-
-        // bidirektional, sonst kennt Game seine Teilnehmer nicht
+        GameParticipant participant = gp(game, winner, deck, true);
         game.setPlayers(List.of(participant));
 
         int wins = Utils.countCommanderWins(List.of(participant), "Atraxa");
@@ -76,17 +92,13 @@ class StatisticServiceTest {
 
     @Test
     void getWinrateByColor_shouldCalculateCorrectly() {
-        Player player = new Player("Maxim");
-        Game game = new Game();
-        game.setWinner(player);
-
-        Deck deck = new Deck();
-        deck.setCommander("Atraxa");
+        Player player = player("Maxim");
+        Deck deck = deck("Atraxa");
         deck.setColors("WUBG");
-        GameParticipant participant = new GameParticipant();
-        participant.setGame(game);
-        participant.setPlayer(player);
-        participant.setDeck(deck);
+
+        Game game = new Game();
+        GameParticipant participant = gp(game, player, deck, true);
+        game.setPlayers(List.of(participant));
 
         when(gameParticipantRepository.findByDeck_ColorsContaining(deck.getColors()))
                 .thenReturn(List.of(participant));
@@ -98,141 +110,105 @@ class StatisticServiceTest {
 
     @Test
     void getWinRateAgainstOtherPlayer_shouldReturnCorrectRate() {
-        // GIVEN
-        Player player1 = new Player("Alice");
-        Player player2 = new Player("Bob");
+        Player alice = player("Alice");
+        Player bob = player("Bob");
 
-        Game game1 = new Game();
-        game1.setWinner(player1);
+        // Spiel 1 — Alice gewinnt
+        Game g1 = new Game();
+        GameParticipant g1a = gp(g1, alice, null, true);
+        GameParticipant g1b = gp(g1, bob, null, false);
+        g1.setPlayers(List.of(g1a, g1b));
 
-        GameParticipant gp1a = new GameParticipant();
-        gp1a.setGame(game1);
-        gp1a.setPlayer(player1);
+        // Spiel 2 — Bob gewinnt
+        Game g2 = new Game();
+        GameParticipant g2a = gp(g2, alice, null, false);
+        GameParticipant g2b = gp(g2, bob, null, true);
+        g2.setPlayers(List.of(g2a, g2b));
 
-        GameParticipant gp1b = new GameParticipant();
-        gp1b.setGame(game1);
-        gp1b.setPlayer(player2);
+        when(gameParticipantRepository.findByPlayer(alice)).thenReturn(List.of(g1a, g2a));
+        when(gameParticipantRepository.findByPlayer(bob)).thenReturn(List.of(g1b, g2b));
 
-        game1.setPlayers(List.of(gp1a, gp1b));
-
-        Game game2 = new Game();
-        game2.setWinner(player2);
-
-        GameParticipant gp2a = new GameParticipant();
-        gp2a.setGame(game2);
-        gp2a.setPlayer(player1);
-
-        GameParticipant gp2b = new GameParticipant();
-        gp2b.setGame(game2);
-        gp2b.setPlayer(player2);
-
-        game2.setPlayers(List.of(gp2a, gp2b));
-
-        when(gameParticipantRepository.findByPlayer(player1))
-                .thenReturn(List.of(gp1a, gp2a));
-
-        when(gameParticipantRepository.findByPlayer(player2))
-                .thenReturn(List.of(gp1b, gp2b));
-
-        // WHEN
         WinrateAgainstAnotherPlayer result =
-                statisticService.getWinRateAgainstOtherPlayer(player1, player2);
+                statisticService.getWinRateAgainstOtherPlayer(alice, bob);
 
-        // THEN
         assertNotNull(result);
-        assertEquals(player1, result.player());
+        assertEquals(alice, result.player());
         assertEquals(0.5, result.winRate(), 0.0001);
     }
 
-
     @Test
     void getStreaksByPlayer_shouldReturnCorrectStreaks() {
-        // GIVEN
-        Player player = new Player("Maxim");
-
-        Game g1 = new Game(); g1.setWinner(player);
-        Game g2 = new Game(); g2.setWinner(player);
-        Game g3 = new Game(); g3.setWinner(new Player("Felix"));
-        Game g4 = new Game(); g4.setWinner(new Player("Felix"));
-        Game g5 = new Game(); g5.setWinner(player);
+        Player player = player("Maxim");
 
         List<GameParticipant> participants = new ArrayList<>();
 
-        GameParticipant p1 = new GameParticipant();
-        p1.setPlayer(player);
-        p1.setGame(g1);
+        Game g1 = new Game();
+        GameParticipant p1 = gp(g1, player, null, true);
+        g1.setPlayers(List.of(p1));
         participants.add(p1);
 
-        GameParticipant p2 = new GameParticipant();
-        p2.setPlayer(player);
-        p2.setGame(g2);
+        Game g2 = new Game();
+        GameParticipant p2 = gp(g2, player, null, true);
+        g2.setPlayers(List.of(p2));
         participants.add(p2);
 
-        GameParticipant p3 = new GameParticipant();
-        p3.setPlayer(player);
-        p3.setGame(g3);
+        Game g3 = new Game();
+        GameParticipant p3 = gp(g3, player, null, false);
+        g3.setPlayers(List.of(p3));
         participants.add(p3);
 
-        GameParticipant p4 = new GameParticipant();
-        p4.setPlayer(player);
-        p4.setGame(g4);
+        Game g4 = new Game();
+        GameParticipant p4 = gp(g4, player, null, false);
+        g4.setPlayers(List.of(p4));
         participants.add(p4);
 
-        GameParticipant p5 = new GameParticipant();
-        p5.setPlayer(player);
-        p5.setGame(g5);
+        Game g5 = new Game();
+        GameParticipant p5 = gp(g5, player, null, true);
+        g5.setPlayers(List.of(p5));
         participants.add(p5);
 
         when(gameParticipantRepository.findByPlayer(player)).thenReturn(participants);
 
         StreakDTO result = statisticService.getStreaksByPlayer(player);
 
-        // THEN
         assertEquals(player.getName(), result.playerName());
         assertEquals(List.of(2, -2, 1), result.streaks());
     }
 
     @Test
     void getCommanderStatsForAll_shouldReturnCorrectStats() {
-        // GIVEN
-        Player player1 = new Player("Maxim");
-        Player player2 = new Player("Felix");
+        Player p1 = player("Maxim");
+        Player p2 = player("Felix");
 
-        Deck deck1 = new Deck();
-        deck1.setCommander("Atraxa");
+        Commander atraxa = new Commander("Atraxa");
 
-        Deck deck2 = new Deck();
-        deck2.setCommander("Atraxa");
+        Deck d1 = new Deck();
+        d1.setDeckName("Deck1");
+        d1.setCommanders(List.of(atraxa));
 
-        Game game1 = new Game();
-        game1.setWinner(player1);
+        Deck d2 = new Deck();
+        d2.setDeckName("Deck2");
+        d2.setCommanders(List.of(atraxa));
 
-        Game game2 = new Game();
-        game2.setWinner(player2);
+        Game g1 = new Game();
+        g1.setId(1);
+        GameParticipant gp1 = gp(g1, p1, d1, true);
+        g1.setPlayers(List.of(gp1));
 
-        GameParticipant p1 = new GameParticipant();
-        p1.setPlayer(player1);
-        p1.setDeck(deck1);
-        p1.setGame(game1);
+        Game g2 = new Game();
+        g2.setId(2);
+        GameParticipant gp2 = gp(g2, p2, d2, true);
+        g2.setPlayers(List.of(gp2));
 
-        GameParticipant p2 = new GameParticipant();
-        p2.setPlayer(player2);
-        p2.setDeck(deck2);
-        p2.setGame(game2);
+        when(gameParticipantRepository.findByDeck_Commanders_NameIgnoreCase("Atraxa"))
+                .thenReturn(List.of(gp1, gp2));
 
-        List<GameParticipant> participants = List.of(p1, p2);
-
-        when(gameParticipantRepository.findByDeck_CommanderContaining("Atraxa"))
-                .thenReturn(participants);
-
-        // WHEN
         CommanderStatDTO result = statisticService.getCommanderStatsForAll("Atraxa");
 
-        // THEN
         assertEquals("Atraxa", result.commanderName());
-        assertEquals(2, result.totalGames());     // zwei unterschiedliche Spiele
-        assertEquals(2, result.totalPlayers());   // beide Spieler haben einmal gewonnen
-        assertEquals(2, result.totalWins());       // beide Spiele gewonnen (je einer)
+        assertEquals(2, result.totalGames());
+        assertEquals(2, result.totalPlayers());
+        assertEquals(2, result.totalWins());
         assertEquals(1.0, result.winRate());
     }
 
@@ -240,56 +216,36 @@ class StatisticServiceTest {
     @Test
     void getLeaderboard_shouldGroupAndSortCorrectly_byPlayer() {
 
-        Player alice = new Player("Alice");
+        Player alice = player("Alice");
         alice.setPlayerId(1);
 
-        Player bob = new Player("Bob");
-        bob.setPlayerId(2);
+        Player harold = player("Harold");
+        harold.setPlayerId(3);
 
-        Player harold = new Player("Harold");
-        bob.setPlayerId(3);
-
-        Game game1 = new Game(); game1.setId(1); game1.setWinner(alice);
-        Game game2 = new Game(); game2.setId(2); game2.setWinner(alice);
-        Game game3 = new Game(); game3.setId(3); game3.setWinner(bob);
-
-        Deck deckAlice = new Deck();
+        Deck deckAlice = deck("Atraxa");
         deckAlice.setDeckId(1);
-        deckAlice.setCommander("Atraxa");
         deckAlice.setColors("WUBG");
         deckAlice.setPlayer(alice);
 
-        Deck deckBob = new Deck();
-        deckBob.setDeckId(2);
-        deckBob.setCommander("Atraxa");
-        deckBob.setColors("WUBG");
-        deckBob.setPlayer(bob);
+        Deck deckHarold = deck("Atraxa");
+        deckHarold.setDeckId(2);
+        deckHarold.setColors("WUBG");
+        deckHarold.setPlayer(harold);
 
-        Deck deckHarold = new Deck();
-        deckBob.setDeckId(2);
-        deckBob.setCommander("Atraxa");
-        deckBob.setColors("WUBG");
-        deckBob.setPlayer(harold);
+        Game g1 = new Game();
+        GameParticipant gp1 = gp(g1, alice, deckAlice, true);
+        g1.setPlayers(List.of(gp1));
 
-        GameParticipant gp1 = new GameParticipant();
-        gp1.setId(1);
-        gp1.setPlayer(alice);
-        gp1.setDeck(deckAlice);
-        gp1.setGame(game1);
+        Game g2 = new Game();
+        GameParticipant gp2 = gp(g2, alice, deckAlice, true);
+        g2.setPlayers(List.of(gp2));
 
-        GameParticipant gp2 = new GameParticipant();
-        gp2.setId(2);
-        gp2.setPlayer(alice);
-        gp2.setDeck(deckAlice);
-        gp2.setGame(game2);
+        Game g3 = new Game();
+        GameParticipant gp3 = gp(g3, harold, deckHarold, false);
+        g3.setPlayers(List.of(gp3));
 
-        GameParticipant gp3 = new GameParticipant();
-        gp3.setId(3);
-        gp3.setPlayer(harold);
-        gp3.setDeck(deckHarold);
-        gp3.setGame(game3);
-
-        when(gameParticipantRepository.findAll()).thenReturn(List.of(gp1, gp2, gp3));
+        when(gameParticipantRepository.findAll())
+                .thenReturn(List.of(gp1, gp2, gp3));
 
         List<LeaderboardEntryDTO> leaderboard =
                 statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false);
@@ -307,6 +263,4 @@ class StatisticServiceTest {
         assertEquals(1, second.totalGames());
         assertEquals(0, second.wins());
     }
-
-
 }

@@ -1,3 +1,11 @@
 package org.example.edhtrack.dto;
 
-public record DeckDTO(int deckId, String commander, String deckName, String colors, boolean isRetired) {}
+import java.util.List;
+
+public record DeckDTO(
+        int deckId,
+        List<String> commanders,
+        String deckName,
+        String colors,
+        boolean retired
+) {}

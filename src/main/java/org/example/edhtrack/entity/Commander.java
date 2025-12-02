@@ -1,25 +1,26 @@
 package org.example.edhtrack.entity;
 
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.*;
+import lombok.Data;
 
-@Embeddable
+@Entity
+@Data
+@Table(name = "commanders")
 public class Commander {
 
+    @Id
+    @GeneratedValue
+    private Long id;
+
     private String name;
-    private String cardId;
+    private String scryfallId;
 
-    public Commander() {}
+    public Commander() {
 
-    public Commander(String name, String cardId) {
+    }
+
+    public Commander(String name) {
         this.name = name;
-        this.cardId = cardId;
-    }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getCardId() {
-        return cardId;
     }
 }
