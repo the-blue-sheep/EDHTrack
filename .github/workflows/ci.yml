@@ -39,6 +39,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=Buridius_EDHTrack
-            -Dsonar.organization=Buridius
+            -Dsonar.organization=buridius
             -Dsonar.sources=./backend/src
             -Dsonar.java.binaries=./backend/target
+            -Dsonar.host.url=https://sonarcloud.io
