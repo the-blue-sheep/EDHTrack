@@ -38,7 +38,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=EDHTrack
+            -Dsonar.projectKey=Buridius_EDHTrack
             -Dsonar.organization=Buridius
             -Dsonar.sources=./backend/src
             -Dsonar.java.binaries=./backend/target
