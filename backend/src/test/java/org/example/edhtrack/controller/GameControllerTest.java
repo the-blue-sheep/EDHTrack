@@ -84,6 +84,7 @@ class GameControllerTest {
 
         String requestJson = """
         {
+          "gameId": 2,
           "date": "%s",
           "notes": "First Turn Sol Ring wins",
           "participants": [
@@ -98,8 +99,8 @@ class GameControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(2))
-                .andExpect(jsonPath("$.notes").value("First Turn Sol Ring wins"))
+                .andExpect(jsonPath("$.gameId").value(2))
+                .andExpect(jsonPath("$.notes").doesNotExist())
                 .andExpect(jsonPath("$.players.length()").value(2));
 
         verify(gameService).createGame(any(CreateGameDTO.class));
