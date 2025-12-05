@@ -1,12 +1,10 @@
-
-import './App.css'
 import HomePage from "./pages/HomePage.tsx";
 import {Route, Routes} from "react-router-dom";
 import AddGamePage from "./pages/AddGamePage.tsx";
 import PlayerManagerPage from "./pages/PlayerManagerPage.tsx";
 import StatsPage from "./pages/StatsPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
-import Navbar from "./Navbar.tsx";
+import Navbar from "./components/ui/Navbar.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
 
 function App() {
@@ -14,7 +12,8 @@ function App() {
   return (
     <>
         <Navbar />
-        <h1>EDH Track</h1>
+        <div className={"pt-16"}>
+            <h1 className={"text-3xl font-bold text-green-950 align-middle"}>EDH Track</h1>
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/add" element={<AddGamePage />} />
@@ -23,6 +22,8 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
             </Routes>
+        </div>
+
     </>
   )
 }
