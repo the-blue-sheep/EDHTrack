@@ -15,6 +15,7 @@ interface CreateDeckDTO {
 }
 
 export default function PlayerManagerPage() {
+    const WUBRG = ["W","U","B","R","G"];
     const [input, setInput] = useState("");
     const [debouncedInput, setDebouncedInput] = useState(input);
     const [results, setResults] = useState<string[]>([]);
@@ -84,8 +85,7 @@ export default function PlayerManagerPage() {
             const card = resp.data;
             const identity: string[] = card.color_identity || [];
             const unique = Array.from(new Set(identity));
-            // z. B. ABC-Reihenfolge WUBRG (White U Blue B Black R Red G Green)
-            unique.sort();
+            unique.sort((a,b) => WUBRG.indexOf(a) - WUBRG.indexOf(b));
             return unique.join("");
         } catch (error) {
             console.error("Error fetching commander colors: ", error);
