@@ -25,13 +25,11 @@ export default function PlayerManagerPage() {
         colors: ""
     });
 
-    // Autocomplete Hook
     function useAutocomplete(input: string) {
         const [debouncedInput, setDebouncedInput] = useState(input);
         const [results, setResults] = useState<string[]>([]);
         const [isOpen, setIsOpen] = useState(false);
 
-        // debounce
         useEffect(() => {
             const handler = setTimeout(() => {
                 setDebouncedInput(input.trim());
