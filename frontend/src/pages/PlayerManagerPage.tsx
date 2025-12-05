@@ -16,9 +16,6 @@ interface CreateDeckDTO {
 
 export default function PlayerManagerPage() {
     const WUBRG = ["W","U","B","R","G"];
-    const [input, setInput] = useState("");
-    const [debouncedInput, setDebouncedInput] = useState(input);
-    const [results, setResults] = useState<string[]>([]);
     const [players, setPlayers] = useState<Player[]>([]);
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [formData, setFormData] = useState<CreateDeckDTO>({
@@ -28,40 +25,44 @@ export default function PlayerManagerPage() {
         colors: ""
     });
 
-    // Scryfall verlangt ein Delay zwischen den Anfragen von 50-100 Millisekunden
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedInput(input.trim());
-        }, 80);
+    // Autocomplete Hook
+    function useAutocomplete(input: string) {
+        const [debouncedInput, setDebouncedInput] = useState(input);
+        const [results, setResults] = useState<string[]>([]);
+        const [isOpen, setIsOpen] = useState(false);
 
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [input]);
+        // debounce
+        useEffect(() => {
+            const handler = setTimeout(() => {
+                setDebouncedInput(input.trim());
+            }, 100);
+            return () => clearTimeout(handler);
+        }, [input]);
 
-    useEffect(() => {
-        if (debouncedInput === "") {
-            setResults([]);
-            return;
-        }
-        axios
-            .get("https://api.scryfall.com/cards/autocomplete", {
-                headers: {
-                    Accept: "*/*",
-                    "User-Agent": "EDHTrack/0.4"
-                },
-                params: {
-                    q: debouncedInput,
-                },
-            })
-            .then((response) => {
-                const names: string[] = response.data.data || [];
-                setResults(names);
-            })
-            .catch((_) => {
+        useEffect(() => {
+            if (!debouncedInput || !isOpen) {
                 setResults([]);
-            });
-    }, [debouncedInput]);
+                return;
+            }
+            axios.get("https://api.scryfall.com/cards/autocomplete", {
+                params: { q: debouncedInput },
+                headers: { Accept: "*/*", "User-Agent": "EDHTrack/0.4" }
+            })
+                .then(resp => setResults(resp.data.data || []))
+                .catch(() => setResults([]));
+        }, [debouncedInput, isOpen]);
+
+        const clearResults = () => {
+            setResults([]);
+            setIsOpen(false);
+        };
+        const reopenResults = () => setIsOpen(true);
+
+        return {results, clearResults, reopenResults};
+    }
+
+    const { results: results0, clearResults: clearResults0, reopenResults: reopenResults0 } = useAutocomplete(formData.commanders[0]);
+    const { results: results1, clearResults: clearResults1, reopenResults: reopenResults1 } = useAutocomplete(formData.commanders[1]);
 
     useEffect(() => {
         axios.get<Player[]>("/api/players")
@@ -74,6 +75,7 @@ export default function PlayerManagerPage() {
     }, []);
 
     async function getColorsForCommander(name: string): Promise<string> {
+        if(name==="") {return ""}
         try {
             const resp = await axios.get(`https://api.scryfall.com/cards/named`, {
                 params: { exact: name },
@@ -93,17 +95,12 @@ export default function PlayerManagerPage() {
         }
     }
 
-
     function computeColorsFromCommanders(commanderNames: string[]): string {
         const allColors = commanderNames
             .flatMap(name => getColorsForCommander(name));
-
-        // Commander können die gleichen Farben haben, daher unique
         const unique = [...new Set(allColors)];
-
         return unique.join("");
     }
-
 
     function onChangeHandler(e: ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target;
@@ -130,12 +127,10 @@ export default function PlayerManagerPage() {
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const computedColors = computeColorsFromCommanders(formData.commanders);
-
         const finalDTO = {
             ...formData,
             colors: computedColors
         };
-
         console.log("Submitting deck:", finalDTO);
         axios.post("/api/decks", finalDTO)
             .then(response => {console.log (response.data);})
@@ -174,9 +169,27 @@ export default function PlayerManagerPage() {
                         type="text"
                         value={formData.commanders[0]}
                         onChange={e => onChangeHandleCommanders(0, e.target.value)}
+                        onFocus={reopenResults0}
+                        onBlur={clearResults0}
                         placeholder="Search for commander..."
-                        className="border p-2 rounded"
+                        className="border border-purple-900 p-2 rounded"
                     />
+                    {results0.length > 0 && (
+                        <ul className="border mt-1 bg-white max-h-40 overflow-y-auto">
+                            {results0.map(name => (
+                                <li
+                                    key={name}
+                                    onMouseDown={() => {
+                                        onChangeHandleCommanders(0, name);
+                                        clearResults0();
+                                    }}
+                                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                                >
+                                    {name}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </label>
                 <label>Partner, Background
                     <input
@@ -184,36 +197,37 @@ export default function PlayerManagerPage() {
                         type="text"
                         value={formData.commanders[1]}
                         onChange={e => onChangeHandleCommanders(1, e.target.value)}
+                        onFocus={reopenResults1}
+                        onBlur={clearResults1}
                         placeholder="Optional"
-                        className="border p-2 rounded"
+                        className="border border-purple-900 p-2 rounded"
                     />
+                    {results1.length > 0 && (
+                        <ul className="border mt-1 bg-white max-h-40 overflow-y-auto">
+                            {results1.map(name => (
+                                <li
+                                    key={name}
+                                    onMouseDown={() => {
+                                        onChangeHandleCommanders(1, name);
+                                        clearResults1();
+                                    }}
+                                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                                >
+                                    {name}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </label>
-                {results.length > 0 && (
-                    <ul className="border mt-1 bg-white max-h-40 overflow-y-auto">
-                        {results.map((name) => (
-                            <li
-                                key={name}
-                                className="p-2 hover:bg-gray-200 cursor-pointer"
-                                onClick={() => {
-                                    setInput(name);
-                                    setResults([]);
-                                }}
-                            >
-                                {name}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-
                 <br/>
                 <label>Deckname
                     <input
                         name="deckname"
                         type="text"
-                        value={formData?.deckname}
+                        value={formData.deckname}
                         onChange={onChangeHandler}
                         placeholder="Optional Deckname"
-                        className="border p-2 rounded"
+                        className="border border-purple-900 p-2 rounded"
                     />
                 </label>
                 <br/>
