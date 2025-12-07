@@ -3,7 +3,7 @@ package org.example.edhtrack.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -27,5 +27,5 @@ public class Deck {
             joinColumns = @JoinColumn(name = "deck_id"),
             inverseJoinColumns = @JoinColumn(name = "commander_id")
     )
-    private List<Commander> commanders;
+    private Set<Commander> commanders;
 }

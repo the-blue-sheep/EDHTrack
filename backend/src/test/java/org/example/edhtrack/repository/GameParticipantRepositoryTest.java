@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -25,12 +25,12 @@ class GameParticipantRepositoryTest {
     @Test
     void findByDeck_ColorsContaining_shouldReturnCorrectEntries() {
         Deck deck = new Deck();
-        List<Commander>  commanders = new ArrayList<>();
+        Set<Commander> commanders = Set.of();
         Commander commander = new Commander();
         commander.setName("Atraxa");
 
         commanders.add(commander);
-        deck.setCommanders(List.of(commander));
+        deck.setCommanders(Set.of(commander));
         entityManager.persist(commander);
 
         deck.setColors("WUBG");

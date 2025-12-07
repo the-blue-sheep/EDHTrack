@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -148,11 +149,11 @@ class PlayerControllerTest {
     void findDecks_shouldReturnListOfDecks_whenCalled() throws Exception {
         int playerId = 10;
 
-        DeckDTO atraxa = new DeckDTO(1, List.of("Atraxa, Praetor's Voice"), "Atraxa Superfriends", "WUBG", false );
+        DeckDTO atraxa = new DeckDTO(1, Set.of("Atraxa, Praetor's Voice"), "Atraxa Superfriends", "WUBG", false );
 
-        DeckDTO krenko = new DeckDTO(2, List.of("Krenko, Mob Boss"), "krenko Goblinhorde", "R", false );
+        DeckDTO krenko = new DeckDTO(2, Set.of("Krenko, Mob Boss"), "krenko Goblinhorde", "R", false );
 
-        List<DeckDTO> decks = List.of(
+        Set<DeckDTO> decks = Set.of(
                 atraxa,
                 krenko
         );

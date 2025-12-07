@@ -13,7 +13,6 @@ function App() {
     <>
         <Navbar />
         <div className={"pt-16"}>
-            <h1 className={"text-3xl font-bold text-green-950 align-middle"}>EDH Track</h1>
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/add" element={<AddGamePage />} />

@@ -1,5 +1,7 @@
 import axios from "axios";
 import {useState, useEffect, type ChangeEvent, type FormEvent} from "react";
+import { useAutocomplete } from "../hooks/useAutocomplete";
+import { computeColorsFromCommanders } from "../services/scryfall";
 
 interface Player {
     id: number;
@@ -15,7 +17,6 @@ interface CreateDeckDTO {
 }
 
 export default function PlayerManagerPage() {
-    const WUBRG = ["W","U","B","R","G"];
     const [players, setPlayers] = useState<Player[]>([]);
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [formData, setFormData] = useState<CreateDeckDTO>({
@@ -24,40 +25,6 @@ export default function PlayerManagerPage() {
         deckname: "",
         colors: ""
     });
-
-    function useAutocomplete(input: string) {
-        const [debouncedInput, setDebouncedInput] = useState(input);
-        const [results, setResults] = useState<string[]>([]);
-        const [isOpen, setIsOpen] = useState(false);
-
-        useEffect(() => {
-            const handler = setTimeout(() => {
-                setDebouncedInput(input.trim());
-            }, 100);
-            return () => clearTimeout(handler);
-        }, [input]);
-
-        useEffect(() => {
-            if (!debouncedInput || !isOpen) {
-                setResults([]);
-                return;
-            }
-            axios.get("https://api.scryfall.com/cards/autocomplete", {
-                params: { q: debouncedInput },
-                headers: { Accept: "*/*", "User-Agent": "EDHTrack/0.4" }
-            })
-                .then(resp => setResults(resp.data.data || []))
-                .catch(() => setResults([]));
-        }, [debouncedInput, isOpen]);
-
-        const clearResults = () => {
-            setResults([]);
-            setIsOpen(false);
-        };
-        const reopenResults = () => setIsOpen(true);
-
-        return {results, clearResults, reopenResults};
-    }
 
     const { results: results0, clearResults: clearResults0, reopenResults: reopenResults0 } = useAutocomplete(formData.commanders[0]);
     const { results: results1, clearResults: clearResults1, reopenResults: reopenResults1 } = useAutocomplete(formData.commanders[1]);
@@ -71,34 +38,6 @@ export default function PlayerManagerPage() {
                 console.error("Error while loading players:", error);
             });
     }, []);
-
-    async function getColorsForCommander(name: string): Promise<string> {
-        if(name==="") {return ""}
-        try {
-            const resp = await axios.get(`https://api.scryfall.com/cards/named`, {
-                params: { exact: name },
-                headers: {
-                    "Accept": "application/json",
-                    "User-Agent": "EDHTrack/0.4"
-                }
-            });
-            const card = resp.data;
-            const identity: string[] = card.color_identity || [];
-            const unique = Array.from(new Set(identity));
-            unique.sort((a,b) => WUBRG.indexOf(a) - WUBRG.indexOf(b));
-            return unique.join("");
-        } catch (error) {
-            console.error("Error fetching commander colors: ", error);
-            return "";
-        }
-    }
-
-    function computeColorsFromCommanders(commanderNames: string[]): string {
-        const allColors = commanderNames
-            .flatMap(name => getColorsForCommander(name));
-        const unique = [...new Set(allColors)];
-        return unique.join("");
-    }
 
     function onChangeHandler(e: ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target;
@@ -140,28 +79,36 @@ export default function PlayerManagerPage() {
     }
 
     return (
-        <>
-            <h2>Player Administration</h2>
-
-            <form onSubmit={handleSubmit}>
-                <label>Select Player
-                    <select
-                        name="id"
-                        id="player-select"
-                        value={selectedPlayerId ?? ""}
-                        onChange={onChangeHandlerPlayer}
-                        className="border px-2 py-1 rounded"
-                    >
-                        <option value="">-- Select --</option>
-                        {players.map(player => (
-                            <option key={player.id} value={player.id}>
-                                {player.name}
-                            </option>
-                        ))}
-                    </select>
+        <div className="p-6">
+            <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Player
                 </label>
-                <br/>
-                <label>Commander
+                <select
+                    name="id"
+                    id="player-select"
+                    value={selectedPlayerId ?? ""}
+                    onChange={onChangeHandlerPlayer}
+                    className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                >
+                    <option value="">-- Select --</option>
+                    {players.map(player => (
+                        <option key={player.id} value={player.id}>
+                            {player.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <h3 className="text-xl font-semibold text-purple-800 mb-4">
+                Add Deck
+            </h3>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Commander
+                    </label>
                     <input
                         name="commander0"
                         type="text"
@@ -170,10 +117,10 @@ export default function PlayerManagerPage() {
                         onFocus={reopenResults0}
                         onBlur={clearResults0}
                         placeholder="Search for commander..."
-                        className="border border-purple-900 p-2 rounded"
+                        className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     />
                     {results0.length > 0 && (
-                        <ul className="border mt-1 bg-white max-h-40 overflow-y-auto">
+                        <ul className="border mt-1 bg-white max-h-40 overflow-y-auto rounded-md">
                             {results0.map(name => (
                                 <li
                                     key={name}
@@ -181,15 +128,19 @@ export default function PlayerManagerPage() {
                                         onChangeHandleCommanders(0, name);
                                         clearResults0();
                                     }}
-                                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                                    className="px-3 py-2 hover:bg-green-100 cursor-pointer"
                                 >
                                     {name}
                                 </li>
                             ))}
                         </ul>
                     )}
-                </label>
-                <label>Partner, Background
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Partner / Background
+                    </label>
                     <input
                         name="commander1"
                         type="text"
@@ -198,10 +149,10 @@ export default function PlayerManagerPage() {
                         onFocus={reopenResults1}
                         onBlur={clearResults1}
                         placeholder="Optional"
-                        className="border border-purple-900 p-2 rounded"
+                        className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     />
                     {results1.length > 0 && (
-                        <ul className="border mt-1 bg-white max-h-40 overflow-y-auto">
+                        <ul className="border mt-1 bg-white max-h-40 overflow-y-auto rounded-md">
                             {results1.map(name => (
                                 <li
                                     key={name}
@@ -209,30 +160,39 @@ export default function PlayerManagerPage() {
                                         onChangeHandleCommanders(1, name);
                                         clearResults1();
                                     }}
-                                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                                    className="px-3 py-2 hover:bg-green-100 cursor-pointer"
                                 >
                                     {name}
                                 </li>
                             ))}
                         </ul>
                     )}
-                </label>
-                <br/>
-                <label>Deckname
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Deckname
+                    </label>
                     <input
                         name="deckname"
                         type="text"
                         value={formData.deckname}
                         onChange={onChangeHandler}
                         placeholder="Optional Deckname"
-                        className="border border-purple-900 p-2 rounded"
+                        className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     />
-                </label>
-                <br/>
-                <button className="mt-4 px-4 py-2 bg-purple-950 text-white rounded">
-                    Add deck to player
-                </button>
+                </div>
+
+                <div>
+                    <button
+                        type="submit"
+                        className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800 focus:ring-2 focus:ring-green-400"
+                    >
+                        Add deck to player
+                    </button>
+                </div>
             </form>
-        </>
+        </div>
     );
+
 }

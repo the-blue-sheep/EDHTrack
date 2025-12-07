@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/players")
@@ -45,7 +46,7 @@ public class PlayerController {
     }
 
     @GetMapping("/{id}/decks")
-    public List<DeckDTO> findDecks(@PathVariable int id) {
+    public Set<DeckDTO> findDecks(@PathVariable int id) {
         return deckService.getDecksByPlayerId(id);
     }
 

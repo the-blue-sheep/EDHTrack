@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -49,14 +50,14 @@ class GameControllerTest {
         deckAlice.setDeckId(10);
         Commander commanderAlice = new Commander();
         commanderAlice.setName("Atraxa");
-        deckAlice.setCommanders(List.of(commanderAlice));
+        deckAlice.setCommanders(Set.of(commanderAlice));
         deckAlice.setPlayer(alice);
 
         Deck deckBob = new Deck();
         deckBob.setDeckId(11);
         Commander commanderBob = new Commander();
         commanderBob.setName("Krenko");
-        deckBob.setCommanders(List.of(commanderBob));
+        deckBob.setCommanders(Set.of(commanderBob));
         deckBob.setPlayer(bob);
 
         GameParticipant gp1 = new GameParticipant();
