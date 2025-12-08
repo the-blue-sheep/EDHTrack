@@ -28,7 +28,8 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <sonar.organization>buridius</sonar.organization>
+        <sonar.projectKey>the-blue-sheep_EDHTrack</sonar.projectKey>
+        <sonar.organization>the-blue-sheep</sonar.organization>
     </properties>
     <dependencies>
         <dependency>
