@@ -5,7 +5,7 @@ interface PlayerCreateDTO {
     name: string;
 }
 
-export default function addPlayerForm() {
+export default function addPlayerPage() {
     const [formData, setFormData] = useState<PlayerCreateDTO>({
         name: ""
     })
