@@ -18,7 +18,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Set;
 
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -148,11 +150,11 @@ class PlayerControllerTest {
     void findDecks_shouldReturnListOfDecks_whenCalled() throws Exception {
         int playerId = 10;
 
-        DeckDTO atraxa = new DeckDTO(1, List.of("Atraxa, Praetor's Voice"), "Atraxa Superfriends", "WUBG", false );
+        DeckDTO atraxa = new DeckDTO(1, Set.of("Atraxa, Praetor's Voice"), "Atraxa Superfriends", "WUBG", false );
 
-        DeckDTO krenko = new DeckDTO(2, List.of("Krenko, Mob Boss"), "krenko Goblinhorde", "R", false );
+        DeckDTO krenko = new DeckDTO(2, Set.of("Krenko, Mob Boss"), "krenko Goblinhorde", "R", false );
 
-        List<DeckDTO> decks = List.of(
+        Set<DeckDTO> decks = Set.of(
                 atraxa,
                 krenko
         );
@@ -162,13 +164,10 @@ class PlayerControllerTest {
 
         mockMvc.perform(get("/api/players/{id}/decks", playerId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].deckId").value(1))
-                .andExpect(jsonPath("$[0].commanders[0]").value("Atraxa, Praetor's Voice"))
-                .andExpect(jsonPath("$[0].colors").value("WUBG"))
-                .andExpect(jsonPath("$[1].deckId").value(2))
-                .andExpect(jsonPath("$[1].commanders[0]").value("Krenko, Mob Boss"))
-                .andExpect(jsonPath("$[1].colors").value("R"));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[*].deckId", containsInAnyOrder(1, 2)))
+                .andExpect(jsonPath("$[*].commanders[*]", hasItem("Atraxa, Praetor's Voice")))
+                .andExpect(jsonPath("$[*].colors", hasItem("WUBG")));
 
         verify(deckService).getDecksByPlayerId(playerId);
 

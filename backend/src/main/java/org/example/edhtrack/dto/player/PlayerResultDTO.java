@@ -1,9 +1,9 @@
 package org.example.edhtrack.dto.player;
 
-import java.util.List;
+import java.util.Set;
 
 public record PlayerResultDTO(
         String playerName,
-        List<String> commanders,
+        Set<String> commanders,
         boolean winner
 ) {}

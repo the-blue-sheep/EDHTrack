@@ -1,10 +1,10 @@
 package org.example.edhtrack.dto.deck;
 
-import java.util.List;
+import java.util.Set;
 
 public record CreateDeckDTO(
         int playerId,
-        List<String> commanders,
+        Set<String> commanders,
         String deckName,
         String colors
 ) {}

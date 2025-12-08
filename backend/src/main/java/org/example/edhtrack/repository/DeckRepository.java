@@ -8,12 +8,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface DeckRepository extends JpaRepository<Deck, Integer> {
     List<Deck> findByPlayer_Id(int playerId);
-    Optional<Deck> findByPlayerAndCommanders(Player player, List<Commander> commanders);
-    List<Deck> findByCommanders(List<Commander> commanders);
+    Optional<Deck> findByPlayerAndCommanders(Player player, Set<Commander> commanders);
+    List<Deck> findByCommanders(Set<Commander> commanders);
     List<Deck> findByCommanders_NameIgnoreCase(String commanderName);
     Optional<Deck> findByPlayer_IdAndDeckName(int playerId, String deckName);
 }

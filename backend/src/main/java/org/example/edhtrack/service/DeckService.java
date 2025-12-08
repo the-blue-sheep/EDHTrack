@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,7 +31,7 @@ public class DeckService {
         this.playerRepository = playerRepository;
     }
 
-    public List<DeckDTO> getDecksByPlayerId(int playerId) {
+    public Set<DeckDTO> getDecksByPlayerId(int playerId) {
         return deckRepository.findByPlayer_Id(playerId)
                 .stream()
                 .map(deck -> new DeckDTO(
@@ -38,12 +39,12 @@ public class DeckService {
                         deck.getCommanders()
                                 .stream()
                                 .map(Commander::getName)
-                                .toList(),
+                                .collect(Collectors.toSet()),
                         deck.getDeckName(),
                         deck.getColors(),
                         deck.isRetired()
                 ))
-                .toList();
+                .collect(Collectors.toSet());
     }
 
 
@@ -56,11 +57,10 @@ public class DeckService {
         deck.setDeckName(createDeckDTO.deckName());
         deck.setColors(createDeckDTO.colors());
 
-        List<Commander> commanders = createDeckDTO.commanders().stream()
+        Set<Commander> commanders = createDeckDTO.commanders().stream()
                 .map(name -> commanderRepository.findByNameIgnoreCase(name)
                         .orElseGet( () -> commanderRepository.save(new Commander(name))))
-                .toList();
-
+                        .collect(Collectors.toSet());
         deck.setCommanders(commanders);
 
         Deck saved = deckRepository.save(deck);

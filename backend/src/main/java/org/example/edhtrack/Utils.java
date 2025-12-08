@@ -59,7 +59,7 @@ public final class Utils {
                 .filter(Objects::nonNull)
                 .map(Deck::getCommanders)
                 .filter(Objects::nonNull)
-                .flatMap(List::stream)
+                .flatMap(Set::stream)
                 .map(Commander::getName)
                 .filter(Objects::nonNull)
                 .map(String::trim)
@@ -69,10 +69,10 @@ public final class Utils {
     }
 
     public static DeckDTO toDTO(Deck deck) {
-        List<String> commanders = deck.getCommanders()
+        Set<String> commanders = deck.getCommanders()
                 .stream()
                 .map(Commander::getName)
-                .toList();
+                .collect(Collectors.toSet());
 
         return new DeckDTO(
                 deck.getDeckId(),
@@ -88,7 +88,7 @@ public final class Utils {
                 gp.getPlayer().getName(),
                 gp.getDeck().getCommanders().stream()
                         .map(Commander::getName)
-                        .toList(),
+                        .collect(Collectors.toSet()),
                 gp.isWinner()
         );
     }

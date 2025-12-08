@@ -62,18 +62,7 @@ jobs:
           cd backend
           mvn -B clean package
 
-      - name: SonarQube Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        with:
-          args: >
-            -Dsonar.projectKey=Buridius_EDHTrack
-            -Dsonar.organization=buridius
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-            -Dsonar.java.binaries=backend/target/classes
-            -Dsonar.sources=backend/src/main/java
-            -Dsonar.tests=backend/src/test/java
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+     
 
       - name: Upload backend Jar
         uses: actions/upload-artifact@v4

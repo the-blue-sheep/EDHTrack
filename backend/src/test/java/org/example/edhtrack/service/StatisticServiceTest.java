@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -44,7 +45,7 @@ class StatisticServiceTest {
     private Deck deck(String commanderName) {
         Deck deck = new Deck();
         deck.setDeckName(commanderName);
-        deck.setCommanders(List.of(commander(commanderName)));
+        deck.setCommanders(Set.of(commander(commanderName)));
         return deck;
     }
 
@@ -184,11 +185,11 @@ class StatisticServiceTest {
 
         Deck d1 = new Deck();
         d1.setDeckName("Deck1");
-        d1.setCommanders(List.of(atraxa));
+        d1.setCommanders(Set.of(atraxa));
 
         Deck d2 = new Deck();
         d2.setDeckName("Deck2");
-        d2.setCommanders(List.of(atraxa));
+        d2.setCommanders(Set.of(atraxa));
 
         Game g1 = new Game();
         g1.setId(1);
