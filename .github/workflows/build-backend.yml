@@ -5,6 +5,7 @@ on:
       - master
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,6 +18,20 @@ jobs:
         with:
           java-version: 21
           distribution: 'zulu'
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      # Branch-Analyse (nur bei Push auf master)
       - name: Build and analyze (push)
         if: github.event_name == 'push'
         env:
@@ -26,6 +41,7 @@ jobs:
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=Buridius_EDHTrack
 
+      # PR-Analyse (nur bei Pull Requests)
       - name: Build and analyze (PR)
         if: github.event_name == 'pull_request'
         env:
