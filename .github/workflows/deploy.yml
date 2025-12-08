@@ -67,7 +67,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=Buridius_EDHTrack
-            -Dsonar.organization=buridius
+            -Dsonar.organization=Buridius
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
             -Dsonar.java.binaries=backend/target/classes
             -Dsonar.sources=backend/src/main/java
