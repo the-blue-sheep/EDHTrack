@@ -39,7 +39,7 @@ jobs:
         working-directory: backend
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=Buridius_EDHTrack
+            -Dsonar.projectKey=the-blue-sheep_EDHTrack
 
       # PR-Analyse (nur bei Pull Requests)
       - name: Build and analyze (PR)
