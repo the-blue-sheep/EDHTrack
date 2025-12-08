@@ -25,11 +25,9 @@ class GameParticipantRepositoryTest {
     @Test
     void findByDeck_ColorsContaining_shouldReturnCorrectEntries() {
         Deck deck = new Deck();
-        Set<Commander> commanders = Set.of();
         Commander commander = new Commander();
         commander.setName("Atraxa");
 
-        commanders.add(commander);
         deck.setCommanders(Set.of(commander));
         entityManager.persist(commander);
 

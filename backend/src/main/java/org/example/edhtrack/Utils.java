@@ -88,7 +88,7 @@ public final class Utils {
                 gp.getPlayer().getName(),
                 gp.getDeck().getCommanders().stream()
                         .map(Commander::getName)
-                        .toList(),
+                        .collect(Collectors.toSet()),
                 gp.isWinner()
         );
     }

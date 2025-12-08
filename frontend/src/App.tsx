@@ -4,15 +4,17 @@ import AddGamePage from "./pages/AddGamePage.tsx";
 import PlayerManagerPage from "./pages/PlayerManagerPage.tsx";
 import StatsPage from "./pages/StatsPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
-import Navbar from "./components/ui/Navbar.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
+import AppLayout from "./components/ui/Layout.tsx";
 
 function App() {
 
   return (
     <>
-        <Navbar />
+        <AppLayout>
+
         <div className={"pt-16"}>
+
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/add" element={<AddGamePage />} />
@@ -22,6 +24,7 @@ function App() {
                 <Route path="/settings" element={<SettingsPage />} />
             </Routes>
         </div>
+        </AppLayout>
 
     </>
   )
