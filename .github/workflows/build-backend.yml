@@ -49,7 +49,7 @@ jobs:
         working-directory: backend
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=Buridius_EDHTrack \
+            -Dsonar.projectKey=the-blue-sheep_EDHTrack \
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
             -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} \
             -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
