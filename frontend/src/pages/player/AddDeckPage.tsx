@@ -2,6 +2,7 @@ import axios from "axios";
 import {useState, useEffect, type ChangeEvent, type FormEvent} from "react";
 import { useAutocomplete } from "../../hooks/useAutocomplete.ts";
 import { computeColorsFromCommanders } from "../../services/scryfall.ts";
+import { toast } from "react-toastify";
 
 interface Player {
     id: number;
@@ -48,7 +49,13 @@ export default function PlayerManagerPage() {
     }
     function onChangeHandlerPlayer(e: ChangeEvent<HTMLSelectElement>) {
         const val = e.target.value;
-        setSelectedPlayerId(val ? Number(val) : undefined);
+        const id =  val ? Number(val) : undefined;
+        setSelectedPlayerId(id);
+
+        setFormData(prev => ({
+            ...prev,
+            playerId: id ?? 0
+        }));
     }
     function onChangeHandleCommanders(index: number, value: string) {
         setFormData(prev => {
@@ -61,17 +68,25 @@ export default function PlayerManagerPage() {
         });
     }
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const computedColors = computeColorsFromCommanders(formData.commanders);
+        const toasty = toast.loading("Please wait...");
+        const computedColors = await computeColorsFromCommanders(formData.commanders);
         const finalDTO = {
             ...formData,
             colors: computedColors
         };
         console.log("Submitting deck:", finalDTO);
         axios.post("/api/decks", finalDTO)
-            .then(response => {console.log (response.data);})
-            .catch(error => {console.log("Error during create Deck: ", error)});
+            .then(() => {toast.update(toasty, {render: "All is good", type: "success", isLoading: false, autoClose: 3000})
+                setFormData({
+                    playerId: 0,
+                    commanders: ["", ""],
+                    deckname: "",
+                    colors: ""
+                });
+            })
+            .catch(() => {toast.update(toasty, {render: "Error", type: "error", isLoading: false})});
     }
 
     if (players === null) {

@@ -1,5 +1,6 @@
 import {type ChangeEvent, type FormEvent, useState} from "react";
 import axios from "axios";
+import {toast} from "react-toastify";
 
 interface PlayerCreateDTO {
     name: string;
@@ -19,9 +20,17 @@ export default function addPlayerPage() {
     }
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        axios.post("/api/players", formData.name)
-            .then(response => {console.log (response.data);})
-            .catch(error => {console.log("Error during create Deck: ", error)});
+        const toasty = toast.loading("Please wait...");
+        const playerCreateDTO: PlayerCreateDTO = {
+            name: formData.name
+        };
+        axios.post("/api/players", playerCreateDTO)
+            .then(() => {toast.update(toasty, {render: "All is good", type: "success", isLoading: false})
+                setFormData({
+                    name: ""
+                })
+            })
+            .catch(() => {toast.update(toasty, {render: "Error", type: "error", isLoading: false})});
     }
 
     return (
@@ -35,7 +44,7 @@ export default function addPlayerPage() {
                         New Player
                     </label>
                     <input
-                        name="addPlayer"
+                        name="name"
                         type="text"
                         value={formData.name}
                         onChange={onChangeHandler}
@@ -43,7 +52,7 @@ export default function addPlayerPage() {
                         className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     />
                     <button
-                        type="button"
+                        type="submit"
                         className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800 focus:ring-2 focus:ring-green-400"
                     >
                         Add Player

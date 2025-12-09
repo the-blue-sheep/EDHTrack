@@ -20,11 +20,16 @@ export const menuConfig = {
         { path: "/players", label: "Players" },
         { path: "/players/add", label: "Add Player" },
         { path: "/decks", label: "Decks" },
-        { path: "/decks/add", label: "Add Deck" }
+        { path: "/decks/add", label: "Add Deck" },
+        { path: "/decks/retire", label: "Retire" },
+        { path: "/decks/update", label: "Update" }
     ],
     games: [
         { path: "/games", label: "Game Overview" },
         { path: "/games/add", label: "Add Game" }
+    ],
+    statistics: [
+        { path: "/statistics", label: "Statistics" },
     ]
 }
 
