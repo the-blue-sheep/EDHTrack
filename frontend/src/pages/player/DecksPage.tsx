@@ -45,7 +45,6 @@ export default function decksPage() {
                     const data = response.data;
                     const decksArray = Array.isArray(data) ? data : Object.values(data);
                     setDecks(decksArray);
-                    console.log(decksArray);
                 })
                 .catch(() => {
                     toast.update(toasty, { render: "Error", type: "error", isLoading: false });
