@@ -20,11 +20,16 @@ export const menuConfig = {
         { path: "/players", label: "Players" },
         { path: "/players/add", label: "Add Player" },
         { path: "/decks", label: "Decks" },
-        { path: "/decks/add", label: "Add Deck" }
+        { path: "/decks/add", label: "Add Deck" },
+        { path: "/players/retire", label: "Retire" },
+        { path: "/players/update", label: "Update" }
     ],
     games: [
         { path: "/games", label: "Game Overview" },
         { path: "/games/add", label: "Add Game" }
+    ],
+    statistics: [
+        { path: "/statistics", label: "Statistics" },
     ]
 }
 
@@ -34,6 +39,7 @@ export default function Sidebar() {
 
     const menuKey: keyof MenuConfig =
         pathname.startsWith("/players") ? "players"
+        :pathname.startsWith("/decks") ? "players"
             : pathname.startsWith("/games") ? "games"
                 : "default";
 

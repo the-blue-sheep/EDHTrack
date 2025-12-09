@@ -2,6 +2,7 @@ import axios from "axios";
 import {useState, useEffect, type ChangeEvent, type FormEvent} from "react";
 import { useAutocomplete } from "../../hooks/useAutocomplete.ts";
 import { computeColorsFromCommanders } from "../../services/scryfall.ts";
+import { toast } from "react-toastify";
 
 interface Player {
     id: number;
@@ -12,7 +13,7 @@ interface Player {
 interface CreateDeckDTO {
     playerId: number;
     commanders: string[];
-    deckname: string;
+    deckName: string;
     colors: string;
 }
 
@@ -22,7 +23,7 @@ export default function PlayerManagerPage() {
     const [formData, setFormData] = useState<CreateDeckDTO>({
         playerId: 0,
         commanders: ["", ""],
-        deckname: "",
+        deckName: "",
         colors: ""
     });
 
@@ -48,7 +49,13 @@ export default function PlayerManagerPage() {
     }
     function onChangeHandlerPlayer(e: ChangeEvent<HTMLSelectElement>) {
         const val = e.target.value;
-        setSelectedPlayerId(val ? Number(val) : undefined);
+        const id =  val ? Number(val) : undefined;
+        setSelectedPlayerId(id);
+
+        setFormData(prev => ({
+            ...prev,
+            playerId: id ?? 0
+        }));
     }
     function onChangeHandleCommanders(index: number, value: string) {
         setFormData(prev => {
@@ -61,17 +68,25 @@ export default function PlayerManagerPage() {
         });
     }
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const computedColors = computeColorsFromCommanders(formData.commanders);
+        const toasty = toast.loading("Please wait...");
+        const computedColors = await computeColorsFromCommanders(formData.commanders);
         const finalDTO = {
             ...formData,
             colors: computedColors
         };
         console.log("Submitting deck:", finalDTO);
         axios.post("/api/decks", finalDTO)
-            .then(response => {console.log (response.data);})
-            .catch(error => {console.log("Error during create Deck: ", error)});
+            .then(() => {toast.update(toasty, {render: "All is good", type: "success", isLoading: false, autoClose: 3000})
+                setFormData({
+                    playerId: 0,
+                    commanders: ["", ""],
+                    deckName: "",
+                    colors: ""
+                });
+            })
+            .catch(() => {toast.update(toasty, {render: "Error", type: "error", isLoading: false})});
     }
 
     if (players === null) {
@@ -176,7 +191,7 @@ export default function PlayerManagerPage() {
                     <input
                         name="deckname"
                         type="text"
-                        value={formData.deckname}
+                        value={formData.deckName}
                         onChange={onChangeHandler}
                         placeholder="Optional Deckname"
                         className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
