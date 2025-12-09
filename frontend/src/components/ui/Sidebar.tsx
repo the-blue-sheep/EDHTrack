@@ -1,5 +1,15 @@
 import {NavLink, useLocation} from "react-router-dom";
 
+interface MenuItem {
+    path: string;
+    label: string;
+}
+type MenuConfig = {
+    default: MenuItem[];
+    players: MenuItem[];
+    games: MenuItem[];
+};
+
 export const menuConfig = {
     default: [
         { path: "/", label: "Home" },
@@ -22,17 +32,12 @@ export default function Sidebar() {
     const location = useLocation();
     const pathname = location.pathname;
 
-    let menuKey: string;
-    if (pathname.startsWith("/players")) {
-        menuKey = "players";
-    } else if (pathname.startsWith("/games")) {
-        menuKey = "games";
-    } else {
-        menuKey = "default";
-    }
+    const menuKey: keyof MenuConfig =
+        pathname.startsWith("/players") ? "players"
+            : pathname.startsWith("/games") ? "games"
+                : "default";
 
-    // @ts-ignore
-    const menuItems = menuConfig[menuKey] ?? [];
+    const menuItems = menuConfig[menuKey];
 
     return (
         <nav className="w-64 bg-gray-100 min-h-full p-4">
