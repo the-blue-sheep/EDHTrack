@@ -21,7 +21,7 @@ public class DeckController {
     }
 
     @PostMapping("/retire")
-    public DeckDTO  setRetiredDeckStatus(@RequestBody RetireDeckDTO retireDeckDTO) {
+    public DeckDTO setRetiredDeckStatus(@RequestBody RetireDeckDTO retireDeckDTO) {
         return deckService.setRetiredDeckStatus(retireDeckDTO);
     }
 

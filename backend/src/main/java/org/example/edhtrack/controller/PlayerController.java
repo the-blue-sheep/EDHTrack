@@ -5,6 +5,7 @@ import org.example.edhtrack.dto.player.PlayerCreateDTO;
 import org.example.edhtrack.dto.player.PlayerResponseDTO;
 import org.example.edhtrack.dto.player.PlayerSetRetiredDTO;
 import org.example.edhtrack.dto.player.PlayerUpdateDTO;
+import org.example.edhtrack.entity.Player;
 import org.example.edhtrack.service.DeckService;
 import org.example.edhtrack.service.PlayerService;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,12 @@ public class PlayerController {
     @PostMapping("/retire")
     public PlayerResponseDTO setIsRetiredPlayer(@RequestBody PlayerSetRetiredDTO dto) {
         return playerService.setIsRetiredPlayer(dto);
+    }
+
+    @GetMapping("/{id}")
+    public PlayerResponseDTO findById(@PathVariable int id) {
+        Player p = playerService.getPlayerById(id);
+        return new PlayerResponseDTO(p.getId(), p.getName(), p.isRetired());
     }
 
     @GetMapping("/{id}/decks")

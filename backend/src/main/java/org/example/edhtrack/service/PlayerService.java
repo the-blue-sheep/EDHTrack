@@ -45,14 +45,15 @@ public class PlayerService {
     }
 
     public Player getPlayerById(int playerId) {
-        return playerRepository.findById(playerId).get();
+        return  playerRepository.findById(playerId)
+                .orElseThrow(() -> new RuntimeException("Id not found: " + playerId));
     }
 
     public PlayerResponseDTO setIsRetiredPlayer(PlayerSetRetiredDTO dto) {
         Player player = playerRepository.findByName(dto.getName())
                 .orElseThrow(() -> new RuntimeException("Player not found: " + dto.getName()));
 
-        player.setRetired(dto.isRetired());
+        player.setRetired(!player.isRetired());
         Player saved = playerRepository.save(player);
         return new PlayerResponseDTO(saved.getId(), saved.getName(), saved.isRetired());
     }
