@@ -25,7 +25,7 @@ export default function addPlayerPage() {
             name: formData.name
         };
         axios.post("/api/players", playerCreateDTO)
-            .then(() => {toast.update(toasty, {render: "All is good", type: "success", isLoading: false})
+            .then(() => {toast.update(toasty, {render: "All is good", type: "success", isLoading: false, autoClose: 3000 })
                 setFormData({
                     name: ""
                 })

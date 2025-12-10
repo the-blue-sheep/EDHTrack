@@ -97,7 +97,7 @@ export default function decksPage() {
                         <tbody>
                         {decks.map(deck => (
                             <tr key={deck.deckId}>
-                                                                <td className="border border-gray-300 px-4 py-2">
+                                <td className="border border-gray-300 px-4 py-2">
                                     {Array.isArray(deck.commanders) ? deck.commanders.join(", ") : deck.commanders}
                                 </td>
                                 <td className="border border-gray-300 px-4 py-2">{deck.colors}</td>

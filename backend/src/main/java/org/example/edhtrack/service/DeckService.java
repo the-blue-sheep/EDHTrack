@@ -100,7 +100,7 @@ public class DeckService {
         Deck deck = deckRepository.findById(retireDeckDTO.deckId())
                 .orElseThrow(() -> new RuntimeException("Deck not found"));
 
-        deck.setRetired(retireDeckDTO.retired());
+        deck.setRetired(!deck.isRetired);
 
         Deck saved = deckRepository.save(deck);
         return Utils.toDTO(saved);
