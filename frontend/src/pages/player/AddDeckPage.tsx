@@ -95,6 +95,9 @@ export default function PlayerManagerPage() {
 
     return (
         <div className="p-6">
+            <h3 className="text-xl font-semibold text-purple-800 space-x-6">
+                Add a new deck
+            </h3>
             <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Player
@@ -114,10 +117,6 @@ export default function PlayerManagerPage() {
                     ))}
                 </select>
             </div>
-
-            <h3 className="text-xl font-semibold text-purple-800 mb-4">
-                Add Deck
-            </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

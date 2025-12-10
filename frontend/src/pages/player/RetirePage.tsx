@@ -141,7 +141,9 @@ export default function RetirePage() {
 
     return (
         <div className="p-6">
-            <h1>Retire Management</h1>
+            <h3 className="text-xl font-semibold text-purple-800 space-x-6">
+                Retire Management
+            </h3>
             <div>
                 Retire a player or deck because they are no longer in your playgroup or you dissolved the deck.
                 This is only relevant if you decide it is for the statistics.

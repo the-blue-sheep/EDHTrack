@@ -34,8 +34,8 @@ export default function addPlayerPage() {
     }
 
     return (
-        <div >
-            <h3 className="text-xl font-semibold text-purple-800 mb-4">
+        <div className="p-6">
+            <h3 className="text-xl font-semibold text-purple-800 space-x-6">
                 Add Player
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
