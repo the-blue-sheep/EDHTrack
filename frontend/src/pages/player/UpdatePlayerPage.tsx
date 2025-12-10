@@ -109,14 +109,14 @@ export default function UpdatePlayerPage() {
     }
 
     return (
-        <div className="p-6">
+        <div className="space-x-6">
             <h1>Change player name</h1>
             <div>
                 You misspelled a name during creation? No Problem.
             </div>
 
-            <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="space-x-6">
+                <label className="block text-sm font-medium text-gray-700 space-x-2">
                     Select Player
                 </label>
                 <select
