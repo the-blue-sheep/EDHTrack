@@ -109,8 +109,8 @@ export default function UpdatePlayerPage() {
     }
 
     return (
-        <div className="space-x-6">
-            <h1>Change player name</h1>
+        <div className="p-6">
+            <h3 className="text-xl font-semibold text-purple-800 space-x-6">Change player name</h3>
             <div>
                 You misspelled a name during creation? No Problem.
             </div>
