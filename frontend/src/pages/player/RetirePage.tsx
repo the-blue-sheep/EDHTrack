@@ -42,6 +42,33 @@ export default function RetirePage() {
             });
     }, []);
 
+    useEffect(() => {
+        if (selectedPlayer === null) {
+            setDecks([]);
+            return;
+        }
+
+        const toasty = toast.loading("Loading decks...");
+        axios.get(`/api/players/${selectedPlayer.id}/decks`)
+            .then(response => {
+                toast.update(toasty, {
+                    render: "Decks loaded",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+                setDecks(Array.isArray(response.data) ? response.data : Object.values(response.data));
+            })
+            .catch(() => {
+                toast.update(toasty, {
+                    render: "Error loading decks",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+            });
+    }, [selectedPlayer]);
+
     function onChangeHandlerPlayer(e: ChangeEvent<HTMLSelectElement>) {
         const val = e.target.value;
         if (!val) {
@@ -82,26 +109,6 @@ export default function RetirePage() {
                     autoClose: 3000
                 });
             });
-    }
-
-    function handleLoadDecks() {
-        if (selectedPlayer !== null) {
-            const toasty = toast.loading("Please wait...");
-            const selectedPlayerId: number = selectedPlayer.id;
-
-            axios.get(`/api/players/${selectedPlayerId}/decks`)
-                .then(response => {
-                    toast.update(toasty, { render: "All is good", type: "success", isLoading: false, autoClose: 3000 });
-                    const data = response.data;
-                    const decksArray = Array.isArray(data) ? data : Object.values(data);
-                    setDecks(decksArray);
-                })
-                .catch(() => {
-                    toast.update(toasty, { render: "Error", type: "error", isLoading: false });
-                })
-        } else {
-            toast.error("You need to select a player...");
-        }
     }
 
     function handleRetirePlayer() {
@@ -227,11 +234,6 @@ export default function RetirePage() {
                     </table>
                 )}
             </div>
-            <button
-                onClick={handleLoadDecks}
-                className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800 focus:ring-2 focus:ring-green-400">
-                Load Decks
-            </button>
         </div>
     );
 }
