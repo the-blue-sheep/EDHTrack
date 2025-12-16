@@ -25,5 +25,10 @@ public class DeckController {
         return deckService.setRetiredDeckStatus(retireDeckDTO);
     }
 
+    @PutMapping("/{id}")
+    public DeckDTO updateDeck(@PathVariable int id, @RequestBody DeckDTO dto) {
+        return deckService.updateDeck(id, dto);
+    }
+
 
 }

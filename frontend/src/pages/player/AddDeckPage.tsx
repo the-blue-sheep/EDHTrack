@@ -1,8 +1,8 @@
 import axios from "axios";
 import {useState, useEffect, type ChangeEvent, type FormEvent} from "react";
-import { useAutocomplete } from "../../hooks/useAutocomplete.ts";
 import { computeColorsFromCommanders } from "../../services/scryfall.ts";
 import { toast } from "react-toastify";
+import { AutocompleteInput } from "../../components/AutocompleteInput.tsx";
 
 interface Player {
     id: number;
@@ -17,7 +17,7 @@ interface CreateDeckDTO {
     colors: string;
 }
 
-export default function PlayerManagerPage() {
+export default function AddDeckPage() {
     const [players, setPlayers] = useState<Player[]>([]);
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [formData, setFormData] = useState<CreateDeckDTO>({
@@ -26,9 +26,6 @@ export default function PlayerManagerPage() {
         deckName: "",
         colors: ""
     });
-
-    const { results: results0, clearResults: clearResults0, reopenResults: reopenResults0 } = useAutocomplete(formData.commanders[0]);
-    const { results: results1, clearResults: clearResults1, reopenResults: reopenResults1 } = useAutocomplete(formData.commanders[1]);
 
     useEffect(() => {
         axios.get<Player[]>("/api/players")
@@ -71,12 +68,15 @@ export default function PlayerManagerPage() {
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const toasty = toast.loading("Please wait...");
-        const computedColors = await computeColorsFromCommanders(formData.commanders);
+        const commandersClean = formData.commanders.filter(Boolean);
+        const computedColors = await computeColorsFromCommanders(commandersClean);
+
         const finalDTO = {
             ...formData,
+            commanders: commandersClean,
             colors: computedColors
         };
-        console.log("Submitting deck:", finalDTO);
+
         axios.post("/api/decks", finalDTO)
             .then(() => {toast.update(toasty, {render: "All is good", type: "success", isLoading: false, autoClose: 3000})
                 setFormData({
@@ -123,64 +123,20 @@ export default function PlayerManagerPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Commander
                     </label>
-                    <input
-                        name="commander0"
-                        type="text"
+                    <AutocompleteInput
                         value={formData.commanders[0]}
-                        onChange={e => onChangeHandleCommanders(0, e.target.value)}
-                        onFocus={reopenResults0}
-                        onBlur={clearResults0}
-                        placeholder="Search for commander..."
-                        className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        onChange={val => onChangeHandleCommanders(0, val)}
                     />
-                    {results0.length > 0 && (
-                        <ul className="border mt-1 bg-white max-h-40 overflow-y-auto rounded-md">
-                            {results0.map(name => (
-                                <li
-                                    key={name}
-                                    onMouseDown={() => {
-                                        onChangeHandleCommanders(0, name);
-                                        clearResults0();
-                                    }}
-                                    className="px-3 py-2 hover:bg-green-100 cursor-pointer"
-                                >
-                                    {name}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Partner / Background
                     </label>
-                    <input
-                        name="commander1"
-                        type="text"
+                    <AutocompleteInput
                         value={formData.commanders[1]}
-                        onChange={e => onChangeHandleCommanders(1, e.target.value)}
-                        onFocus={reopenResults1}
-                        onBlur={clearResults1}
-                        placeholder="Optional"
-                        className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        onChange={val => onChangeHandleCommanders(1, val)}
                     />
-                    {results1.length > 0 && (
-                        <ul className="border mt-1 bg-white max-h-40 overflow-y-auto rounded-md">
-                            {results1.map(name => (
-                                <li
-                                    key={name}
-                                    onMouseDown={() => {
-                                        onChangeHandleCommanders(1, name);
-                                        clearResults1();
-                                    }}
-                                    className="px-3 py-2 hover:bg-green-100 cursor-pointer"
-                                >
-                                    {name}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
                 </div>
 
                 <div>
@@ -188,7 +144,7 @@ export default function PlayerManagerPage() {
                         Deckname
                     </label>
                     <input
-                        name="deckname"
+                        name="deckName"
                         type="text"
                         value={formData.deckName}
                         onChange={onChangeHandler}

@@ -106,4 +106,26 @@ public class DeckService {
         return Utils.toDTO(saved);
     }
 
+    public DeckDTO updateDeck(int id, DeckDTO dto) {
+        Deck deck = deckRepository.findById(dto.deckId())
+                .orElseThrow(() -> new RuntimeException("Deck not found with id: " + id));
+
+        deck.setDeckName(dto.deckName());
+        deck.setColors(dto.colors());
+        deck.setRetired(dto.retired());
+
+        Set<String> commanderNames = dto.commanders();
+        Set<Commander> commanders = commanderNames.stream()
+                .map(name -> commanderRepository
+                        .findByNameIgnoreCase(name)
+                        .orElseGet(() -> commanderRepository.save(new Commander(name)))
+                ).collect(Collectors.toSet());
+
+        deck.setCommanders(commanders);
+
+        Deck saved = deckRepository.save(deck);
+
+        return Utils.toDTO(saved);
+    }
+
 }
