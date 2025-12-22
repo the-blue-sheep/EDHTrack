@@ -13,7 +13,7 @@ export default function Navbar() {
                 <nav className="flex flex-1 justify-center gap-8 text-lg font-medium">
                     <Link to="/" className="hover:text-blue-600">Home</Link>
                     <Link to="/stats" className="hover:text-blue-600">Statistics</Link>
-                    <Link to="/add" className="hover:text-blue-600">Games</Link>
+                    <Link to="/games" className="hover:text-blue-600">Games</Link>
                     <Link to="/players" className="hover:text-blue-600">Players</Link>
                     <Link to="/settings" className="hover:text-blue-600">Settings</Link>
                     <Link to="/login" className="hover:text-blue-600">Login</Link>
