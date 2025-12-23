@@ -1,8 +1,11 @@
 package org.example.edhtrack.controller;
 
 import org.example.edhtrack.Utils;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import org.example.edhtrack.dto.GameParticipantOverviewDTO;
 import org.example.edhtrack.dto.game.CreateGameDTO;
 import org.example.edhtrack.dto.game.CreateGameResponseDTO;
+import org.example.edhtrack.dto.game.GameOverviewDTO;
 import org.example.edhtrack.dto.player.PlayerResultDTO;
 import org.example.edhtrack.entity.*;
 import org.example.edhtrack.service.GameService;
@@ -35,6 +38,30 @@ class GameControllerTest {
 
     @MockitoBean
     private GameService gameService;
+
+    @Test
+    void getAllGames_returnsListOfGames() throws Exception {
+        GameParticipantOverviewDTO p1 = new GameParticipantOverviewDTO(1, "Alice", 11, "Bribe Control", true);
+        GameParticipantOverviewDTO p2 = new GameParticipantOverviewDTO(2, "Bob", 22, "Midrange", false);
+
+        GameOverviewDTO game1 = new GameOverviewDTO(
+                100,
+                LocalDate.of(2025, 12, 1),
+                "Fun game",
+                List.of(p1, p2)
+        );
+
+        when(gameService.getAllGames()).thenReturn(List.of(game1));
+
+        mockMvc.perform(get("/api/games")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].gameId").value(100))
+                .andExpect(jsonPath("$[0].notes").value("Fun game"))
+                .andExpect(jsonPath("$[0].participants[0].playerName").value("Alice"))
+                .andExpect(jsonPath("$[0].participants[1].playerName").value("Bob"));
+    }
 
     @Test
     void createGame_shouldReturnCreatedGame() throws Exception {
