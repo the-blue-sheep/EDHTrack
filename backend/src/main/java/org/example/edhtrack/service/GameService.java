@@ -1,7 +1,9 @@
 package org.example.edhtrack.service;
 
+import org.example.edhtrack.dto.GameParticipantOverviewDTO;
 import org.example.edhtrack.dto.game.CreateGameDTO;
 import org.example.edhtrack.dto.game.CreateGameResponseDTO;
+import org.example.edhtrack.dto.game.GameOverviewDTO;
 import org.example.edhtrack.dto.player.PlayerResultDTO;
 import org.example.edhtrack.Utils;
 import org.example.edhtrack.entity.Game;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GameService {
@@ -63,6 +66,25 @@ public class GameService {
                 savedGame.getDate(),
                 playerResults
         );
+    }
+
+    public List<GameOverviewDTO> getAllGames() {
+        return gameRepository.findAll().stream()
+                .map(game -> new GameOverviewDTO(
+                        game.getId(),
+                        game.getDate(),
+                        game.getNotes(),
+                        game.getPlayers().stream()
+                                .map(gp -> new GameParticipantOverviewDTO(
+                                        gp.getPlayer().getId(),
+                                        gp.getPlayer().getName(),
+                                        gp.getDeck().getDeckId(),
+                                        gp.getDeck().getDeckName(),
+                                        gp.isWinner()
+                                ))
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
     }
 
 }
