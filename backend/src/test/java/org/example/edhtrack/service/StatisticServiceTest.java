@@ -1,6 +1,7 @@
 package org.example.edhtrack.service;
 
 import org.example.edhtrack.Utils;
+import org.example.edhtrack.dto.player.PlayerVsPlayerDTO;
 import org.example.edhtrack.dto.stats.*;
 import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
@@ -129,11 +130,12 @@ class StatisticServiceTest {
         when(gameParticipantRepository.findByPlayer(alice)).thenReturn(List.of(g1a, g2a));
         when(gameParticipantRepository.findByPlayer(bob)).thenReturn(List.of(g1b, g2b));
 
-        WinrateAgainstAnotherPlayer result =
+        PlayerVsPlayerDTO result =
                 statisticService.getWinRateAgainstOtherPlayer(alice, bob);
 
         assertNotNull(result);
-        assertEquals(alice, result.player());
+        assertEquals(alice.getName(), result.player1Name());
+        assertEquals(alice.getId(), result.player1Id());
         assertEquals(0.5, result.winRate(), 0.0001);
     }
 

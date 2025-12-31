@@ -30,6 +30,7 @@ export const menuConfig = {
     ],
     statistics: [
         { path: "/statistics", label: "Statistics" },
+        { path: "/stats", label: "Statistics" },
     ]
 }
 

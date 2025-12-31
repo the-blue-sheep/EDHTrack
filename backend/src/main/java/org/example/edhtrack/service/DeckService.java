@@ -5,6 +5,7 @@ import org.example.edhtrack.dto.deck.CreateDeckDTO;
 import org.example.edhtrack.dto.deck.DeckDTO;
 import org.example.edhtrack.dto.deck.RetireDeckDTO;
 import org.example.edhtrack.dto.stats.CommanderAmountStatDTO;
+import org.example.edhtrack.dto.stats.CommanderWinRateDTO;
 import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.Player;
@@ -80,8 +81,11 @@ public class DeckService {
                 ))
                 .entrySet()
                 .stream()
-                .sorted(Comparator.comparing(Map.Entry<String, Long>::getValue).reversed())
-                .map(entry -> new CommanderAmountStatDTO(entry.getKey(), entry.getValue()))
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .map(entry -> new CommanderAmountStatDTO(
+                        entry.getKey(),
+                        Math.toIntExact(entry.getValue())
+                ))
                 .toList();
     }
 
@@ -126,6 +130,16 @@ public class DeckService {
         Deck saved = deckRepository.save(deck);
 
         return Utils.toDTO(saved);
+    }
+
+    public List<String> getAllCommanderNames() {
+        return deckRepository.findAll()
+                .stream()
+                .flatMap(deck -> deck.getCommanders().stream())
+                .map(Commander::getName)
+                .distinct()
+                .sorted()
+                .toList();
     }
 
 }

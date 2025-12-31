@@ -14,6 +14,13 @@ import UpdatePlayerAndDecksPage from "./pages/player/UpdatePlayerAndDecksPage.ts
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GameOverviewPage from "./pages/games/GameOverviewPage.tsx";
+import LeaderboardPage from "./pages/statistics/LeaderboardPage.tsx";
+import CommanderAmountsPage from "./pages/statistics/CommanderAmountsPage.tsx";
+import WinrateByCommander from "./pages/statistics/WinrateByCommander.tsx";
+import StreaksPage from "./pages/statistics/StreaksPage.tsx";
+import PlayerVsPlayerPage from "./pages/statistics/PlayerVsPlayerPage.tsx";
+import PlayerWinratePage from "./pages/statistics/PlayerWinratePage.tsx";
+import PlayerDetailPage from "./pages/player/PlayerDetailPage.tsx";
 
 function App() {
 
@@ -32,8 +39,15 @@ function App() {
                     <Route path="/players/retire" element={<RetirePage />} />
                     <Route path="/players/update" element={<UpdatePlayerAndDecksPage />} />
                     <Route path="/stats" element={<StatsPage />} />
+                    <Route path="/statistics/leaderboard" element={<LeaderboardPage />} />
+                    <Route path="/statistics/commander-amounts" element={<CommanderAmountsPage />} />
+                    <Route path="/statistics/commander-winrate" element={<WinrateByCommander />} />
+                    <Route path="/statistics/streaks" element={<StreaksPage />} />
+                    <Route path="/statistics/player-winrate" element={<PlayerWinratePage />} />
+                    <Route path="/statistics/player-vs-player" element={<PlayerVsPlayerPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/players/:id" element={<PlayerDetailPage />} />
                 </Route>
             </Routes>
             <ToastContainer

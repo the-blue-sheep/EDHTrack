@@ -1,7 +1,11 @@
 package org.example.edhtrack.controller;
 
 import org.example.edhtrack.Utils;
+import org.example.edhtrack.dto.player.PlayerDetailDTO;
+import org.example.edhtrack.dto.player.PlayerGamesCountDTO;
+import org.example.edhtrack.dto.player.PlayerVsPlayerDTO;
 import org.example.edhtrack.dto.stats.*;
+import org.example.edhtrack.entity.Player;
 import org.example.edhtrack.service.DeckService;
 import org.example.edhtrack.service.PlayerService;
 import org.example.edhtrack.service.StatisticService;
@@ -54,7 +58,7 @@ public class StatisticController {
     }
 
     @GetMapping("/player-vs-player-stat")
-    public WinrateAgainstAnotherPlayer  getWinRateAgainstAnotherPlayer(@RequestParam int playerId1, @RequestParam int playerId2) {
+    public PlayerVsPlayerDTO getWinRateAgainstAnotherPlayer(@RequestParam int playerId1, @RequestParam int playerId2) {
         return statisticService.getWinRateAgainstOtherPlayer(playerService.getPlayerById(playerId1), playerService.getPlayerById(playerId2));
     }
 
@@ -72,4 +76,36 @@ public class StatisticController {
     ){
         return statisticService.getLeaderboard(type, minGames, hideRetiredPlayers, hideRetiredDecks);
     }
+
+    @GetMapping("/players/game-count")
+    public List<PlayerGamesCountDTO> getPlayerGameCounts(
+            @RequestParam(defaultValue = "false") boolean hideRetired
+    ) {
+        return statisticService.getPlayerGamesCount(hideRetired);
+    }
+
+    @GetMapping("/players/{id}/detail")
+    public PlayerDetailDTO getPlayerDetail(@PathVariable int id) {
+        Player player = playerService.getPlayerById(id);
+        return statisticService.getPlayerDetail(player);
+    }
+
+    @GetMapping("/players/{id}/top-played-decks")
+    public List<DeckStatDTO> getTopPlayedDecks(
+            @PathVariable int id,
+            @RequestParam(defaultValue = "3") int limit
+    ) {
+        Player player = playerService.getPlayerById(id);
+        return statisticService.getTopPlayedDecks(player, limit);
+    }
+
+    @GetMapping("/players/{id}/top-successful-decks")
+    public List<DeckStatDTO> getTopSuccessfulDecks(
+            @PathVariable int id,
+            @RequestParam(defaultValue = "3") int limit
+    ) {
+        Player player = playerService.getPlayerById(id);
+        return statisticService.getTopSuccessfulDecks(player, limit);
+    }
+
 }
