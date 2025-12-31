@@ -5,7 +5,6 @@ import org.example.edhtrack.dto.deck.CreateDeckDTO;
 import org.example.edhtrack.dto.deck.DeckDTO;
 import org.example.edhtrack.dto.deck.RetireDeckDTO;
 import org.example.edhtrack.dto.stats.CommanderAmountStatDTO;
-import org.example.edhtrack.dto.stats.CommanderWinRateDTO;
 import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.Player;
@@ -14,7 +13,6 @@ import org.example.edhtrack.repository.DeckRepository;
 import org.example.edhtrack.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

@@ -266,4 +266,34 @@ class StatisticServiceTest {
         assertEquals(1, second.totalGames());
         assertEquals(0, second.wins());
     }
+
+    @Test
+    void getWinRatesForAllCommanders_shouldReturnWinratesForAllCommanders() {
+        Player p1 = player("Maxim");
+    }
+
+    @Test
+    void getPlayerGamesCount_shouldReturnPlayerGamesCount() {
+        Player p1 = player("Maxim");
+    }
+
+    @Test
+    void getPlayerDetail_shouldReturnPlayerDetail() {
+        Player p1 = player("Maxim");
+    }
+
+    @Test
+    void getTopPlayedDecks_shouldReturnTopPlayedDecks() {
+        Player p1 = player("Maxim");
+    }
+
+    @Test
+    void getTopSuccessfulDecks_shouldReturnTopSuccessfulDecks() {
+        Player p1 = player("Maxim");
+    }
+
+    @Test
+    void getDeckStatsForPlayer_shouldReturnDeckStatsForPlayer() {
+        Player p1 = player("Maxim");
+    }
 }
