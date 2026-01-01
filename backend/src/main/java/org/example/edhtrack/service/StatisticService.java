@@ -266,7 +266,7 @@ public class StatisticService {
                 .toList();
     }
 
-    private List<DeckStatDTO> getDeckStatsForPlayer(Player player) {
+    public List<DeckStatDTO> getDeckStatsForPlayer(Player player) {
         Map<Deck, List<GameParticipant>> byDeck =
                 gameParticipantRepository.findByPlayer(player)
                         .stream()
