@@ -3,10 +3,9 @@ package org.example.edhtrack.controller;
 import org.example.edhtrack.dto.deck.CreateDeckDTO;
 import org.example.edhtrack.dto.deck.DeckDTO;
 import org.example.edhtrack.dto.deck.RetireDeckDTO;
-import org.example.edhtrack.entity.Commander;
-import org.example.edhtrack.entity.Deck;
-import org.example.edhtrack.entity.Player;
+import org.example.edhtrack.dto.stats.CommanderWinRateDTO;
 import org.example.edhtrack.service.DeckService;
+import org.example.edhtrack.service.StatisticService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,14 +14,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 
 @SpringBootTest
@@ -34,6 +35,9 @@ class DeckControllerTest {
 
     @MockitoBean
     private DeckService deckService;
+
+    @MockitoBean
+    StatisticService statisticService;
 
     @Test
     void createDeck_shouldReturnDeck() throws Exception {
@@ -118,4 +122,17 @@ class DeckControllerTest {
 
         verify(deckService).setRetiredDeckStatus(any(RetireDeckDTO.class));
     }
+
+    @Test
+    void getAllCommanderNames_returnsListOfNames() throws Exception {
+        when(deckService.getAllCommanderNames()).thenReturn(
+                List.of("Atraxa", "Edgar", "Yuriko")
+        );
+
+        mockMvc.perform(get("/api/decks/commanders"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(3));
+    }
+
 }

@@ -18,4 +18,5 @@ public interface GameParticipantRepository extends JpaRepository<GameParticipant
 
     List<GameParticipant> findByDeck_Commanders_NameIgnoreCase(String commanderName);
 
+    int countByPlayer(Player player);
 }

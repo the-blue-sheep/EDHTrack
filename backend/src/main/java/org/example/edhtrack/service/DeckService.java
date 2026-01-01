@@ -13,7 +13,6 @@ import org.example.edhtrack.repository.DeckRepository;
 import org.example.edhtrack.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,8 +79,11 @@ public class DeckService {
                 ))
                 .entrySet()
                 .stream()
-                .sorted(Comparator.comparing(Map.Entry<String, Long>::getValue).reversed())
-                .map(entry -> new CommanderAmountStatDTO(entry.getKey(), entry.getValue()))
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .map(entry -> new CommanderAmountStatDTO(
+                        entry.getKey(),
+                        Math.toIntExact(entry.getValue())
+                ))
                 .toList();
     }
 
@@ -126,6 +128,16 @@ public class DeckService {
         Deck saved = deckRepository.save(deck);
 
         return Utils.toDTO(saved);
+    }
+
+    public List<String> getAllCommanderNames() {
+        return deckRepository.findAll()
+                .stream()
+                .flatMap(deck -> deck.getCommanders().stream())
+                .map(Commander::getName)
+                .distinct()
+                .sorted()
+                .toList();
     }
 
 }

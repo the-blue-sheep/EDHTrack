@@ -1,10 +1,7 @@
 package org.example.edhtrack.controller;
 
 import org.example.edhtrack.dto.deck.DeckDTO;
-import org.example.edhtrack.dto.player.PlayerCreateDTO;
-import org.example.edhtrack.dto.player.PlayerResponseDTO;
-import org.example.edhtrack.dto.player.PlayerSetRetiredDTO;
-import org.example.edhtrack.dto.player.PlayerUpdateDTO;
+import org.example.edhtrack.dto.player.*;
 import org.example.edhtrack.entity.Player;
 import org.example.edhtrack.service.DeckService;
 import org.example.edhtrack.service.PlayerService;

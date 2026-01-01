@@ -1,11 +1,17 @@
 package org.example.edhtrack.service;
 
 import org.example.edhtrack.Utils;
+import org.example.edhtrack.dto.player.PlayerDetailDTO;
+import org.example.edhtrack.dto.player.PlayerGamesCountDTO;
+import org.example.edhtrack.dto.player.PlayerVsPlayerDTO;
 import org.example.edhtrack.dto.stats.*;
+import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.GameParticipant;
 import org.example.edhtrack.entity.Player;
+import org.example.edhtrack.repository.DeckRepository;
 import org.example.edhtrack.repository.GameParticipantRepository;
+import org.example.edhtrack.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,9 +21,13 @@ import java.util.stream.Collectors;
 @Service
 public class StatisticService {
     private final GameParticipantRepository gameParticipantRepository;
+    private final DeckRepository deckRepository;
+    private final PlayerRepository playerRepository;
 
-    public StatisticService(GameParticipantRepository gameParticipantRepository) {
+    public StatisticService(GameParticipantRepository gameParticipantRepository, DeckRepository deckRepository, PlayerRepository playerRepository) {
         this.gameParticipantRepository = gameParticipantRepository;
+        this.deckRepository = deckRepository;
+        this.playerRepository = playerRepository;
     }
 
     public WinrateByPlayerDTO getWinRateByPlayer(Player player) {
@@ -27,21 +37,34 @@ public class StatisticService {
         int gamesWon = Utils.countWins(participants);
 
         double winRate = gamesIn == 0 ? 0 : (double) gamesWon / gamesIn;
-        return new WinrateByPlayerDTO(player, gamesIn, gamesWon, winRate);
+        return new WinrateByPlayerDTO(player.getId(), player.getName(), gamesIn, gamesWon, winRate);
     }
 
     public CommanderWinRateDTO getWinRateByCommander(String commanderName) {
-        List<GameParticipant> participants = gameParticipantRepository.findAll();
-        int gamesIn = participants.size();
 
-        int gamesWon = (int) participants.stream()
+        List<GameParticipant> participants =
+                gameParticipantRepository.findAll().stream()
+                        .filter(gp ->
+                                gp.getDeck().getCommanders().stream()
+                                        .anyMatch(c -> c.getName().equalsIgnoreCase(commanderName))
+                        )
+                        .toList();
+
+        int totalGames = participants.size();
+        int wins = (int) participants.stream()
                 .filter(GameParticipant::isWinner)
-                .filter(p -> p.getDeck().getCommanders().stream()
-                        .anyMatch(c -> c.getName().equalsIgnoreCase(commanderName)))
                 .count();
 
-        double winRate = gamesIn == 0 ? 0 : (double) gamesWon / gamesIn;
-        return new CommanderWinRateDTO(commanderName, gamesIn, gamesWon, winRate);
+        double winRate = totalGames == 0
+                ? 0.0
+                : (double) wins / totalGames;
+
+        return new CommanderWinRateDTO(
+                commanderName,
+                totalGames,
+                wins,
+                winRate
+        );
     }
 
     public ColorStatDTO getWinrateByColor(String colors) {
@@ -54,7 +77,7 @@ public class StatisticService {
         return new ColorStatDTO(colors, gamesIn, gamesWon, winRate);
     }
 
-    public WinrateAgainstAnotherPlayer getWinRateAgainstOtherPlayer(Player player1, Player player2) {
+    public PlayerVsPlayerDTO getWinRateAgainstOtherPlayer(Player player1, Player player2) {
         List<GameParticipant> participants1 = gameParticipantRepository.findByPlayer(player1);
         List<GameParticipant> participants2 =  gameParticipantRepository.findByPlayer(player2);
         List<GameParticipant> participants = new ArrayList<>();
@@ -70,7 +93,13 @@ public class StatisticService {
         int gamesWon = Utils.countWins(participants);
 
         double winRate = gamesIn == 0 ? 0 : (double) gamesWon / gamesIn;
-        return new WinrateAgainstAnotherPlayer(player1, player2, winRate);
+        return new PlayerVsPlayerDTO(
+                player1.getId(),
+                player1.getName(),
+                player2.getId(),
+                player2.getName(),
+                winRate
+        );
     }
 
     public StreakDTO getStreaksByPlayer(Player player){
@@ -135,10 +164,7 @@ public class StatisticService {
                     if (hideRetiredPlayers && p.getPlayer().isRetired()) {
                         return false;
                     }
-                    if (hideRetiredDecks && p.getDeck() != null && p.getDeck().isRetired()) {
-                        return false;
-                    }
-                    return true;
+                    return !hideRetiredDecks || p.getDeck() == null || !p.getDeck().isRetired();
                 })
                 .toList();
 
@@ -178,4 +204,92 @@ public class StatisticService {
                 .toList();
 
     }
+
+    public List<CommanderWinRateDTO> getWinRatesForAllCommanders() {
+
+        return deckRepository.findAll().stream()
+                .flatMap(deck -> deck.getCommanders().stream())
+                .map(Commander::getName)
+                .distinct()
+                .map(this::getWinRateByCommander)
+                .filter(dto -> dto.totalGames() > 0)
+                .sorted(Comparator.comparing(CommanderWinRateDTO::winRate).reversed())
+                .toList();
+    }
+
+    public List<PlayerGamesCountDTO> getPlayerGamesCount(boolean hideRetired) {
+        return playerRepository.findAll()
+                .stream()
+                .filter(p -> !hideRetired || !p.isRetired())
+                .map(player -> {
+                    int games = gameParticipantRepository.countByPlayer(player);
+                    return new PlayerGamesCountDTO(
+                            player.getId(),
+                            player.getName(),
+                            player.isRetired(),
+                            games
+                    );
+                })
+                .sorted(Comparator.comparing(PlayerGamesCountDTO::totalGames).reversed())
+                .toList();
+    }
+
+    public PlayerDetailDTO getPlayerDetail(Player player) {
+        List<GameParticipant> parts = gameParticipantRepository.findByPlayer(player);
+
+        int totalGames = parts.size();
+        int wins = Utils.countWins(parts);
+        double winRate = totalGames == 0 ? 0 : (double) wins / totalGames;
+
+        return new PlayerDetailDTO(
+                player.getId(),
+                player.getName(),
+                player.isRetired(),
+                totalGames,
+                wins,
+                winRate
+        );
+    }
+
+    public List<DeckStatDTO> getTopPlayedDecks(Player player, int limit) {
+        return getDeckStatsForPlayer(player).stream()
+                .sorted(Comparator.comparing(DeckStatDTO::totalGames).reversed())
+                .limit(limit)
+                .toList();
+    }
+
+    public List<DeckStatDTO> getTopSuccessfulDecks(Player player, int limit) {
+        return getDeckStatsForPlayer(player).stream()
+                .filter(d -> d.totalGames() >= 3)
+                .sorted(Comparator.comparing(DeckStatDTO::winRate).reversed())
+                .limit(limit)
+                .toList();
+    }
+
+    public List<DeckStatDTO> getDeckStatsForPlayer(Player player) {
+        Map<Deck, List<GameParticipant>> byDeck =
+                gameParticipantRepository.findByPlayer(player)
+                        .stream()
+                        .collect(Collectors.groupingBy(GameParticipant::getDeck));
+
+        return byDeck.entrySet().stream()
+                .map(entry -> {
+                    Deck deck = entry.getKey();
+                    List<GameParticipant> games = entry.getValue();
+
+                    int totalGames = games.size();
+                    int wins = Utils.countWins(games);
+                    double winRate = totalGames == 0 ? 0 : (double) wins / totalGames;
+
+                    return new DeckStatDTO(
+                            deck.getDeckId(),
+                            deck.getDeckName(),
+                            totalGames,
+                            wins,
+                            winRate
+                    );
+                })
+                .toList();
+    }
+
 }

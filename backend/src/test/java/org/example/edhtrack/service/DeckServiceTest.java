@@ -192,4 +192,31 @@ class DeckServiceTest {
         verify(deckRepository).save(existing);
     }
 
+    @Test
+    void getAllCommanderNames_shouldReturnAllCommanderNames() {
+        // given
+        Commander atraxa = new Commander("Atraxa");
+        Commander edgar = new Commander("Edgar Markov");
+        Commander yuriko = new Commander("Yuriko");
+
+        Deck deck1 = new Deck();
+        deck1.setCommanders(Set.of(atraxa, edgar));
+
+        Deck deck2 = new Deck();
+        deck2.setCommanders(Set.of(atraxa, yuriko));
+
+        when(deckRepository.findAll()).thenReturn(List.of(deck1, deck2));
+
+        // when
+        List<String> result = deckService.getAllCommanderNames();
+
+        // then
+        assertThat(result)
+                .containsExactly(
+                        "Atraxa",
+                        "Edgar Markov",
+                        "Yuriko"
+                );
+
+    }
 }

@@ -1,10 +1,10 @@
 package org.example.edhtrack.service;
 
-import org.example.edhtrack.dto.player.PlayerCreateDTO;
-import org.example.edhtrack.dto.player.PlayerResponseDTO;
-import org.example.edhtrack.dto.player.PlayerSetRetiredDTO;
-import org.example.edhtrack.dto.player.PlayerUpdateDTO;
+import org.example.edhtrack.Utils;
+import org.example.edhtrack.dto.player.*;
+import org.example.edhtrack.entity.GameParticipant;
 import org.example.edhtrack.entity.Player;
+import org.example.edhtrack.repository.GameParticipantRepository;
 import org.example.edhtrack.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 @Service
 public class PlayerService {
     private final PlayerRepository playerRepository;
+    private final GameParticipantRepository gameParticipantRepository;
 
-    public PlayerService(PlayerRepository playerRepository) {
+    public PlayerService(PlayerRepository playerRepository, GameParticipantRepository gameParticipantRepository) {
         this.playerRepository = playerRepository;
+        this.gameParticipantRepository = gameParticipantRepository;
     }
 
     public PlayerResponseDTO createPlayer(PlayerCreateDTO dto) {
