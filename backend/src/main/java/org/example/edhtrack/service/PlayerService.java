@@ -1,5 +1,6 @@
 package org.example.edhtrack.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.player.*;
 import org.example.edhtrack.entity.GameParticipant;
@@ -52,11 +53,21 @@ public class PlayerService {
     }
 
     public PlayerResponseDTO setIsRetiredPlayer(PlayerSetRetiredDTO dto) {
-        Player player = playerRepository.findByName(dto.getName())
-                .orElseThrow(() -> new RuntimeException("Player not found: " + dto.getName()));
 
-        player.setRetired(!player.isRetired());
+        Player player = playerRepository.findById(dto.id())
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Player not found: " + dto.id())
+                );
+
+        player.setRetired(dto.isRetired());
+
         Player saved = playerRepository.save(player);
-        return new PlayerResponseDTO(saved.getId(), saved.getName(), saved.isRetired());
+
+        return new PlayerResponseDTO(
+                saved.getId(),
+                saved.getName(),
+                saved.isRetired()
+        );
     }
+
 }

@@ -9,7 +9,6 @@ import AppLayout from "./components/ui/Layout.tsx";
 import AddPlayerForm from "./pages/player/AddPlayerPage.tsx";
 import AddDeckPage from "./pages/player/AddDeckPage.tsx";
 import DecksPage from "./pages/player/DecksPage.tsx";
-import RetirePage from "./pages/player/RetirePage.tsx";
 import UpdatePlayerAndDecksPage from "./pages/player/UpdatePlayerAndDecksPage.tsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -36,7 +35,6 @@ function App() {
                     <Route path="/decks" element={<DecksPage />} />
                     <Route path="/decks/add" element={<AddDeckPage />} />
                     <Route path="/players/add" element={<AddPlayerForm />} />
-                    <Route path="/players/retire" element={<RetirePage />} />
                     <Route path="/players/update" element={<UpdatePlayerAndDecksPage />} />
                     <Route path="/stats" element={<StatsPage />} />
                     <Route path="/statistics/leaderboard" element={<LeaderboardPage />} />
