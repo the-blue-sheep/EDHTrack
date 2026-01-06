@@ -226,7 +226,7 @@ export default function UpdatePlayerAndDecksPage() {
                 </select>
             </div>
 
-            {selectedPlayer && (
+            {selectedPlayer ?
                 <form
                     onSubmit={e => {
                         e.preventDefault();
@@ -247,9 +247,9 @@ export default function UpdatePlayerAndDecksPage() {
                         Update
                     </button>
                 </form>
-            )}
+            : null}
 
-            {editingDeckId && (
+            {editingDeckId ?
                 <div className="p-4 border rounded bg-gray-50 space-y-3">
                     <h3 className="text-lg font-bold">
                         Edit Deck
@@ -320,9 +320,9 @@ export default function UpdatePlayerAndDecksPage() {
                         </button>
                     </div>
                 </div>
-            )}
+            : null}
 
-            {decks.length > 0 && (
+            {decks.length > 0 ?
                 <table className="min-w-full border-collapse border border-gray-300">
                     <thead className="bg-gray-100">
                     <tr>
@@ -354,7 +354,7 @@ export default function UpdatePlayerAndDecksPage() {
                     ))}
                     </tbody>
                 </table>
-            )}
+            : null}
         </div>
     );
 }

@@ -26,9 +26,9 @@ export default function CommanderAmountsPage() {
                 Commander amounts
             </h3>
 
-            {loading && <p>Lade...</p>}
+            {loading ? <p>Lade...</p> : null}
 
-            {!loading && data.length > 0 && (
+            {!loading && data.length > 0 ?
                 <table className="w-full border-collapse">
                     <thead className="bg-purple-100">
                     <tr className="border-b">
@@ -56,11 +56,11 @@ export default function CommanderAmountsPage() {
                     ))}
                     </tbody>
                 </table>
-            )}
+            : null}
 
-            {!loading && data.length === 0 && (
+            {!loading && data.length === 0 ?
                 <p>No Data</p>
-            )}
+            : null}
         </div>
     );
 }

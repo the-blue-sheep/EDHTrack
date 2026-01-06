@@ -174,7 +174,7 @@ export default function RetirePage() {
                         </option>
                     ))}
                 </select>
-                {selectedPlayer && (
+                {selectedPlayer ?
                     <p className="mt-2">
                         Status:{" "}
                         {selectedPlayer.isRetired
@@ -182,7 +182,7 @@ export default function RetirePage() {
                             : <span className="text-green-600">Active</span>
                         }
                     </p>
-                )}
+                : null}
             </div>
             <div className="mb-6">
             <button
@@ -197,7 +197,7 @@ export default function RetirePage() {
                 <label className="block text-sm font-medium text-purple-900 mb-2">Decks from the selected Player</label>
             </div>
             <div className="mb-6">
-                {decks.length > 0 && (
+                {decks.length > 0 ?
                     <table className="min-w-full border-collapse border border-gray-300">
                         <thead className="bg-gray-100">
                         <tr>
@@ -232,7 +232,7 @@ export default function RetirePage() {
                         ))}
                         </tbody>
                     </table>
-                )}
+                : null}
             </div>
         </div>
     );

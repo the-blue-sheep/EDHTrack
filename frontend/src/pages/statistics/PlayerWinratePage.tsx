@@ -96,9 +96,9 @@ export default function PlayerWinratePage() {
                 </div>
             </div>
 
-            {loading && <p>Loading...</p>}
+            {loading ? <p>Loading...</p> : null}
 
-            {data && (
+            {data ?
                 <div className="mt-6">
 
                     <h2 className="text-xl font-semibold mb-4 text-purple-900">
@@ -129,7 +129,7 @@ export default function PlayerWinratePage() {
                     </div>
 
                 </div>
-            )}
+            : null}
         </div>
     )
 }
