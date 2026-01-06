@@ -16,10 +16,21 @@ interface DeckDTO {
     retired: boolean,
 }
 
+interface RetireDeckDTO {
+    deckId: number;
+    retired: boolean;
+}
+
+interface RetirePlayerDTO {
+    id: number;
+    isRetired: boolean;
+}
+
 export default function decksPage() {
     const [players, setPlayers] = useState<Player[]>([]);
     const [decks, setDecks] = useState<DeckDTO[]>([]);
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
+    const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
     useEffect(() => {
         axios.get<Player[]>("/api/players")
@@ -31,26 +42,107 @@ export default function decksPage() {
             });
     }, []);
 
+    useEffect(() => {
+        if (selectedPlayerId == null) return;
+
+        const toasty = toast.loading("Loading decks...");
+
+        axios.get(`/api/players/${selectedPlayerId}/decks`)
+            .then(response => {
+                const data = response.data;
+                const decksArray = Array.isArray(data) ? data : Object.values(data);
+                setDecks(decksArray);
+                toast.update(toasty, {
+                    render: "Decks loaded",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+            })
+            .catch(() => {
+                toast.update(toasty, {
+                    render: "Error loading decks",
+                    type: "error",
+                    isLoading: false
+                });
+            });
+
+    }, [selectedPlayerId]);
+
     function onChangeHandlerPlayer(e: ChangeEvent<HTMLSelectElement>) {
         const val = e.target.value;
-        const id =  val ? Number(val) : undefined;
+        const id = val ? Number(val) : undefined;
+
         setSelectedPlayerId(id);
+
+        if (!id) {
+            setSelectedPlayer(null);
+            return;
+        }
+
+        axios.get(`/api/players/${id}`)
+            .then(res => {
+                setSelectedPlayer(res.data);
+            })
+            .catch(() => {
+                toast.error("Failed to load player");
+                setSelectedPlayer(null);
+            });
     }
-    function handleLoadDecks() {
-        if (selectedPlayerId !== undefined) {
-            const toasty = toast.loading("Please wait...");
-            axios.get(`/api/players/${selectedPlayerId}/decks`)
-                .then(response => {
-                    toast.update(toasty, { render: "All is good", type: "success", isLoading: false, autoClose: 3000 });
-                    const data = response.data;
-                    const decksArray = Array.isArray(data) ? data : Object.values(data);
-                    setDecks(decksArray);
-                })
-                .catch(() => {
-                    toast.update(toasty, { render: "Error", type: "error", isLoading: false });
+
+    function handleRetirePlayer() {
+        if (selectedPlayerId === undefined || selectedPlayer === undefined) {
+            return;
+        }
+
+        const toasty = toast.loading("Please wait...");
+
+        const dto: RetirePlayerDTO = {
+            id: selectedPlayerId,
+            isRetired: !selectedPlayer?.isRetired
+        };
+
+        axios.post('/api/players/retire', dto)
+            .then(res => {
+                const updated = res.data as Player;
+
+                setSelectedPlayer(updated);
+
+                toast.update(toasty, {
+                    render: "Player updated",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 3000
                 });
-        } else {
-            toast.error("You need to select a player...");
+            })
+            .catch(() => {
+                toast.update(toasty, {
+                    render: "Error",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+            });
+    }
+
+    function handleRetireDeck(deck: DeckDTO) {
+        if(selectedPlayerId !== null) {
+            const retireDeckDTO: RetireDeckDTO = {
+                deckId: deck.deckId,
+                retired: deck.retired
+            }
+
+            const toasty = toast.loading("Please wait...");
+
+            axios.post('/api/decks/retire', retireDeckDTO)
+                .then(res => {
+                    const updatedDeck = res.data;
+                    setDecks(prev =>
+                        prev.map(d => d.deckId === updatedDeck.deckId ? updatedDeck : d)
+                    );
+                    toast.update(toasty, { render: "Retire status changed", type: "success", isLoading: false, autoClose: 3000 });
+                })
+                .catch(() => {toast.update(toasty, {render: "Error", type: "error", isLoading: false, autoClose: 3000})});
         }
     }
 
@@ -77,12 +169,24 @@ export default function decksPage() {
                         </option>
                     ))}
                 </select>
-                <button
-                    onClick={handleLoadDecks}
-                    className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800 focus:ring-2 focus:ring-green-400">
-                    Load Decks
-                </button>
             </div>
+            {selectedPlayerId && (
+                <p className="mt-2">
+                    Status:{" "}
+                    {selectedPlayer?.isRetired
+                        ? <span className="text-red-600">Retired</span>
+                        : <span className="text-green-600">Active</span>
+                    }
+                </p>
+            )}
+            {selectedPlayerId && (<button
+                type="button"
+                className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800 focus:ring-2 focus:ring-green-400"
+                onClick={handleRetirePlayer}
+            >
+                {selectedPlayer?.isRetired ? "Reactivate player" : "Retire player"}
+            </button>
+                )}
             <div className="mb-6">
                 <label className="block text-sm font-medium text-purple-900 mb-2">Decks the selected Player has played</label>
             </div>
@@ -105,8 +209,16 @@ export default function decksPage() {
                                 </td>
                                 <td className="border border-gray-300 px-4 py-2">{deck.colors}</td>
                                 <td className="border border-gray-300 px-4 py-2">{deck.deckName}</td>
+
                                 <td className="border border-gray-300 px-4 py-2">
-                                    {deck.retired ? "Retired" : "Active"}
+
+                                    <button
+                                        type="button"
+                                        className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800 focus:ring-2 focus:ring-green-400"
+                                        onClick={() => handleRetireDeck(deck)}
+                                    >
+                                        {deck.retired ? "Retired" : "Active"}
+                                    </button>
                                 </td>
                             </tr>
                         ))}

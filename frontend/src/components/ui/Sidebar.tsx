@@ -21,7 +21,6 @@ export const menuConfig = {
         { path: "/players/add", label: "Add Player" },
         { path: "/decks", label: "Decks" },
         { path: "/decks/add", label: "Add Deck" },
-        { path: "/players/retire", label: "Retire" },
         { path: "/players/update", label: "Update" }
     ],
     games: [
