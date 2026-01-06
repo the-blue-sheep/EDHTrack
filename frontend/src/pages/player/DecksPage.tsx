@@ -191,7 +191,7 @@ export default function decksPage() {
                 <label className="block text-sm font-medium text-purple-900 mb-2">Decks the selected Player has played</label>
             </div>
             <div className="mb-6">
-                {decks.length > 0 && (
+                {decks.length > 0 ?
                     <table className="min-w-full border-collapse border border-gray-300">
                         <thead className="bg-gray-100">
                         <tr>
@@ -224,7 +224,7 @@ export default function decksPage() {
                         ))}
                         </tbody>
                     </table>
-                )}
+                : null}
             </div>
         </div>
     )

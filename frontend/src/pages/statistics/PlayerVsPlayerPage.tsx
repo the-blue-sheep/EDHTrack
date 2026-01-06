@@ -131,9 +131,9 @@ export default function PlayerVsPlayerPage() {
                 Compare
             </button>
 
-            {loading && <p className="mt-4">Loading...</p>}
+            {loading ? <p className="mt-4">Loading...</p> : null}
 
-            {!loading && data && (
+            {!loading && data ?
                 <div className="mt-6">
                     <h2 className="text-xl font-semibold mb-4">
                         {data.player1Name} vs {data.player2Name}
@@ -147,7 +147,7 @@ export default function PlayerVsPlayerPage() {
                         </span>
                     </p>
                 </div>
-            )}
+            : null}
         </div>
     );
 }

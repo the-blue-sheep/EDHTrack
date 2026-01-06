@@ -20,13 +20,35 @@ interface DeckStatDTO {
     totalGames: number;
     wins: number;
     winRate: number;
+    isRetired: boolean;
 }
+
 export default function PlayerDetailPage() {
     const { id } = useParams();
     const [data, setData] = useState<PlayerDetailDTO | null>(null);
     const [topPlayed, setTopPlayed] = useState<DeckStatDTO[]>([]);
     const [topSuccessful, setTopSuccessful] = useState<DeckStatDTO[]>([]);
+    const [hideRetiredDecks, setHideRetiredDecks] = useState<boolean>(false);
+    const [topPlayedFiltered, setTopPlayedFiltered] = useState<DeckStatDTO[]>([]);
+    const [topSuccessfulFiltered, setTopSuccessfulFiltered] = useState<DeckStatDTO[]>([]);
 
+    function getTopDecks(decks: DeckStatDTO[], hideRetired: boolean, count: number = 3) {
+        if (!decks) return [];
+
+        if (!hideRetired) {
+            return decks.slice(0, count);
+        }
+
+        const top: DeckStatDTO[] = [];
+        for (const deck of decks) {
+            if (!deck.isRetired) {
+                top.push(deck);
+            }
+            if (top.length === count) break;
+        }
+
+        return top;
+    }
 
     function Stat({ label, value }: { label: string; value: string | number }) {
         return (
@@ -43,13 +65,13 @@ export default function PlayerDetailPage() {
         }
 
         return (
-            <table className="w-full border-collapse text-sm">
+            <table className="w-full table-auto border-collapse text-sm">
                 <thead>
-                <tr className="border-b">
-                    <th className="px-2 py-1 text-left">Deck</th>
-                    <th className="px-2 py-1 text-center">Games</th>
-                    <th className="px-2 py-1 text-center">Wins</th>
-                    <th className="px-2 py-1 text-center">Winrate</th>
+                <tr className="border-b bg-gray-100">
+                    <th className="px-4 py-2 text-left w-1/2">Deck</th>
+                    <th className="px-4 py-2 text-center w-1/6">Games</th>
+                    <th className="px-4 py-2 text-center w-1/6">Wins</th>
+                    <th className="px-4 py-2 text-center w-1/6">Winrate</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -58,12 +80,10 @@ export default function PlayerDetailPage() {
                         key={deck.deckId}
                         className="border-b last:border-b-0 hover:bg-purple-50"
                     >
-                        <td className="px-2 py-1 font-medium">
-                            {deck.deckName}
-                        </td>
-                        <td className="text-center">{deck.totalGames}</td>
-                        <td className="text-center">{deck.wins}</td>
-                        <td className="text-center">
+                        <td className="px-4 py-2 font-medium">{deck.deckName}</td>
+                        <td className="px-4 py-2 text-center">{deck.totalGames}</td>
+                        <td className="px-4 py-2 text-center">{deck.wins}</td>
+                        <td className="px-4 py-2 text-center">
                             {(deck.winRate * 100).toFixed(1)}%
                         </td>
                     </tr>
@@ -82,6 +102,12 @@ export default function PlayerDetailPage() {
         axios.get<DeckStatDTO[]>(`/api/stats/players/${id}/top-successful-decks`)
             .then(res => setTopSuccessful(res.data));
     }, [id]);
+
+    useEffect(() => {
+        setTopPlayedFiltered(getTopDecks(topPlayed, hideRetiredDecks));
+        setTopSuccessfulFiltered(getTopDecks(topSuccessful, hideRetiredDecks));
+        console.log("hideRetiredDecks triggered");
+    }, [topPlayed, topSuccessful, hideRetiredDecks]);
 
     useEffect(() => {
         if (!id) return;
@@ -114,34 +140,50 @@ export default function PlayerDetailPage() {
             <h1 className="text-3xl font-bold text-purple-900 mb-2">
                 {data.playerName}
             </h1>
-
-            <p className="mb-4">
-                Status:{" "}
-                <span className={data.isRetired ? "text-red-600" : "text-green-600"}>
-                    {data.isRetired ? "Retired" : "Active"}
-                </span>
-            </p>
+            <div
+                className="grid gap-4 mb-6 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]"
+            >
+                <p className="mb-4">
+                    Status:{" "}
+                    <span className={data.isRetired ? "text-red-600" : "text-green-600"}>
+                        {data.isRetired ? "Retired" : "Active"}
+                    </span>
+                </p>
+                <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 text-purple-900 font-bold">
+                        <input
+                            type="checkbox"
+                            checked={hideRetiredDecks}
+                            onChange={e => setHideRetiredDecks(e.target.checked)}
+                        />
+                        Hide retired Decks
+                    </label>
+                </div>
+            </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Stat label="Games" value={data.totalGames} />
                 <Stat label="Wins" value={data.wins} />
                 <Stat label="Winrate" value={`${(data.winRate * 100).toFixed(1)}%`} />
             </div>
-            <div>
-                <h2 className="text-lg font-semibold text-purple-900 mb-3">
-                    Top 3 Successful Decks
-                </h2>
+            <div className="space-y-6">
+                <div>
+                    <h2 className="text-lg font-semibold text-purple-900 mb-3">
+                        Top 3 Successful Decks
+                    </h2>
+                    <DeckStatsTable decks={topSuccessfulFiltered} />
+                </div>
 
-                <DeckStatsTable decks={topSuccessful} />
+                <div>
+                    <h2 className="text-lg font-semibold text-purple-900 mb-3">
+                        Top 3 Played Decks
+                    </h2>
+                    <DeckStatsTable decks={topPlayedFiltered} />
+                </div>
             </div>
+            <DeckStatsTable decks={getTopDecks(topPlayed, hideRetiredDecks)} />
+            <DeckStatsTable decks={getTopDecks(topSuccessful, hideRetiredDecks)} />
 
-            <div>
-                <h2 className="text-lg font-semibold text-purple-900 mb-3">
-                    Top 3 Played Decks
-                </h2>
-
-                <DeckStatsTable decks={topPlayed} />
-            </div>
         </div>
     );
 }

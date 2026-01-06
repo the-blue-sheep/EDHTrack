@@ -89,9 +89,9 @@ export default function LeaderboardPage() {
                     Load
             </button>
 
-            {loading && <p>Loading...</p>}
+            {loading ? <p>Loading...</p> : null}
 
-            {!loading && data.length > 0 && (
+            {!loading && data.length > 0 ?
                 <table className="mt-6 w-full border-collapse">
                     <thead>
                         <tr className="border-b">
@@ -114,7 +114,7 @@ export default function LeaderboardPage() {
                     ))}
                     </tbody>
                 </table>
-            )}
+            : null}
         </div>
     );
 }

@@ -58,9 +58,9 @@ export default function PlayerManagerPage() {
                 </label>
             </div>
 
-            {loading && <p>Loading...</p>}
+            {loading ? <p>Loading...</p> : null}
 
-            {!loading && data.length > 0 && (
+            {!loading && data.length > 0 ?
                 <table className="w-full border-collapse">
                     <thead>
                     <tr className="border-b">
@@ -90,7 +90,7 @@ export default function PlayerManagerPage() {
                     ))}
                     </tbody>
                 </table>
-            )}
+            : null}
         </div>
     );
 }

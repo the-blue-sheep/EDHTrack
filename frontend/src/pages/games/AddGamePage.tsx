@@ -169,9 +169,9 @@ export default function AddGamePage() {
                                 className="border px-2 py-1 rounded w-full"
                             >
                                 <option value="">-- Select Deck --</option>
-                                {p.playerId && (
+                                {p.playerId ?
                                     <DeckOptionsForPlayer playerId={p.playerId} />
-                                )}
+                                : null}
                             </select>
                         </div>
 

@@ -93,9 +93,9 @@ export default function StreaksPage() {
                 </div>
             </div>
 
-            {loading && <p>Loading...</p>}
+            {loading ? <p>Loading...</p> : null}
 
-            {data && (
+            {data ?
                 <div>
                     <h2 className="text-xl font-semibold mb-4">
                         {data.playerName}
@@ -119,7 +119,7 @@ export default function StreaksPage() {
                         ))}
                     </div>
                 </div>
-            )}
+            :null}
         </div>
     );
 }

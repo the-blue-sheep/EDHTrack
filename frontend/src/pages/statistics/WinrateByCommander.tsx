@@ -136,7 +136,7 @@ export default function WinrateByCommander() {
                 </button>
             </div>
 
-            {!loading && data && (
+            {!loading && data ?
                 <table className="mt-6 w-full border-collapse">
                     <thead>
                     <tr className="border-b">
@@ -155,9 +155,9 @@ export default function WinrateByCommander() {
                     </tr>
                     </tbody>
                 </table>
-            )}
+            : null}
             <div className="flex items-center gap-2">
-                {!loading && allData.length > 0 && (
+                {!loading && allData.length > 0 ?
                     <table className="mt-6 w-full border-collapse">
                         <thead>
                         <tr className="border-b">
@@ -180,7 +180,7 @@ export default function WinrateByCommander() {
                         ))}
                         </tbody>
                     </table>
-                )}
+                : null}
             </div>
         </div>
 
