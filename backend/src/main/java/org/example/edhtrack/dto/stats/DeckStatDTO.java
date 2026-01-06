@@ -5,5 +5,6 @@ public record DeckStatDTO(
         String deckName,
         int totalGames,
         int wins,
-        double winRate
+        double winRate,
+        boolean isRetired
 ) {}

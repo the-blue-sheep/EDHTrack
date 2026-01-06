@@ -93,7 +93,7 @@ public class StatisticController {
     @GetMapping("/players/{id}/top-played-decks")
     public List<DeckStatDTO> getTopPlayedDecks(
             @PathVariable int id,
-            @RequestParam(defaultValue = "3") int limit
+            @RequestParam(defaultValue = "6") int limit
     ) {
         Player player = playerService.getPlayerById(id);
         return statisticService.getTopPlayedDecks(player, limit);
@@ -102,7 +102,7 @@ public class StatisticController {
     @GetMapping("/players/{id}/top-successful-decks")
     public List<DeckStatDTO> getTopSuccessfulDecks(
             @PathVariable int id,
-            @RequestParam(defaultValue = "3") int limit
+            @RequestParam(defaultValue = "6") int limit
     ) {
         Player player = playerService.getPlayerById(id);
         return statisticService.getTopSuccessfulDecks(player, limit);

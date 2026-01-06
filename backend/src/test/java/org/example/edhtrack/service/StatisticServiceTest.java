@@ -405,9 +405,9 @@ class StatisticServiceTest {
 
         Player player = player("Hans");
 
-        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 10, 5, 0.5);
-        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 30, 15, 0.5);
-        DeckStatDTO deck3 = new DeckStatDTO(3, "Yuriko", 20, 10, 0.5);
+        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 10, 5, 0.5, false);
+        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 30, 15, 0.5, false);
+        DeckStatDTO deck3 = new DeckStatDTO(3, "Yuriko", 20, 10, 0.5, false);
 
         StatisticService spyService = org.mockito.Mockito.spy(statisticService);
 
@@ -428,10 +428,10 @@ class StatisticServiceTest {
 
         Player player = player("Hans");
 
-        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 10, 5, 0.5);   // gültig
-        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 2, 2, 1.0);    // raus (totalGames < 3)
-        DeckStatDTO deck3 = new DeckStatDTO(3, "Yuriko", 8, 6, 0.75);  // gültig
-        DeckStatDTO deck4 = new DeckStatDTO(4, "Krenko", 5, 1, 0.2);   // gültig
+        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 10, 5, 0.5, false);
+        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 2, 2, 1.0, false);
+        DeckStatDTO deck3 = new DeckStatDTO(3, "Yuriko", 8, 6, 0.75, false);
+        DeckStatDTO deck4 = new DeckStatDTO(4, "Krenko", 5, 1, 0.2, false);
 
         StatisticService spyService = org.mockito.Mockito.spy(statisticService);
 

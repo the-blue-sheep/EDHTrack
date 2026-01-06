@@ -280,13 +280,15 @@ public class StatisticService {
                     int totalGames = games.size();
                     int wins = Utils.countWins(games);
                     double winRate = totalGames == 0 ? 0 : (double) wins / totalGames;
+                    boolean isRetired = entry.getKey().isRetired();
 
                     return new DeckStatDTO(
                             deck.getDeckId(),
                             deck.getDeckName(),
                             totalGames,
                             wins,
-                            winRate
+                            winRate,
+                            isRetired
                     );
                 })
                 .toList();
