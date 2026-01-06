@@ -121,9 +121,9 @@ class StatisticControllerTest {
         player.setRetired(false);
 
 
-        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 100, 25, 0.25);
-        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 10, 5, 0.50);
-        DeckStatDTO deck3 = new DeckStatDTO(3, "Y'shtola", 50, 25, 0.50);
+        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 100, 25, 0.25, false);
+        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 10, 5, 0.50, false);
+        DeckStatDTO deck3 = new DeckStatDTO(3, "Y'shtola", 50, 25, 0.50, false);
 
         when(playerService.getPlayerById(1)).thenReturn(player);
         when(statisticService.getTopPlayedDecks(player, 3))
@@ -158,9 +158,9 @@ class StatisticControllerTest {
         player.setRetired(false);
 
 
-        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 100, 25, 0.25);
-        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 10, 5, 0.50);
-        DeckStatDTO deck3 = new DeckStatDTO(3, "Y'shtola", 50, 25, 0.50);
+        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 100, 25, 0.25, false);
+        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 10, 5, 0.50, false);
+        DeckStatDTO deck3 = new DeckStatDTO(3, "Y'shtola", 50, 25, 0.50, false);
 
         when(playerService.getPlayerById(1)).thenReturn(player);
         when(statisticService.getTopSuccessfulDecks(player, 3))

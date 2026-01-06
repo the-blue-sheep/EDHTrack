@@ -106,7 +106,6 @@ export default function PlayerDetailPage() {
     useEffect(() => {
         setTopPlayedFiltered(getTopDecks(topPlayed, hideRetiredDecks));
         setTopSuccessfulFiltered(getTopDecks(topSuccessful, hideRetiredDecks));
-        console.log("hideRetiredDecks triggered");
     }, [topPlayed, topSuccessful, hideRetiredDecks]);
 
     useEffect(() => {
@@ -181,9 +180,6 @@ export default function PlayerDetailPage() {
                     <DeckStatsTable decks={topPlayedFiltered} />
                 </div>
             </div>
-            <DeckStatsTable decks={getTopDecks(topPlayed, hideRetiredDecks)} />
-            <DeckStatsTable decks={getTopDecks(topSuccessful, hideRetiredDecks)} />
-
         </div>
     );
 }
