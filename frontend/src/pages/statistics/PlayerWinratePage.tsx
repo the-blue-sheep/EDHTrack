@@ -1,6 +1,7 @@
 import {type ChangeEvent, useEffect, useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
+import DeckStatsTable from "../../components/DeckStatsTable.tsx";
 
 interface Player {
     id: number;
@@ -16,12 +17,43 @@ interface WinrateByPlayerDTO {
     winRate: number;
 }
 
+interface DeckStatDTO {
+    deckId: number;
+    deckName: string;
+    totalGames: number;
+    wins: number;
+    winRate: number;
+    isRetired: boolean;
+}
 
 export default function PlayerWinratePage() {
     const [players, setPlayers] = useState<Player[]>([]);
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [data, setData] = useState<WinrateByPlayerDTO | null>(null);
     const [loading] = useState(false);
+    const [topPlayed, setTopPlayed] = useState<DeckStatDTO[]>([]);
+    const [topSuccessful, setTopSuccessful] = useState<DeckStatDTO[]>([]);
+    const [hideRetiredDecks, setHideRetiredDecks] = useState<boolean>(false);
+    const [topPlayedFiltered, setTopPlayedFiltered] = useState<DeckStatDTO[]>([]);
+    const [topSuccessfulFiltered, setTopSuccessfulFiltered] = useState<DeckStatDTO[]>([]);
+
+    function getTopDecks(decks: DeckStatDTO[], hideRetired: boolean, count: number = 100) {
+        if (!decks) return [];
+
+        if (!hideRetired) {
+            return decks.slice(0, count);
+        }
+
+        const top: DeckStatDTO[] = [];
+        for (const deck of decks) {
+            if (!deck.isRetired) {
+                top.push(deck);
+            }
+            if (top.length === count) break;
+        }
+
+        return top;
+    }
 
     useEffect(() => {
         axios.get<Player[]>("/api/players")
@@ -32,6 +64,21 @@ export default function PlayerWinratePage() {
                 console.error("Error while loading players:", error);
             });
     }, []);
+
+    useEffect(() => {
+        setTopPlayedFiltered(getTopDecks(topPlayed, hideRetiredDecks));
+        setTopSuccessfulFiltered(getTopDecks(topSuccessful, hideRetiredDecks));
+    }, [topPlayed, topSuccessful, hideRetiredDecks]);
+
+    useEffect(() => {
+        if (!selectedPlayerId) return;
+
+        axios.get<DeckStatDTO[]>(`/api/stats/players/${selectedPlayerId}/top-played-decks`, {params: {limit:100}})
+            .then(res => setTopPlayed(res.data));
+
+        axios.get<DeckStatDTO[]>(`/api/stats/players/${selectedPlayerId}/top-successful-decks`, {params: {limit:100}})
+            .then(res => setTopSuccessful(res.data));
+    }, [selectedPlayerId]);
 
     function onChangeHandlerPlayer(e: ChangeEvent<HTMLSelectElement>) {
         const val = e.target.value;
@@ -93,6 +140,16 @@ export default function PlayerWinratePage() {
                             </option>
                         ))}
                     </select>
+                    <div className="flex items-center gap-2">
+                        <label className="flex items-center gap-2 text-purple-900 font-bold">
+                            <input
+                                type="checkbox"
+                                checked={hideRetiredDecks}
+                                onChange={e => setHideRetiredDecks(e.target.checked)}
+                            />
+                            Hide retired Decks
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -127,9 +184,26 @@ export default function PlayerWinratePage() {
                             </p>
                         </div>
                     </div>
-
                 </div>
             : null}
+
+            {data ?
+                <div className="space-y-6">
+                    <div>
+                        <h2 className="text-lg font-semibold text-purple-900 mb-3">
+                            Ranked Top Successful Decks
+                        </h2>
+                        <DeckStatsTable decks={topSuccessfulFiltered} />
+                    </div>
+
+                    <div>
+                        <h2 className="text-lg font-semibold text-purple-900 mb-3">
+                            Ranked Top Played Decks
+                        </h2>
+                        <DeckStatsTable decks={topPlayedFiltered} />
+                    </div>
+                </div>
+                : null}
         </div>
     )
 }
