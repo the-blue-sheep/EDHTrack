@@ -38,7 +38,7 @@ public class GameController {
     public void updateGame(
             @PathVariable int id,
             @RequestBody GameEditDTO dto
-    ) {
+    ) throws Exception {
         gameService.updateGame(id, dto);
     }
 

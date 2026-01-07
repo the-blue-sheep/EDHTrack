@@ -175,7 +175,7 @@ export default function EditGamePage() {
                 </div>
 
                 <div>
-                    <label className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500">Comment</label>
+                    <label className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md  focus:ring-purple-500 focus:border-purple-500">Comment</label>
                     <textarea
                         value={game.notes ?? ""}
                         onChange={e => setGame(prev => prev && { ...prev, notes: e.target.value })}

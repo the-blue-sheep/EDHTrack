@@ -222,7 +222,7 @@ class GameServiceTest {
     }
 
     @Test
-    void updateGame_updatesGameAndParticipants() {
+    void updateGame_updatesGameAndParticipants() throws Exception {
 
         Game game = new Game();
         game.setId(1);

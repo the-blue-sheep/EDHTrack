@@ -109,7 +109,7 @@ public class GameService {
     }
 
     @Transactional
-    public void updateGame(int gameId, GameEditDTO dto) {
+    public void updateGame(int gameId, GameEditDTO dto) throws Exception {
 
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
@@ -122,10 +122,10 @@ public class GameService {
         for (GameParticipantDTO p : dto.participants()) {
 
             Player player = playerRepository.findById(p.playerId())
-                    .orElseThrow();
+                    .orElseThrow(() -> new Exception("Player not found with id: " + p.playerId()));
 
             Deck deck = deckRepository.findById(p.deckId())
-                    .orElseThrow();
+                    .orElseThrow(() -> new Exception("Deck not found with id: " + p.deckId()));
 
             GameParticipant gp = new GameParticipant();
             gp.setGame(game);
