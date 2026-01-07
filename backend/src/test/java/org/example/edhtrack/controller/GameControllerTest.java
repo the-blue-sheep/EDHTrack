@@ -138,7 +138,7 @@ class GameControllerTest {
         }
         """.formatted(date.toString());
 
-        // WHEN + THEN: Request an den Controller, Response prüfen
+        // WHEN + THEN
         mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
