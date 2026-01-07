@@ -39,9 +39,9 @@ public class PlayerService {
     }
 
     public PlayerResponseDTO updatePlayer(PlayerUpdateDTO dto) {
-        Player player = playerRepository.findById(dto.getId())
-                .orElseThrow(() -> new RuntimeException("Id not found: " + dto.getId()));
-        player.setName(dto.getNewName());
+        Player player = playerRepository.findById(dto.id())
+                .orElseThrow(() -> new RuntimeException("Id not found: " + dto.id()));
+        player.setName(dto.newName());
 
         Player saved = playerRepository.save(player);
         return new PlayerResponseDTO(saved.getId(), saved.getName(), saved.isRetired());
