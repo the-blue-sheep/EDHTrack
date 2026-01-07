@@ -2,6 +2,7 @@ import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import DeckOptionsForPlayer from '../../components/DeckOptionsForPlayer.tsx'
+import { useNavigate } from "react-router-dom";
 
 interface Player {
     id: number;
@@ -20,6 +21,7 @@ export default function AddGamePage() {
     const [numberOfPlayers, setNumberOfPlayers] = useState<number>(4);
     const [comment, setComment] = useState("");
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get<Player[]>("/api/players")
@@ -88,12 +90,18 @@ export default function AddGamePage() {
         };
 
         axios.post("/api/games", body)
-            .then(() => toast.update(toasty, {
-                render: "Game added!",
-                type: "success",
-                isLoading: false,
-                autoClose: 3000
-            }))
+            .then(() => {
+                toast.update(toasty, {
+                    render: "Game added!",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 1500
+                });
+
+                setTimeout(() => {
+                    navigate("/games");
+                }, 1500);
+            })
             .catch(() => toast.update(toasty, {
                 render: "Error saving game",
                 type: "error",

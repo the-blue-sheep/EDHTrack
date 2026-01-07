@@ -1,22 +1,30 @@
 package org.example.edhtrack.service;
 
+import org.example.edhtrack.dto.GameParticipantDTO;
 import org.example.edhtrack.dto.GameParticipantOverviewDTO;
 import org.example.edhtrack.dto.game.CreateGameDTO;
 import org.example.edhtrack.dto.game.CreateGameResponseDTO;
+import org.example.edhtrack.dto.game.GameEditDTO;
 import org.example.edhtrack.dto.game.GameOverviewDTO;
 import org.example.edhtrack.dto.player.PlayerResultDTO;
 import org.example.edhtrack.Utils;
+import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.Game;
 import org.example.edhtrack.entity.GameParticipant;
+import org.example.edhtrack.entity.Player;
 import org.example.edhtrack.repository.DeckRepository;
 import org.example.edhtrack.repository.GameParticipantRepository;
 import org.example.edhtrack.repository.GameRepository;
 import org.example.edhtrack.repository.PlayerRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class GameService {
@@ -68,23 +76,69 @@ public class GameService {
         );
     }
 
-    public List<GameOverviewDTO> getAllGames() {
-        return gameRepository.findAll().stream()
-                .map(game -> new GameOverviewDTO(
-                        game.getId(),
-                        game.getDate(),
-                        game.getNotes(),
-                        game.getPlayers().stream()
-                                .map(gp -> new GameParticipantOverviewDTO(
-                                        gp.getPlayer().getId(),
-                                        gp.getPlayer().getName(),
-                                        gp.getDeck().getDeckId(),
-                                        gp.getDeck().getDeckName(),
-                                        gp.isWinner()
-                                ))
-                                .collect(Collectors.toList())
-                ))
-                .collect(Collectors.toList());
+    private GameOverviewDTO mapToOverviewDTO(Game game) {
+        return new GameOverviewDTO(
+                game.getId(),
+                game.getDate(),
+                game.getNotes(),
+                game.getPlayers().stream()
+                        .map(p -> new GameParticipantOverviewDTO(
+                                p.getPlayer().getId(),
+                                p.getPlayer().getName(),
+                                p.getDeck().getDeckId(),
+                                p.getDeck().getDeckName(),
+                                p.isWinner()
+                        ))
+                        .toList()
+        );
     }
+
+    public Page<GameOverviewDTO> getGames(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        return gameRepository.findAll(pageable)
+                .map(this::mapToOverviewDTO);
+    }
+
+    public GameOverviewDTO getGameById(int id) {
+        return gameRepository.findById(id).map(this::mapToOverviewDTO).orElse(null);
+    }
+
+    public void deleteGameById(int id) {
+        gameRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void updateGame(int gameId, GameEditDTO dto) {
+
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new RuntimeException("Game not found"));
+
+        game.setDate(dto.date());
+        game.setNotes(dto.notes());
+
+        game.getPlayers().clear();
+
+        for (GameParticipantDTO p : dto.participants()) {
+
+            Player player = playerRepository.findById(p.playerId())
+                    .orElseThrow();
+
+            Deck deck = deckRepository.findById(p.deckId())
+                    .orElseThrow();
+
+            GameParticipant gp = new GameParticipant();
+            gp.setGame(game);
+            gp.setPlayer(player);
+            gp.setDeck(deck);
+            gp.setWinner(p.isWinner());
+
+            game.getPlayers().add(gp);
+        }
+
+        gameRepository.save(game);
+    }
+
+
 
 }

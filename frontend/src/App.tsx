@@ -20,6 +20,7 @@ import StreaksPage from "./pages/statistics/StreaksPage.tsx";
 import PlayerVsPlayerPage from "./pages/statistics/PlayerVsPlayerPage.tsx";
 import PlayerWinratePage from "./pages/statistics/PlayerWinratePage.tsx";
 import PlayerDetailPage from "./pages/player/PlayerDetailPage.tsx";
+import EditGamePage from "./pages/games/EditGamePage.tsx";
 
 function App() {
 
@@ -46,6 +47,7 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/players/:id" element={<PlayerDetailPage />} />
+                    <Route path="/games/:id/edit" element={<EditGamePage />} />
                 </Route>
             </Routes>
             <ToastContainer
