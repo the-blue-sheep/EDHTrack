@@ -41,6 +41,9 @@ export default function TableSizeWinrate() {
         axios.get<TableSizeWinrateResponseDTO>(`/api/stats/players/${selectedPlayerId}/table-size-winrate`)
             .then(res => {
                 setTableSizeWinrate(res.data)
+            })
+            .catch(error => {
+                console.error("Error while loading winrates:", error);
             });
     }, [selectedPlayerId]);
 
