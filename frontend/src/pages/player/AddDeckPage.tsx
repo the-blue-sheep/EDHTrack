@@ -3,6 +3,7 @@ import {useState, useEffect, type ChangeEvent, type FormEvent} from "react";
 import { computeColorsFromCommanders } from "../../services/scryfall.ts";
 import { toast } from "react-toastify";
 import { AutocompleteInput } from "../../components/AutocompleteInput.tsx";
+import PlayerSelect from "../../components/PlayerSelect.tsx";
 
 interface Player {
     id: number;
@@ -44,8 +45,8 @@ export default function AddDeckPage() {
             [name]: value
         }))
     }
-    function onChangeHandlerPlayer(e: ChangeEvent<HTMLSelectElement>) {
-        const val = e.target.value;
+    function onChangeHandlerPlayer(playerId?: number) {
+        const val = playerId;
         const id =  val ? Number(val) : undefined;
         setSelectedPlayerId(id);
 
@@ -99,23 +100,11 @@ export default function AddDeckPage() {
                 Add a new deck
             </h3>
             <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select Player
-                </label>
-                <select
-                    name="id"
-                    id="player-select"
-                    value={selectedPlayerId ?? ""}
+                <PlayerSelect
+                    players={players}
+                    value={selectedPlayerId}
                     onChange={onChangeHandlerPlayer}
-                    className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                >
-                    <option value="">-- Select --</option>
-                    {players.map(player => (
-                        <option key={player.id} value={player.id}>
-                            {player.name}
-                        </option>
-                    ))}
-                </select>
+                />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">

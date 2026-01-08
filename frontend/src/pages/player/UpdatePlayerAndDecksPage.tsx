@@ -1,8 +1,9 @@
-import { type ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { computeColorsFromCommanders } from "../../services/scryfall.ts";
 import { AutocompleteInput } from "../../components/AutocompleteInput.tsx";
+import PlayerSelect from "../../components/PlayerSelect.tsx";
 
 interface Player {
     id: number;
@@ -27,6 +28,7 @@ interface DeckDTO {
 export default function UpdatePlayerAndDecksPage() {
     const [players, setPlayers] = useState<Player[]>([]);
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+    const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [newName, setNewName] = useState("");
     const [decks, setDecks] = useState<DeckDTO[]>([]);
     const [editingDeckId, setEditingDeckId] = useState<number | null>(null);
@@ -70,42 +72,36 @@ export default function UpdatePlayerAndDecksPage() {
             });
     }, [selectedPlayer]);
 
-
-    function onChangeHandlerPlayer(e: ChangeEvent<HTMLSelectElement>) {
-        const val = e.target.value;
-        if (!val) {
-            setSelectedPlayer(null);
-            return;
-        }
-        const id = Number(val);
-        if (isNaN(id)) {
+    useEffect(() => {
+        if (!selectedPlayerId) {
             setSelectedPlayer(null);
             return;
         }
 
-        const toasty = toast.loading("Please wait...");
-        axios.get(`/api/players/${id}`)
+        const toasty = toast.loading("Loading player...");
+        axios.get<Player>(`/api/players/${selectedPlayerId}`)
             .then(response => {
+                setSelectedPlayer(response.data);
                 toast.update(toasty, {
                     render: "Player loaded",
                     type: "success",
                     isLoading: false,
                     autoClose: 2000
                 });
-                setSelectedPlayer({
-                    id: response.data.id,
-                    name: response.data.name,
-                    isRetired: response.data.isRetired
-                });
             })
             .catch(() => {
                 toast.update(toasty, {
-                    render: "Error",
+                    render: "Error loading player",
                     type: "error",
                     isLoading: false,
                     autoClose: 3000
                 });
             });
+    }, [selectedPlayerId]);
+
+
+    function onChangeHandlerPlayer(playerId?: number) {
+        setSelectedPlayerId(playerId);
     }
 
     function updatePlayer(newName: string) {
@@ -211,19 +207,11 @@ export default function UpdatePlayerAndDecksPage() {
                 Something in your deck data is wrong? Also no Problem.
             </div>
             <div className="space-y-2">
-                <label>Select Player</label>
-                <select
-                    value={selectedPlayer?.id ?? ""}
+                <PlayerSelect
+                    players={players}
+                    value={selectedPlayerId}
                     onChange={onChangeHandlerPlayer}
-                    className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                >
-                    <option value="">-- Select --</option>
-                    {players.map(player => (
-                        <option key={player.id} value={player.id}>
-                            {player.name}
-                        </option>
-                    ))}
-                </select>
+                />
             </div>
 
             {selectedPlayer ?
