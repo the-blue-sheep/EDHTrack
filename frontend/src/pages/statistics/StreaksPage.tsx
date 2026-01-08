@@ -1,6 +1,7 @@
-import {type ChangeEvent, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
+import PlayerSelect from "../../components/PlayerSelect.tsx";
 
 interface StreakDTO {
     playerName: string;
@@ -29,8 +30,8 @@ export default function StreaksPage() {
             });
     }, []);
 
-    function onChangeHandlerPlayer(e: ChangeEvent<HTMLSelectElement>) {
-        const val = e.target.value;
+    function onChangeHandlerPlayer(playerId?: number) {
+        const val = playerId;
 
         if (!val) {
             setSelectedPlayerId(undefined);
@@ -73,23 +74,11 @@ export default function StreaksPage() {
 
             <div className="flex items-center gap-3 mb-6">
                 <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Select Player
-                    </label>
-                    <select
-                        name="id"
-                        id="player-select"
-                        value={selectedPlayerId ?? ""}
+                    <PlayerSelect
+                        players={players}
+                        value={selectedPlayerId}
                         onChange={onChangeHandlerPlayer}
-                        className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    >
-                        <option value="">-- Select --</option>
-                        {players.map(player => (
-                            <option key={player.id} value={player.id}>
-                                {player.name}
-                            </option>
-                        ))}
-                    </select>
+                    />
                 </div>
             </div>
 

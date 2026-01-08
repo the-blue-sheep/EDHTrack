@@ -109,7 +109,7 @@ export default function LeaderboardPage() {
                             <td>{entry.playerName}</td>
                             <td>{entry.totalGames}</td>
                             <td>{entry.wins}</td>
-                            <td>{entry.winRate}</td>
+                            <td>{entry.winRate.toFixed(2)}</td>
                         </tr>
                     ))}
                     </tbody>
