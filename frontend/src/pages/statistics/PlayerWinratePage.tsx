@@ -37,11 +37,11 @@ export default function PlayerWinratePage() {
     const [topPlayedFiltered, setTopPlayedFiltered] = useState<DeckStatDTO[]>([]);
     const [topSuccessfulFiltered, setTopSuccessfulFiltered] = useState<DeckStatDTO[]>([]);
 
-    function getTopDecks(decks: DeckStatDTO[], hideRetired: boolean, count: number = 100) {
+    function getTopDecks(decks: DeckStatDTO[], hideRetired: boolean) {
         if (!decks) return [];
 
         if (!hideRetired) {
-            return decks.slice(0, count);
+            return decks;
         }
 
         const top: DeckStatDTO[] = [];
@@ -49,7 +49,6 @@ export default function PlayerWinratePage() {
             if (!deck.isRetired) {
                 top.push(deck);
             }
-            if (top.length === count) break;
         }
 
         return top;
