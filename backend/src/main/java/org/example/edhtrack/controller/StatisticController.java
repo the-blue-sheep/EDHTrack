@@ -1,9 +1,7 @@
 package org.example.edhtrack.controller;
 
 import org.example.edhtrack.Utils;
-import org.example.edhtrack.dto.player.PlayerDetailDTO;
-import org.example.edhtrack.dto.player.PlayerGamesCountDTO;
-import org.example.edhtrack.dto.player.PlayerVsPlayerDTO;
+import org.example.edhtrack.dto.player.*;
 import org.example.edhtrack.dto.stats.*;
 import org.example.edhtrack.entity.Player;
 import org.example.edhtrack.service.DeckService;
@@ -62,11 +60,6 @@ public class StatisticController {
         return statisticService.getWinRateAgainstOtherPlayer(playerService.getPlayerById(playerId1), playerService.getPlayerById(playerId2));
     }
 
-    @GetMapping("/winrate-by-player")
-    public WinrateByPlayerDTO getWinrateByPlayer(@RequestParam int playerId){
-        return statisticService.getWinRateByPlayer(playerService.getPlayerById(playerId));
-    }
-
     @GetMapping("/leaderboard")
     public List<LeaderboardEntryDTO> getLeaderboard(
             @RequestParam Utils.DeterminedType type,
@@ -108,4 +101,9 @@ public class StatisticController {
         return statisticService.getTopSuccessfulDecks(player, limit);
     }
 
+    @GetMapping("/players/{id}/table-size-winrate")
+    public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(@PathVariable int id) {
+        Player player = playerService.getPlayerById(id);
+        return statisticService.getTableSizeWinRateByPlayer(player);
+    }
 }

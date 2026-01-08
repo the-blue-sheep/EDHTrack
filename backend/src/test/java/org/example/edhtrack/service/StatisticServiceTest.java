@@ -1,9 +1,7 @@
 package org.example.edhtrack.service;
 
 import org.example.edhtrack.Utils;
-import org.example.edhtrack.dto.player.PlayerDetailDTO;
-import org.example.edhtrack.dto.player.PlayerGamesCountDTO;
-import org.example.edhtrack.dto.player.PlayerVsPlayerDTO;
+import org.example.edhtrack.dto.player.*;
 import org.example.edhtrack.dto.stats.*;
 import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
@@ -493,5 +491,60 @@ class StatisticServiceTest {
         assertEquals(1, edgar.totalGames());
         assertEquals(1, edgar.wins());
         assertEquals(1.0, edgar.winRate());
+    }
+
+    @Test
+    void getTableSizeWinRateByPlayer_shouldReturnCorrectDTOs() {
+        //GIVEN
+        Player player = new Player();
+        player.setId(1);
+        player.setName("Alice");
+
+        Game game3 = new Game();
+        game3.setPlayers(List.of(new GameParticipant(), new GameParticipant(), new GameParticipant()));
+
+        GameParticipant gp3 = new GameParticipant();
+        gp3.setGame(game3);
+        gp3.setPlayer(player);
+        gp3.setWinner(true);
+
+        Game game4a = new Game();
+        game4a.setPlayers(List.of(new GameParticipant(), new GameParticipant(), new GameParticipant(), new GameParticipant()));
+
+        GameParticipant gp4a = new GameParticipant();
+        gp4a.setGame(game4a);
+        gp4a.setPlayer(player);
+        gp4a.setWinner(true);
+
+        Game game4b = new Game();
+        game4b.setPlayers(List.of(new GameParticipant(), new GameParticipant(), new GameParticipant(), new GameParticipant()));
+
+        GameParticipant gp4b = new GameParticipant();
+        gp4b.setGame(game4b);
+        gp4b.setPlayer(player);
+        gp4b.setWinner(false);
+
+        List<GameParticipant> allParticipants = List.of(gp3, gp4a, gp4b);
+
+        //WHEN & THEN
+        when(gameParticipantRepository.findByPlayer(player)).thenReturn(allParticipants);
+
+        TableSizeWinrateResponseDTO result = statisticService.getTableSizeWinRateByPlayer(player);
+
+        assertEquals(player.getId(), result.playerId());
+        assertEquals(player.getName(), result.playerName());
+        assertEquals(2, result.stats().size());
+
+        TableSizeWinrateDTO ts3 = result.stats().stream()
+                .filter(ts -> ts.tableSize() == 3).findFirst().orElseThrow();
+        assertEquals(1, ts3.games());
+        assertEquals(1, ts3.wins());
+        assertEquals(1.0, ts3.winRate());
+
+        TableSizeWinrateDTO ts4 = result.stats().stream()
+                .filter(ts -> ts.tableSize() == 4).findFirst().orElseThrow();
+        assertEquals(2, ts4.games());
+        assertEquals(1, ts4.wins());
+        assertEquals(0.5, ts4.winRate());
     }
 }

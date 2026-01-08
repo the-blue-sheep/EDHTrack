@@ -3,6 +3,8 @@ package org.example.edhtrack.controller;
 import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.player.PlayerDetailDTO;
 import org.example.edhtrack.dto.player.PlayerGamesCountDTO;
+import org.example.edhtrack.dto.player.TableSizeWinrateDTO;
+import org.example.edhtrack.dto.player.TableSizeWinrateResponseDTO;
 import org.example.edhtrack.dto.stats.CommanderWinRateDTO;
 import org.example.edhtrack.dto.stats.DeckStatDTO;
 import org.example.edhtrack.dto.stats.LeaderboardEntryDTO;
@@ -185,5 +187,26 @@ class StatisticControllerTest {
                 .andExpect(jsonPath("$[2].totalGames").value(50))
                 .andExpect(jsonPath("$[2].wins").value(25))
                 .andExpect(jsonPath("$[2].winRate").value(0.50));
+    }
+
+    @Test
+    void testGetTableSizeWinRateByPlayer() throws Exception {
+        Player player = new Player();
+        player.setId(1);
+        player.setName("Alice");
+        TableSizeWinrateDTO dto3 = new TableSizeWinrateDTO(3, 10, 5, 0.5);
+        TableSizeWinrateDTO dto4 = new TableSizeWinrateDTO(4, 20, 12, 0.6);
+        TableSizeWinrateResponseDTO responseDTO =
+                new TableSizeWinrateResponseDTO(1, "Alice", List.of(dto3, dto4));
+
+        when(playerService.getPlayerById(1)).thenReturn(player);
+        when(statisticService.getTableSizeWinRateByPlayer(player)).thenReturn(responseDTO);
+
+        mockMvc.perform(get("/api/stats/players/1/table-size-winrate"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.playerId").value(1))
+                .andExpect(jsonPath("$.playerName").value("Alice"))
+                .andExpect(jsonPath("$.stats[0].tableSize").value(3))
+                .andExpect(jsonPath("$.stats[1].tableSize").value(4));
     }
 }

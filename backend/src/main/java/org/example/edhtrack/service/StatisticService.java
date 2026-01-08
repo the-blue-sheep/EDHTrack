@@ -1,9 +1,7 @@
 package org.example.edhtrack.service;
 
 import org.example.edhtrack.Utils;
-import org.example.edhtrack.dto.player.PlayerDetailDTO;
-import org.example.edhtrack.dto.player.PlayerGamesCountDTO;
-import org.example.edhtrack.dto.player.PlayerVsPlayerDTO;
+import org.example.edhtrack.dto.player.*;
 import org.example.edhtrack.dto.stats.*;
 import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
@@ -291,6 +289,49 @@ public class StatisticService {
                     );
                 })
                 .toList();
+    }
+
+    public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(Player player) {
+
+        List<GameParticipant> participants =
+                gameParticipantRepository.findByPlayer(player);
+
+        Map<Integer, List<GameParticipant>> byTableSize =
+                participants.stream()
+                        .collect(Collectors.groupingBy(
+                                gp -> gp.getGame().getPlayers().size()
+                        ));
+
+        List<TableSizeWinrateDTO> stats =
+                byTableSize.entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .map(entry -> {
+                            int tableSize = entry.getKey();
+                            List<GameParticipant> games = entry.getValue();
+
+                            int totalGames = games.size();
+                            long wins = games.stream()
+                                    .filter(GameParticipant::isWinner)
+                                    .count();
+
+                            double winRate = totalGames == 0
+                                    ? 0.0
+                                    : (double) wins / totalGames;
+
+                            return new TableSizeWinrateDTO(
+                                    tableSize,
+                                    totalGames,
+                                    (int) wins,
+                                    winRate
+                            );
+                        })
+                        .toList();
+
+        return new TableSizeWinrateResponseDTO(
+                player.getId(),
+                player.getName(),
+                stats
+        );
     }
 
 }
