@@ -1,6 +1,7 @@
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import {toast} from "react-toastify";
 
 interface Player {
     id: number;
@@ -26,24 +27,49 @@ export default function TableSizeWinrate() {
     const [tableSizeWinrate, setTableSizeWinrate] = useState<TableSizeWinrateResponseDTO | undefined>(undefined);
 
     useEffect(() => {
+        const toasty = toast.loading("Please wait...");
         axios.get<Player[]>("/api/players")
             .then(response => {
                 setPlayers(Array.isArray(response.data) ? response.data : []);
+                toast.update(toasty, {
+                    render: "Player updated",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 3000
+                });
             })
             .catch(error => {
                 console.error("Error while loading players:", error);
+                toast.update(toasty, {
+                    render: "Error",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 3000
+                });
             });
     }, []);
 
     useEffect(() => {
         if (!selectedPlayerId) return;
-
+        const toasty = toast.loading("Please wait...");
         axios.get<TableSizeWinrateResponseDTO>(`/api/stats/players/${selectedPlayerId}/table-size-winrate`)
             .then(res => {
                 setTableSizeWinrate(res.data)
+                toast.update(toasty, {
+                    render: "Player updated",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 3000
+                });
             })
             .catch(error => {
                 console.error("Error while loading winrates:", error);
+                toast.update(toasty, {
+                    render: "Error",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 3000
+                });
             });
     }, [selectedPlayerId]);
 
