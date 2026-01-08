@@ -442,8 +442,8 @@ class StatisticServiceTest {
 
         assertEquals(2, result.size());
 
-        assertEquals("Yuriko", result.get(0).deckName());
-        assertEquals("Atraxa", result.get(1).deckName());
+        assertEquals("Edgar", result.get(0).deckName());
+        assertEquals("Yuriko", result.get(1).deckName());
     }
 
 

@@ -260,7 +260,6 @@ public class StatisticService {
 
     public List<DeckStatDTO> getTopSuccessfulDecks(Player player, int limit) {
         return getDeckStatsForPlayer(player).stream()
-                .filter(d -> d.totalGames() >= 3)
                 .sorted(Comparator.comparing(DeckStatDTO::winRate).reversed())
                 .limit(limit)
                 .toList();

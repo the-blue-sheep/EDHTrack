@@ -13,12 +13,13 @@ export default function StatisticsOverview() {
                     display: "grid",
                     gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
                     gap: "1.5rem",
-                    marginTop: "2rem"
+                    marginTop: "2rem",
                 }}
             >
                 {STATISTICS.map(stat => (
                     <div
                         key={stat.id}
+                        style={{cursor: "pointer"}}
                         onClick={() => navigate(stat.route)}
                         className="border border-gray-300 px-4 py-2"
                     >

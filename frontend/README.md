@@ -1,73 +1,121 @@
-# React + TypeScript + Vite
+# EDHTrack
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+EDHTrack is a web application for tracking and analyzing Commander (EDH) games.  
+It allows players to record games, manage decks and players, and view statistics such as most played or most successful decks.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- Create, edit and delete games
+- Assign players and decks to games
+- Track winners and game notes
+- View player-based deck statistics
+- Analyze top played and top successful decks
+- Responsive web interface
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Frontend
+- React (TypeScript)
+- Vite
+- React Router
+- Axios
+- Tailwind CSS
+- React Toastify
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Backend
+- Java 21
+- Spring Boot
+- Spring Web
+- Spring Data JPA (Hibernate)
+- Spring Validation
+- Lombok
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Database
+- PostgreSQL (production)
+- H2 (tests)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Testing
+- JUnit 5
+- Mockito
+- Spring Boot Test
+
+### Tooling & Infrastructure
+- Maven
+- Vite
+- ESLint
+- JaCoCo (code coverage)
+- Apache POI (Excel export/import)
+- spring-dotenv (environment configuration)
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Java 21
+- Node.js (LTS recommended)
+- PostgreSQL
+- Maven
+
+---
+
+## Backend Setup
+Configure database access in `application.yml` or via environment variables.
+   
+### Run the backend:
+```bash
+  mvn spring-boot:run
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### The backend will be available at:
+http://localhost:8080
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+
+
+## Frontend Setup
+
+#### Install dependencies:
+```bash
+npm install
+```
+
+#### Install dependencies:
+```bash
+  npm install
+```
+
+### Start development server:
+```bash
+  npm run dev
+```
+
+### The frontend will be available at:
+http://localhost:5173
+
+
+# API Overview
+- GET /api/games
+- GET /api/games/{id}
+- POST /api/games
+- PUT /api/games/{id}
+- DELETE /api/games?id={id}
+- GET /api/stats/players/{id}/top-played-decks
+- GET /api/stats/players/{id}/top-successful-decks
+
+# Testing
+
+### Run backend tests with:
+```bash
+  mvn test
+```
+
+### Generate code coverage report:
+```bash
+  mvn verify
 ```
