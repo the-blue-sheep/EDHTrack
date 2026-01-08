@@ -42,5 +42,17 @@ export const STATISTICS: StatisticEntry[] = [
         description: "How often does a Commander get played?",
         route: "/statistics/commander-amounts"
     },
+    {
+        id: "table-size-winrate",
+        title: "Table Size Winrate",
+        description: "Winrate by number of players",
+        route: "/statistics/table-size-winrate"
+    },
+    {
+        id: "winrate-over-time",
+        title: "Winrate Over Time",
+        description: "Winrate development over time",
+        route: "/statistics/winrate-over-time"
+    }
 
 ];
