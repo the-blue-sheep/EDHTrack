@@ -344,7 +344,7 @@ public class StatisticService {
         }
 
         List<GameParticipant> participants =
-                gameParticipantRepository.findByPlayerAndDeck(player, deck);
+                new ArrayList<>(gameParticipantRepository.findByPlayerAndDeck(player, deck));
 
         participants.sort(Comparator.comparing(gp -> gp.getGame().getId()));
 
