@@ -22,6 +22,7 @@ import PlayerWinratePage from "./pages/statistics/PlayerWinratePage.tsx";
 import PlayerDetailPage from "./pages/player/PlayerDetailPage.tsx";
 import EditGamePage from "./pages/games/EditGamePage.tsx";
 import TableSizeWinrate from "./pages/statistics/TableSizeWinrate.tsx";
+import WinrateOverTime from "./pages/statistics/WinrateOverTime.tsx";
 
 function App() {
 
@@ -46,6 +47,7 @@ function App() {
                     <Route path="/statistics/player-winrate" element={<PlayerWinratePage />} />
                     <Route path="/statistics/player-vs-player" element={<PlayerVsPlayerPage />} />
                     <Route path="/statistics/table-size-winrate" element={<TableSizeWinrate />} />
+                    <Route path="/statistics/winrate-over-time" element={<WinrateOverTime />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/players/:id" element={<PlayerDetailPage />} />

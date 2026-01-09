@@ -3,6 +3,7 @@ package org.example.edhtrack.controller;
 import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.player.*;
 import org.example.edhtrack.dto.stats.*;
+import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.Player;
 import org.example.edhtrack.service.DeckService;
 import org.example.edhtrack.service.PlayerService;
@@ -105,5 +106,17 @@ public class StatisticController {
     public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(@PathVariable int id) {
         Player player = playerService.getPlayerById(id);
         return statisticService.getTableSizeWinRateByPlayer(player);
+    }
+
+    @GetMapping("/players/{playerId}/decks/{deckId}/winrate-over-time")
+    public WinrateOverTimeDTO getWinrateOverTime(
+            @PathVariable int playerId,
+            @PathVariable int deckId,
+            @RequestParam(defaultValue = "3") int stepSize
+    ) {
+        Player player = playerService.getPlayerById(playerId);
+        Deck deck = deckService.getDeckById(deckId);
+
+        return statisticService.getWinrateOverTime(player, deck, stepSize);
     }
 }
