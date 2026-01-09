@@ -334,4 +334,55 @@ public class StatisticService {
         );
     }
 
+    public WinrateOverTimeDTO getWinrateOverTime(
+            Player player,
+            Deck deck,
+            int stepSize
+    ) {
+        if (stepSize <= 0) {
+            stepSize = 1;
+        }
+
+        List<GameParticipant> participants =
+                new ArrayList<>(gameParticipantRepository.findByPlayerAndDeck(player, deck));
+
+        participants.sort(Comparator.comparing(gp -> gp.getGame().getId()));
+
+        List<WinratePointDTO> points = new ArrayList<>();
+
+        int totalGames = 0;
+        int totalWins = 0;
+
+        for (int i = 0; i < participants.size(); i++) {
+            GameParticipant gp = participants.get(i);
+            totalGames++;
+
+            if (gp.isWinner()) {
+                totalWins++;
+            }
+
+            boolean isStepBoundary = totalGames % stepSize == 0;
+            boolean isLastGame = i == participants.size() - 1;
+
+            if (isStepBoundary || isLastGame) {
+                double winrate = totalGames == 0
+                        ? 0.0
+                        : (double) totalWins / totalGames;
+
+                points.add(new WinratePointDTO(
+                        totalGames,
+                        totalWins,
+                        winrate
+                ));
+            }
+        }
+
+        return new WinrateOverTimeDTO(
+                player.getId(),
+                deck.getDeckId(),
+                stepSize,
+                points
+        );
+    }
+
 }

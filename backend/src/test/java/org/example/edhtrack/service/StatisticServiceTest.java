@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -546,5 +547,57 @@ class StatisticServiceTest {
         assertEquals(2, ts4.games());
         assertEquals(1, ts4.wins());
         assertEquals(0.5, ts4.winRate());
+    }
+
+    //Helper Method
+    private GameParticipant participant(int gameId, boolean winner) {
+        Game game = new Game();
+        game.setId(gameId);
+
+        GameParticipant gp = new GameParticipant();
+        gp.setGame(game);
+        gp.setWinner(winner);
+
+        return gp;
+    }
+
+    @Test
+    void getWinrateOverTime_shouldReturnCumulativeWinratePoints() {
+        // GIVEN
+        Player player = new Player();
+        player.setId(1);
+
+        Deck deck = new Deck();
+        deck.setDeckId(10);
+
+        int stepSize = 2;
+
+        List<GameParticipant> participants = List.of(
+                participant(1, false),
+                participant(2, true),
+                participant(3, true),
+                participant(4, false),
+                participant(5, true)
+        );
+
+        when(gameParticipantRepository.findByPlayerAndDeck(player, deck))
+                .thenReturn(participants);
+
+        // WHEN
+        WinrateOverTimeDTO result =
+                statisticService.getWinrateOverTime(player, deck, stepSize);
+
+        // THEN
+        assertThat(result.playerId()).isEqualTo(1);
+        assertThat(result.deckId()).isEqualTo(10);
+        assertThat(result.stepSize()).isEqualTo(2);
+
+        assertThat(result.points()).hasSize(3);
+
+        assertThat(result.points()).containsExactly(
+                new WinratePointDTO(2, 1, 0.5),
+                new WinratePointDTO(4, 2, 0.5),
+                new WinratePointDTO(5, 3, 0.6)
+        );
     }
 }

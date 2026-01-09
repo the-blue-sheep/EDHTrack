@@ -5,10 +5,10 @@ import org.example.edhtrack.dto.player.PlayerDetailDTO;
 import org.example.edhtrack.dto.player.PlayerGamesCountDTO;
 import org.example.edhtrack.dto.player.TableSizeWinrateDTO;
 import org.example.edhtrack.dto.player.TableSizeWinrateResponseDTO;
-import org.example.edhtrack.dto.stats.CommanderWinRateDTO;
-import org.example.edhtrack.dto.stats.DeckStatDTO;
-import org.example.edhtrack.dto.stats.LeaderboardEntryDTO;
+import org.example.edhtrack.dto.stats.*;
+import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.Player;
+import org.example.edhtrack.service.DeckService;
 import org.example.edhtrack.service.PlayerService;
 import org.example.edhtrack.service.StatisticService;
 import org.junit.jupiter.api.Test;
@@ -38,6 +38,9 @@ class StatisticControllerTest {
 
     @MockitoBean
     private PlayerService playerService;
+
+    @MockitoBean
+    private DeckService deckService;
 
     @Test
     void getLeaderboard_shouldReturnOkAndJson() throws Exception {
@@ -209,4 +212,55 @@ class StatisticControllerTest {
                 .andExpect(jsonPath("$.stats[0].tableSize").value(3))
                 .andExpect(jsonPath("$.stats[1].tableSize").value(4));
     }
+
+    @Test
+    void getWinrateOverTime_shouldReturnWinrateData() throws Exception {
+        // GIVEN
+        int playerId = 1;
+        int deckId = 10;
+        int stepSize = 5;
+
+        Player player = new Player();
+        player.setId(playerId);
+        player.setName("Alice");
+
+        Deck deck = new Deck();
+        deck.setDeckId(deckId);
+        deck.setDeckName("Atraxa");
+
+        List<WinratePointDTO> points = List.of(
+                new WinratePointDTO(5, 2, 0.4),
+                new WinratePointDTO(10, 5, 0.5)
+        );
+
+        WinrateOverTimeDTO expectedDto = new WinrateOverTimeDTO(
+                playerId,
+                deckId,
+                stepSize,
+                points
+        );
+
+        when(playerService.getPlayerById(playerId)).thenReturn(player);
+        when(deckService.getDeckById(deckId)).thenReturn(deck);
+        when(statisticService.getWinrateOverTime(player, deck, stepSize))
+                .thenReturn(expectedDto);
+
+        // WHEN & THEN
+        mockMvc.perform(
+                        get("/api/stats/players/{playerId}/decks/{deckId}/winrate-over-time",
+                                playerId, deckId)
+                                .param("stepSize", String.valueOf(stepSize))
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.playerId").value(playerId))
+                .andExpect(jsonPath("$.deckId").value(deckId))
+                .andExpect(jsonPath("$.stepSize").value(stepSize))
+                .andExpect(jsonPath("$.points").isArray())
+                .andExpect(jsonPath("$.points.length()").value(2))
+                .andExpect(jsonPath("$.points[0].gamesPlayed").value(5))
+                .andExpect(jsonPath("$.points[0].wins").value(2))
+                .andExpect(jsonPath("$.points[0].winrate").value(0.4));
+    }
+
 }

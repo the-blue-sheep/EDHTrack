@@ -140,4 +140,8 @@ public class DeckService {
                 .toList();
     }
 
+    public Deck getDeckById(int deckId) {
+        return deckRepository.findById(deckId)
+                .orElseThrow(() -> new RuntimeException("Deck not found with id: " + deckId));
+    }
 }
