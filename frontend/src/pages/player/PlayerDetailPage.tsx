@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import DeckStatsTable from "../../components/DeckStatsTable.tsx";
+import MinGamesInput from "../../components/MinGamesInput.tsx";
 
 interface PlayerDetailDTO {
     playerId: number;
@@ -32,6 +33,7 @@ export default function PlayerDetailPage() {
     const [hideRetiredDecks, setHideRetiredDecks] = useState<boolean>(false);
     const [topPlayedFiltered, setTopPlayedFiltered] = useState<DeckStatDTO[]>([]);
     const [topSuccessfulFiltered, setTopSuccessfulFiltered] = useState<DeckStatDTO[]>([]);
+    const [minGames, setMinGames] = useState<number>(1);
 
     function getTopDecks(decks: DeckStatDTO[], hideRetired: boolean, count: number = 3) {
         if (!decks) return [];
@@ -62,18 +64,37 @@ export default function PlayerDetailPage() {
 
     useEffect(() => {
         if (!id) return;
+        const toasty = toast.loading("Loading details...");
 
         axios.get<DeckStatDTO[]>(`/api/stats/players/${id}/top-played-decks`)
-            .then(res => setTopPlayed(res.data));
+            .then(res => {
+                setTopPlayed(res.data)
+                toast.update(toasty, {
+                    render: "Details loaded",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 2000
+                });
+            });
 
-        axios.get<DeckStatDTO[]>(`/api/stats/players/${id}/top-successful-decks`)
-            .then(res => setTopSuccessful(res.data));
-    }, [id]);
+        axios.get<DeckStatDTO[]>(`/api/stats/players/${id}/top-successful-decks`, {params: { minGames: minGames } })
+            .then(res => {
+                setTopSuccessful(res.data)
+                toast.update(toasty, {
+                    render: "Details loaded",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 2000
+                });
+            });
+
+
+    }, [id, minGames]);
 
     useEffect(() => {
         setTopPlayedFiltered(getTopDecks(topPlayed, hideRetiredDecks));
         setTopSuccessfulFiltered(getTopDecks(topSuccessful, hideRetiredDecks));
-    }, [topPlayed, topSuccessful, hideRetiredDecks]);
+    }, [topPlayed, topSuccessful, hideRetiredDecks, minGames]);
 
     useEffect(() => {
         if (!id) return;
@@ -125,6 +146,12 @@ export default function PlayerDetailPage() {
                         Hide retired Decks
                     </label>
                 </div>
+
+                <MinGamesInput
+                    value={minGames}
+                    onChange={setMinGames}
+                />
+
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

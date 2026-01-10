@@ -303,7 +303,7 @@ class StatisticServiceTest {
                 .thenReturn(List.of(gp1, gp2, gp3));
 
         List<CommanderWinRateDTO> result =
-                statisticService.getWinRatesForAllCommanders();
+                statisticService.getWinRatesForAllCommanders(1);
 
         assertEquals(2, result.size());
 
@@ -413,7 +413,7 @@ class StatisticServiceTest {
         org.mockito.Mockito.doReturn(List.of(deck1, deck2, deck3))
                 .when(spyService).getDeckStatsForPlayer(player);
 
-        List<DeckStatDTO> result = spyService.getTopPlayedDecks(player, 2);
+        List<DeckStatDTO> result = spyService.getTopPlayedDecks(player, 3, 2);
 
         assertEquals(2, result.size());
 
@@ -437,7 +437,7 @@ class StatisticServiceTest {
         org.mockito.Mockito.doReturn(List.of(deck1, deck2, deck3, deck4))
                 .when(spyService).getDeckStatsForPlayer(player);
 
-        List<DeckStatDTO> result = spyService.getTopSuccessfulDecks(player, 2);
+        List<DeckStatDTO> result = spyService.getTopSuccessfulDecks(player, 3, 2);
 
         assertEquals(2, result.size());
 

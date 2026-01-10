@@ -65,12 +65,13 @@ class StatisticControllerTest {
 
     @Test
     void getAllCommanderWinrates_returnsWinrateList() throws Exception {
-        when(statisticService.getWinRatesForAllCommanders())
+        when(statisticService.getWinRatesForAllCommanders(1))
                 .thenReturn(List.of(
                         new CommanderWinRateDTO("Atraxa", 10, 6, 0.6)
                 ));
 
-        mockMvc.perform(get("/api/decks/commander-winrates"))
+        mockMvc.perform(get("/api/stats/commander-winrates")
+                        .param("minGames", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].commanderName").value("Atraxa"))
                 .andExpect(jsonPath("$[0].totalGames").value(10))
@@ -131,10 +132,12 @@ class StatisticControllerTest {
         DeckStatDTO deck3 = new DeckStatDTO(3, "Y'shtola", 50, 25, 0.50, false);
 
         when(playerService.getPlayerById(1)).thenReturn(player);
-        when(statisticService.getTopPlayedDecks(player, 3))
+        when(statisticService.getTopPlayedDecks(player, 3, 3))
                 .thenReturn(List.of(deck1, deck2, deck3));
 
-        mockMvc.perform(get("/api/stats/players/1/top-played-decks").param("limit", "3"))
+        mockMvc.perform(get("/api/stats/players/1/top-played-decks")
+                        .param("minGames", "3")
+                        .param("limit", "3"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -168,10 +171,12 @@ class StatisticControllerTest {
         DeckStatDTO deck3 = new DeckStatDTO(3, "Y'shtola", 50, 25, 0.50, false);
 
         when(playerService.getPlayerById(1)).thenReturn(player);
-        when(statisticService.getTopSuccessfulDecks(player, 3))
+        when(statisticService.getTopSuccessfulDecks(player, 3, 3))
                 .thenReturn(List.of(deck1, deck2, deck3));
 
-        mockMvc.perform(get("/api/stats/players/1/top-successful-decks").param("limit", "3"))
+        mockMvc.perform(get("/api/stats/players/1/top-successful-decks")
+                        .param("minGames", "3")
+                        .param("limit", "3"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

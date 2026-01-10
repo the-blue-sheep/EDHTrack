@@ -38,24 +38,34 @@ public class StatisticService {
         return new WinrateByPlayerDTO(player.getId(), player.getName(), gamesIn, gamesWon, winRate);
     }
 
-    public CommanderWinRateDTO getWinRateByCommander(String commanderName) {
+    public CommanderWinRateDTO getWinRateByCommander(String commanderName, int minGames) {
 
         List<GameParticipant> participants =
                 gameParticipantRepository.findAll().stream()
                         .filter(gp ->
                                 gp.getDeck().getCommanders().stream()
-                                        .anyMatch(c -> c.getName().equalsIgnoreCase(commanderName))
+                                        .anyMatch(c ->
+                                                c.getName().equalsIgnoreCase(commanderName)
+                                        )
                         )
                         .toList();
 
         int totalGames = participants.size();
+
+        if (totalGames < minGames) {
+            return new CommanderWinRateDTO(
+                    commanderName,
+                    totalGames,
+                    0,
+                    0.0
+            );
+        }
+
         int wins = (int) participants.stream()
                 .filter(GameParticipant::isWinner)
                 .count();
 
-        double winRate = totalGames == 0
-                ? 0.0
-                : (double) wins / totalGames;
+        double winRate = (double) wins / totalGames;
 
         return new CommanderWinRateDTO(
                 commanderName,
@@ -64,6 +74,7 @@ public class StatisticService {
                 winRate
         );
     }
+
 
     public ColorStatDTO getWinrateByColor(String colors) {
         List<GameParticipant> participants = gameParticipantRepository.findByDeck_ColorsContaining(colors);
@@ -203,17 +214,18 @@ public class StatisticService {
 
     }
 
-    public List<CommanderWinRateDTO> getWinRatesForAllCommanders() {
+    public List<CommanderWinRateDTO> getWinRatesForAllCommanders(int minGames) {
 
         return deckRepository.findAll().stream()
                 .flatMap(deck -> deck.getCommanders().stream())
                 .map(Commander::getName)
                 .distinct()
-                .map(this::getWinRateByCommander)
-                .filter(dto -> dto.totalGames() > 0)
+                .map(name -> getWinRateByCommander(name, minGames))
+                .filter(dto -> dto.totalGames() >= minGames)
                 .sorted(Comparator.comparing(CommanderWinRateDTO::winRate).reversed())
                 .toList();
     }
+
 
     public List<PlayerGamesCountDTO> getPlayerGamesCount(boolean hideRetired) {
         return playerRepository.findAll()
@@ -249,15 +261,17 @@ public class StatisticService {
         );
     }
 
-    public List<DeckStatDTO> getTopPlayedDecks(Player player, int limit) {
+    public List<DeckStatDTO> getTopPlayedDecks(Player player, int minGames, int limit) {
         return getDeckStatsForPlayer(player).stream()
+                .filter(dto -> dto.totalGames() >= minGames)
                 .sorted(Comparator.comparing(DeckStatDTO::totalGames).reversed())
                 .limit(limit)
                 .toList();
     }
 
-    public List<DeckStatDTO> getTopSuccessfulDecks(Player player, int limit) {
+    public List<DeckStatDTO> getTopSuccessfulDecks(Player player, int minGames, int limit) {
         return getDeckStatsForPlayer(player).stream()
+                .filter(dto -> dto.totalGames() >= minGames)
                 .sorted(Comparator.comparing(DeckStatDTO::winRate).reversed())
                 .limit(limit)
                 .toList();
