@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MinGamesInput from "../../components/MinGamesInput.tsx";
 
 type DeterminedType = "PLAYER" | "COMMANDER" | "COLOR";
 
@@ -49,16 +50,10 @@ export default function LeaderboardPage() {
                     </select>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <label className="text-purple-900 font-bold">Minimum Games</label>
-                    <input
-                        type="number"
-                        min={0}
-                        value={minGames}
-                        onChange={e => setMinGames(Number(e.target.value))}
-                        className="border rounded px-2 py-1"
-                    />
-                </div>
+                <MinGamesInput
+                    value={minGames}
+                    onChange={setMinGames}
+                />
 
                 <div className="flex items-center gap-2">
                     <label className="flex items-center gap-2 text-purple-900 font-bold">

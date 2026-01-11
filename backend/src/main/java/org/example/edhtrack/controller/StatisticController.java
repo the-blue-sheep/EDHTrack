@@ -32,8 +32,11 @@ public class StatisticController {
     }
 
     @GetMapping("/commander-winrate")
-    public CommanderWinRateDTO getCommanderWinRate(@RequestParam String commanderName){
-        return statisticService.getWinRateByCommander(commanderName);
+    public CommanderWinRateDTO getCommanderWinRate(
+            @RequestParam String commanderName,
+            @RequestParam int minGames
+    ){
+        return statisticService.getWinRateByCommander(commanderName, minGames);
     }
 
     @GetMapping("/color-winrate")
@@ -54,6 +57,11 @@ public class StatisticController {
     @GetMapping("/player-winrate")
     public WinrateByPlayerDTO getWinRateByPlayer(@RequestParam int playerId) {
         return statisticService.getWinRateByPlayer(playerService.getPlayerById(playerId));
+    }
+
+    @GetMapping("/commander-winrates")
+    public List<CommanderWinRateDTO> getAllCommanderWinrates( @RequestParam int minGames ) {
+        return statisticService.getWinRatesForAllCommanders(minGames);
     }
 
     @GetMapping("/player-vs-player-stat")
@@ -87,19 +95,21 @@ public class StatisticController {
     @GetMapping("/players/{id}/top-played-decks")
     public List<DeckStatDTO> getTopPlayedDecks(
             @PathVariable int id,
+            @RequestParam(defaultValue = "0") int minGames,
             @RequestParam(defaultValue = "6") int limit
     ) {
         Player player = playerService.getPlayerById(id);
-        return statisticService.getTopPlayedDecks(player, limit);
+        return statisticService.getTopPlayedDecks(player, minGames, limit);
     }
 
     @GetMapping("/players/{id}/top-successful-decks")
     public List<DeckStatDTO> getTopSuccessfulDecks(
             @PathVariable int id,
+            @RequestParam(defaultValue = "0") int minGames,
             @RequestParam(defaultValue = "6") int limit
     ) {
         Player player = playerService.getPlayerById(id);
-        return statisticService.getTopSuccessfulDecks(player, limit);
+        return statisticService.getTopSuccessfulDecks(player, minGames, limit);
     }
 
     @GetMapping("/players/{id}/table-size-winrate")

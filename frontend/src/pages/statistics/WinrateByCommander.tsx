@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
+import MinGamesInput from "../../components/MinGamesInput.tsx";
 
 
 interface CommanderWinRateDTO {
@@ -16,6 +17,7 @@ export default function WinrateByCommander() {
     const [loading, setLoading] = useState(false);
     const [allData, setAllData] = useState<CommanderWinRateDTO[]>([]);
     const [allCommanders, setAllCommanders] = useState<string[]>([]);
+    const [minGames, setMinGames] = useState<number>(1);
 
     useEffect(() => {
         const toasty = toast.loading("Loading...");
@@ -56,7 +58,7 @@ export default function WinrateByCommander() {
 
         axios.get<CommanderWinRateDTO>(
             "/api/stats/commander-winrate",
-            { params: { commanderName } }
+            { params: { commanderName, minGames } }
         )
             .then(res => {
                 setData(res.data);
@@ -87,7 +89,7 @@ export default function WinrateByCommander() {
         const toasty = toast.loading("Loading all commander winrates...");
         setLoading(true);
 
-        axios.get<CommanderWinRateDTO[]>("/api/decks/commander-winrates")
+        axios.get<CommanderWinRateDTO[]>("/api/stats/commander-winrates", { params: { minGames } })
             .then(res => {
                 setAllData(res.data);
                 toast.update(toasty, {
@@ -125,6 +127,10 @@ export default function WinrateByCommander() {
                         <option key={name} value={name} />
                     ))}
                 </datalist>
+                <MinGamesInput
+                    value={minGames}
+                    onChange={setMinGames}
+                />
             </div>
 
             <div className="flex gap-4 items-center mt-4">

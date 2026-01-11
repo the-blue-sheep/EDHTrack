@@ -3,6 +3,7 @@ import axios from "axios";
 import {toast} from "react-toastify";
 import DeckStatsTable from "../../components/DeckStatsTable.tsx";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
+import MinGamesInput from "../../components/MinGamesInput.tsx";
 
 interface Player {
     id: number;
@@ -37,6 +38,7 @@ export default function PlayerWinratePage() {
     const [hideRetiredDecks, setHideRetiredDecks] = useState<boolean>(false);
     const [topPlayedFiltered, setTopPlayedFiltered] = useState<DeckStatDTO[]>([]);
     const [topSuccessfulFiltered, setTopSuccessfulFiltered] = useState<DeckStatDTO[]>([]);
+    const [minGames, setMinGames] = useState<number>(1);
 
     function getTopDecks(decks: DeckStatDTO[], hideRetired: boolean) {
         if (!decks) return [];
@@ -72,13 +74,30 @@ export default function PlayerWinratePage() {
 
     useEffect(() => {
         if (!selectedPlayerId) return;
+        const toasty = toast.loading("Loading details...");
 
         axios.get<DeckStatDTO[]>(`/api/stats/players/${selectedPlayerId}/top-played-decks`, {params: {limit:100}})
-            .then(res => setTopPlayed(res.data));
+            .then(res => {
+                setTopPlayed(res.data)
+                toast.update(toasty, {
+                    render: "Details loaded",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 2000
+                });
+            });
 
-        axios.get<DeckStatDTO[]>(`/api/stats/players/${selectedPlayerId}/top-successful-decks`, {params: {limit:100}})
-            .then(res => setTopSuccessful(res.data));
-    }, [selectedPlayerId]);
+        axios.get<DeckStatDTO[]>(`/api/stats/players/${selectedPlayerId}/top-successful-decks`, {params: {limit:100, minGames: minGames }} )
+            .then(res => {
+                setTopSuccessful(res.data)
+                toast.update(toasty, {
+                    render: "Details loaded",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 2000
+                });
+            });
+    }, [selectedPlayerId, minGames]);
 
     function onChangeHandlerPlayer(playerId?: number) {
         const val = playerId;
@@ -123,12 +142,13 @@ export default function PlayerWinratePage() {
             <div className="flex items-center gap-3 mb-6">
                 <div className="mb-6">
                     <h3 className="text-xl font-semibold text-purple-800 space-x-6">Player Winrate</h3>
-                    <PlayerSelect
-                        players={players}
-                        value={selectedPlayerId}
-                        onChange={onChangeHandlerPlayer}
-                        />
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3 mb-6">
+                        <PlayerSelect
+                            players={players}
+                            value={selectedPlayerId}
+                            onChange={onChangeHandlerPlayer}
+                            />
+
                         <label className="flex items-center gap-2 text-purple-900 font-bold">
                             <input
                                 type="checkbox"
@@ -137,6 +157,11 @@ export default function PlayerWinratePage() {
                             />
                             Hide retired Decks
                         </label>
+
+                        <MinGamesInput
+                            value={minGames}
+                            onChange={setMinGames}
+                        />
                     </div>
                 </div>
             </div>
