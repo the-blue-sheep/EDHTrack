@@ -127,11 +127,11 @@ class GameServiceTest {
 
         when(gameRepository.findAll(any(PageRequest.class))).thenReturn(page);
 
-        Page<GameOverviewDTO> result = gameService.getGames(0, 10);
+        Page<GameOverviewDTO> result = gameService.getGames(0, 10, 0, "");
 
         assertThat(result.getContent()).hasSize(1);
 
-        GameOverviewDTO gameDto = result.getContent().get(0);
+        GameOverviewDTO gameDto = result.getContent().getFirst();
         assertThat(gameDto.gameId()).isEqualTo(100);
         assertThat(gameDto.notes()).isEqualTo("Test Game");
         assertThat(gameDto.date()).isEqualTo(LocalDate.of(2025, 12, 1));

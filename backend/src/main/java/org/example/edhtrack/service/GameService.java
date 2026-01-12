@@ -93,12 +93,24 @@ public class GameService {
         );
     }
 
-    public Page<GameOverviewDTO> getGames(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+    public Page<GameOverviewDTO> getGames(
+            int page,
+            int size,
+            Integer playerId,
+            String commander
+    ) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "id")
+        );
 
-        return gameRepository.findAll(pageable)
+        return gameRepository
+                .findByFilters(playerId, commander, pageable)
                 .map(this::mapToOverviewDTO);
     }
+
+
 
     public GameOverviewDTO getGameById(int id) {
         return gameRepository.findById(id).map(this::mapToOverviewDTO).orElse(null);
