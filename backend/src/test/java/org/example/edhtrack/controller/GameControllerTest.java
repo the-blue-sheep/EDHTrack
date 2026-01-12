@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -64,7 +63,7 @@ class GameControllerTest {
                 1
         );
 
-        when(gameService.getGames(1, 10)).thenReturn(page);
+        when(gameService.getGames(1, 10, 0, "")).thenReturn(page);
 
         mockMvc.perform(get("/api/games")
                         .param("page", "1")

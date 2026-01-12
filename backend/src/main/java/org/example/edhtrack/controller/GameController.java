@@ -21,9 +21,12 @@ public class GameController {
     @GetMapping
     public Page<GameOverviewDTO> getGames(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            //int kann kein "nicht gesetzt" Darstellen wenn selectedPlayerId undefined ist
+            @RequestParam(required = false) Integer playerId,
+            @RequestParam(required = false) String commander
     ) {
-        return gameService.getGames(page, size);
+        return gameService.getGames(page, size, playerId, commander);
     }
 
     @GetMapping("/{id}")

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import PlayerSelect from "../../components/PlayerSelect.tsx";
 
 interface GameParticipant {
     playerName: string;
@@ -24,50 +25,160 @@ interface PageResponse<T> {
     size: number;
 }
 
+interface Player {
+    id: number;
+    name: string;
+    isRetired: boolean;
+}
+
 export default function GameOverviewPage() {
+    const [players, setPlayers] = useState<Player[]>([]);
+    const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
+    const [playerFilterId, setPlayerFilterId] = useState<number | undefined>(undefined);
     const [games, setGames] = useState<GameOverviewDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [commanderInput, setCommanderInput] = useState("");
+    const [commanderFilter, setCommanderFilter] = useState("");
+    const [allCommanders, setAllCommanders] = useState<string[]>([]);
+    const [hasLoaded, setHasLoaded] = useState(false);
 
     useEffect(() => {
-        const toasty = toast.loading("Loading games…");
-        axios.get<PageResponse<GameOverviewDTO>>("/api/games")
-            .then(resp => {
-                setGames(resp.data.content);
-                setLoading(false);
-                toast.update(toasty, { render: "Games loaded", type: "success", isLoading: false, autoClose: 2000 });
+        const toasty = toast.loading("Loading games...");
+
+        axios.get<string[]>("/api/decks/commanders")
+            .then(res => {
+                toast.update(toasty, {
+                    render: "commanders loaded",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 2000
+                });
+                setAllCommanders(res.data)
             })
+
             .catch(err => {
-                console.error("Error loading games:", err);
-                toast.update(toasty, { render: "Error loading games", type: "error", isLoading: false, autoClose: 3000 });
-                setLoading(false);
+                toast.update(toasty, {
+                    render: "Error loading commanders",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+                console.error("Failed to load commanders", err)
             });
     }, []);
 
     useEffect(() => {
         setLoading(true);
 
-        axios.get("/api/games", {
-            params: { page, size: 20 }
+        axios.get<PageResponse<GameOverviewDTO>>("/api/games", {
+            params: {
+                page,
+                size: 20,
+                playerId: selectedPlayerId,
+                commander: commanderFilter || undefined
+            }
         })
             .then(resp => {
-                setGames(resp.data.content);
-                setTotalPages(resp.data.totalPages);
+                console.log("Loaded games:", resp.data.content);
+                setGames(resp.data.content ?? []);
+                setTotalPages(resp.data.totalPages ?? 0);
+                setHasLoaded(true);
             })
             .finally(() => setLoading(false));
-    }, [page]);
+    }, [page, playerFilterId, commanderFilter]);
 
 
-    if (loading) {
+    useEffect(() => {
+        axios.get<Player[]>("/api/players")
+            .then(response => {
+                setPlayers(Array.isArray(response.data) ? response.data : []);
+            });
+    }, []);
+
+    if (loading && !hasLoaded) {
         return <p className="p-6 text-lg font-medium">Loading…</p>;
     }
 
     return (
         <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Game Overview</h2>
+            <h3 className="text-xl font-semibold text-purple-800 space-x-6">Game Overview</h3>
+            <div className="flex gap-4 mt-4 mb-6 items-end">
 
-            {games.length === 0 ? (
+                <PlayerSelect
+                    players={players}
+                    value={selectedPlayerId}
+                    onChange={(id) => {
+                        setPage(0);
+                        setSelectedPlayerId(id);
+                    }}
+                    label="Player"
+                />
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Search for Games with…
+                    </label>
+
+                    <input
+                        list="commanders"
+                        value={commanderInput}
+                        onChange={e => setCommanderInput(e.target.value)}
+                        className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md
+                       focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="Commander name"
+                    />
+
+                    <datalist id="commanders">
+                        {allCommanders.map(name => (
+                            <option key={name} value={name} />
+                        ))}
+                    </datalist>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 invisible">
+                        Apply
+                    </label>
+
+                    <button
+                        onClick={() => {
+                            setPage(0);
+                            setCommanderFilter(commanderInput.trim());
+                            setPlayerFilterId(selectedPlayerId);
+                        }}
+                        className="px-3 py-2 border rounded-md bg-purple-700 text-white
+                       focus:ring-2 focus:ring-purple-500"
+                    >
+                        Apply
+                    </button>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 invisible">
+                        Reset
+                    </label>
+                    <button
+                        onClick={() => {
+                            setPage(0);
+
+                            setSelectedPlayerId(undefined);
+                            setCommanderInput("");
+
+                            setPlayerFilterId(undefined);
+                            setCommanderFilter("");
+                        }}
+                        className="px-3 py-2 border rounded-md bg-red-600 text-white
+                       focus:ring-2 focus:ring-purple-500"
+                    >
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+
+            {hasLoaded && games.length === 0 ? (
                 <p>No games found</p>
             ) : (
                 <div className="overflow-x-auto">
