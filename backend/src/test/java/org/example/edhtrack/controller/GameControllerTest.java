@@ -68,6 +68,8 @@ class GameControllerTest {
         mockMvc.perform(get("/api/games")
                         .param("page", "1")
                         .param("size", "10")
+                        .param("playerId", "0")
+                        .param("commander", "")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
