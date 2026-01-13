@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
+import { useCommanders } from "../../hooks/useCommanders";
 
 interface GameParticipant {
     playerName: string;
@@ -41,33 +41,9 @@ export default function GameOverviewPage() {
     const [totalPages, setTotalPages] = useState(0);
     const [commanderInput, setCommanderInput] = useState("");
     const [commanderFilter, setCommanderFilter] = useState("");
-    const [allCommanders, setAllCommanders] = useState<string[]>([]);
     const [hasLoaded, setHasLoaded] = useState(false);
+    const { commanders: allCommanders, loading: commandersLoading } = useCommanders();
 
-    useEffect(() => {
-        const toasty = toast.loading("Loading games...");
-
-        axios.get<string[]>("/api/decks/commanders")
-            .then(res => {
-                toast.update(toasty, {
-                    render: "commanders loaded",
-                    type: "success",
-                    isLoading: false,
-                    autoClose: 2000
-                });
-                setAllCommanders(res.data)
-            })
-
-            .catch(err => {
-                toast.update(toasty, {
-                    render: "Error loading commanders",
-                    type: "error",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-                console.error("Failed to load commanders", err)
-            });
-    }, []);
 
     useEffect(() => {
         setLoading(true);
@@ -81,7 +57,6 @@ export default function GameOverviewPage() {
             }
         })
             .then(resp => {
-                console.log("Loaded games:", resp.data.content);
                 setGames(resp.data.content ?? []);
                 setTotalPages(resp.data.totalPages ?? 0);
                 setHasLoaded(true);
@@ -124,10 +99,11 @@ export default function GameOverviewPage() {
                     <input
                         list="commanders"
                         value={commanderInput}
+                        disabled={commandersLoading}
+                        placeholder={commandersLoading ? "Loading commanders…" : "Commander name"}
                         onChange={e => setCommanderInput(e.target.value)}
                         className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md
                        focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                        placeholder="Commander name"
                     />
 
                     <datalist id="commanders">

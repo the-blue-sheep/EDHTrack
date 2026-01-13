@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
 import MinGamesInput from "../../components/MinGamesInput.tsx";
+import {useCommanders} from "../../hooks/useCommanders.ts";
 
 
 interface CommanderWinRateDTO {
@@ -16,32 +17,10 @@ export default function WinrateByCommander() {
     const [data, setData] = useState<CommanderWinRateDTO | null>(null);
     const [loading, setLoading] = useState(false);
     const [allData, setAllData] = useState<CommanderWinRateDTO[]>([]);
-    const [allCommanders, setAllCommanders] = useState<string[]>([]);
+    // const [allCommanders, setAllCommanders] = useState<string[]>([]);
     const [minGames, setMinGames] = useState<number>(1);
+    const { commanders: allCommanders, loading: commandersLoading } = useCommanders();
 
-    useEffect(() => {
-        const toasty = toast.loading("Loading...");
-        axios.get<string[]>("/api/decks/commanders")
-            .then(res => {
-                toast.update(toasty, {
-                    render: "commanders loaded",
-                    type: "success",
-                    isLoading: false,
-                    autoClose: 2000
-                });
-                setAllCommanders(res.data)
-            })
-
-            .catch(err => {
-                toast.update(toasty, {
-                    render: "Error loading commanders",
-                    type: "error",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-                console.error("Failed to load commanders", err)
-            });
-    }, []);
 
     useEffect(() => {
         if (!commanderName) {
@@ -118,9 +97,10 @@ export default function WinrateByCommander() {
                 <input
                     list="commanders"
                     value={commanderName}
+                    disabled={commandersLoading}
+                    placeholder={commandersLoading ? "Loading commanders…" : "Commander name"}
                     onChange={e => setCommanderName(e.target.value)}
                     className="border rounded px-2 py-1"
-                    placeholder="Commander name"
                 />
                 <datalist id="commanders">
                     {allCommanders.map(name => (

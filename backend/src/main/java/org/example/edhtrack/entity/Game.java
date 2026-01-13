@@ -15,6 +15,8 @@ public class Game {
     @Id
     @GeneratedValue
     private int id;
+    @Column(unique = true)
+    private Integer importRow;
     private LocalDate date;
     private String notes;
 
@@ -23,9 +25,4 @@ public class Game {
     @EqualsAndHashCode.Exclude
     private List<GameParticipant> players;
 
-    public List<GameParticipant> getWinners() {
-        return players.stream()
-                .filter(GameParticipant::isWinner)
-                .toList();
-    }
 }
