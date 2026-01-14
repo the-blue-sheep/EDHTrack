@@ -6,9 +6,7 @@ import org.example.edhtrack.dto.deck.RetireDeckDTO;
 import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.Player;
-import org.example.edhtrack.repository.CommanderRepository;
-import org.example.edhtrack.repository.DeckRepository;
-import org.example.edhtrack.repository.PlayerRepository;
+import org.example.edhtrack.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -30,13 +28,15 @@ class DeckServiceTest {
     CommanderRepository commanderRepository;
     @Mock
     PlayerRepository playerRepository;
+    @Mock
+    GameParticipantRepository gameParticipantRepository;
 
     DeckService deckService;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
-        deckService = new DeckService(deckRepository, commanderRepository, playerRepository);
+        deckService = new DeckService(deckRepository, commanderRepository, playerRepository, gameParticipantRepository);
     }
 
 

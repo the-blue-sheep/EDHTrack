@@ -6,6 +6,7 @@ import { useCommanders } from "../../hooks/useCommanders";
 
 interface GameParticipant {
     playerName: string;
+    commanders: string[] | string;
     deckName: string;
     isWinner: boolean;
 }
@@ -183,7 +184,7 @@ export default function GameOverviewPage() {
                                                     {p.isWinner && "🏆 "} {p.playerName}
                                                 </span>
                                                 <span className="text-gray-600">
-                                                    {p.deckName}
+                                                    {Array.isArray(p.commanders) ? p.commanders?.filter(Boolean).join(" // ") : p.commanders}
                                                 </span>
                                             </li>
                                         ))}

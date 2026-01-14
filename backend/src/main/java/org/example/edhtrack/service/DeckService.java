@@ -8,9 +8,7 @@ import org.example.edhtrack.dto.stats.CommanderAmountStatDTO;
 import org.example.edhtrack.entity.Commander;
 import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.Player;
-import org.example.edhtrack.repository.CommanderRepository;
-import org.example.edhtrack.repository.DeckRepository;
-import org.example.edhtrack.repository.PlayerRepository;
+import org.example.edhtrack.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,11 +21,18 @@ public class DeckService {
     private final DeckRepository deckRepository;
     private final CommanderRepository commanderRepository;
     private final PlayerRepository playerRepository;
+    private final GameParticipantRepository gameParticipantRepository;
 
-    public DeckService(DeckRepository deckRepository, CommanderRepository commanderRepository, PlayerRepository playerRepository) {
+    public DeckService(
+            DeckRepository deckRepository,
+            CommanderRepository commanderRepository,
+            PlayerRepository playerRepository,
+            GameParticipantRepository gameParticipantRepository
+    ) {
         this.deckRepository = deckRepository;
         this.commanderRepository = commanderRepository;
         this.playerRepository = playerRepository;
+        this.gameParticipantRepository = gameParticipantRepository;
     }
 
     public Set<DeckDTO> getDecksByPlayerId(int playerId) {
@@ -143,5 +148,17 @@ public class DeckService {
     public Deck getDeckById(int deckId) {
         return deckRepository.findById(deckId)
                 .orElseThrow(() -> new RuntimeException("Deck not found with id: " + deckId));
+    }
+
+    public void deleteDeck(int id) {
+
+        if (gameParticipantRepository.isDeckUsed(id)) {
+            System.out.println("Delete deck failed with id " + id);
+            throw new IllegalStateException(
+                    "Cannot delete deck if it is still in a game"
+            );
+        }
+        System.out.println("Delete deck successful with id " + id);
+        deckRepository.deleteById(id);
     }
 }

@@ -12,7 +12,7 @@ export default function Navbar() {
                     <img src={logo} alt="EDH Track" className="h-24 mg:h-28 w-auto" />
                 </Link>
 
-                <nav className="flex flex-1 justify-center gap-8 text-lg font-medium">
+                <nav className="flex flex-1 justify-center gap-8 text-lg font-medium text-white">
                     <Link to="/" className="hover:text-blue-600">Home</Link>
                     <Link to="/stats" className="hover:text-blue-600">Statistics</Link>
                     <Link to="/games" className="hover:text-blue-600">Games</Link>
@@ -21,7 +21,7 @@ export default function Navbar() {
                 </nav>
 
                 {user ? (
-                    <div className="flex gap-3 items-center text-lg font-medium">
+                    <div className="flex gap-3 items-center text-lg font-medium text-white">
                         <span>{user.username} ({user.role})</span>
                         <button onClick={logout}>Logout</button>
                     </div>

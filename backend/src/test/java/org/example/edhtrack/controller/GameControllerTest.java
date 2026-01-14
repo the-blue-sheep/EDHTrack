@@ -46,9 +46,9 @@ class GameControllerTest {
     @Test
     void getGames_returnsPagedGames() throws Exception {
         GameParticipantOverviewDTO p1 =
-                new GameParticipantOverviewDTO(1, "Alice", 11, "Bribe Control", true);
+                new GameParticipantOverviewDTO(1, "Alice", 11, Set.of("Mrs. Bumbleflower"), "Bribe Control", true);
         GameParticipantOverviewDTO p2 =
-                new GameParticipantOverviewDTO(2, "Bob", 22, "Midrange", false);
+                new GameParticipantOverviewDTO(2, "Bob", 22, Set.of("Hazezon, Shaper of Sands"), "Midrange", false);
 
         GameOverviewDTO game1 = new GameOverviewDTO(
                 100,

@@ -23,6 +23,7 @@ import PlayerDetailPage from "./pages/player/PlayerDetailPage.tsx";
 import EditGamePage from "./pages/games/EditGamePage.tsx";
 import TableSizeWinrate from "./pages/statistics/TableSizeWinrate.tsx";
 import WinrateOverTime from "./pages/statistics/WinrateOverTime.tsx";
+import DeletePage from "./pages/player/DeletePage.tsx";
 
 function App() {
 
@@ -52,6 +53,7 @@ function App() {
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/players/:id" element={<PlayerDetailPage />} />
                     <Route path="/games/:id/edit" element={<EditGamePage />} />
+                    <Route path="/players/delete" element={<DeletePage />} />
                 </Route>
             </Routes>
             <ToastContainer

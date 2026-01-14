@@ -4,6 +4,8 @@ import org.example.edhtrack.dto.deck.CreateDeckDTO;
 import org.example.edhtrack.dto.deck.DeckDTO;
 import org.example.edhtrack.dto.deck.RetireDeckDTO;
 import org.example.edhtrack.service.DeckService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,4 +39,13 @@ public class DeckController {
         return deckService.getAllCommanderNames();
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteDeck(@PathVariable int id) {
+        try {
+            deckService.deleteDeck(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+    }
 }

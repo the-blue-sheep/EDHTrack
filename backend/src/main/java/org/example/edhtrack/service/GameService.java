@@ -8,10 +8,7 @@ import org.example.edhtrack.dto.game.GameEditDTO;
 import org.example.edhtrack.dto.game.GameOverviewDTO;
 import org.example.edhtrack.dto.player.PlayerResultDTO;
 import org.example.edhtrack.Utils;
-import org.example.edhtrack.entity.Deck;
-import org.example.edhtrack.entity.Game;
-import org.example.edhtrack.entity.GameParticipant;
-import org.example.edhtrack.entity.Player;
+import org.example.edhtrack.entity.*;
 import org.example.edhtrack.repository.DeckRepository;
 import org.example.edhtrack.repository.GameParticipantRepository;
 import org.example.edhtrack.repository.GameRepository;
@@ -25,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GameService {
@@ -86,6 +84,9 @@ public class GameService {
                                 p.getPlayer().getId(),
                                 p.getPlayer().getName(),
                                 p.getDeck().getDeckId(),
+                                p.getDeck().getCommanders().stream()
+                                        .map(Commander::getName)
+                                        .collect(Collectors.toSet()),
                                 p.getDeck().getDeckName(),
                                 p.isWinner()
                         ))

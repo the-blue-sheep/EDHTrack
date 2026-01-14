@@ -4,6 +4,8 @@ import org.example.edhtrack.entity.Deck;
 import org.example.edhtrack.entity.GameParticipant;
 import org.example.edhtrack.entity.Player;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,4 +21,11 @@ public interface GameParticipantRepository extends JpaRepository<GameParticipant
     int countByPlayer(Player player);
 
     List<GameParticipant> findByPlayerAndDeck(Player player, Deck deck);
+
+    @Query("""
+        select count(gp) > 0
+        from GameParticipant gp
+        where gp.deck.deckId = :deckId
+    """)
+    boolean isDeckUsed(@Param("deckId") int deckId);
 }
