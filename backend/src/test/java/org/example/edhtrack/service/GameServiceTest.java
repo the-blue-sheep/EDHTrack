@@ -116,6 +116,7 @@ class GameServiceTest {
 
         Deck d1 = new Deck();
         d1.setDeckId(30);
+        d1.setCommanders(new HashSet<>());
         d1.setDeckName("DeckC");
 
         gp1.setPlayer(p1);
@@ -195,6 +196,7 @@ class GameServiceTest {
 
         Deck deck = new Deck();
         deck.setDeckId(20);
+        deck.setCommanders(new HashSet<>());
         deck.setDeckName("Control");
 
         GameParticipant gp = new GameParticipant();
