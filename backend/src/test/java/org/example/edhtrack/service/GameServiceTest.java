@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -109,6 +109,7 @@ class GameServiceTest {
         g1.setNotes("Test Game");
 
         GameParticipant gp1 = new GameParticipant();
+
         Player p1 = new Player();
         p1.setPlayerId(3);
         p1.setName("Carl");
@@ -125,7 +126,11 @@ class GameServiceTest {
 
         Page<Game> page = new PageImpl<>(List.of(g1));
 
-        when(gameRepository.findAll(any(PageRequest.class))).thenReturn(page);
+        when(gameRepository.findByFilters(
+                any(),
+                any(),
+                any(Pageable.class)
+        )).thenReturn(page);
 
         Page<GameOverviewDTO> result = gameService.getGames(0, 10, 0, "");
 
@@ -143,7 +148,7 @@ class GameServiceTest {
         assertThat(partDto.deckName()).isEqualTo("DeckC");
         assertThat(partDto.isWinner()).isTrue();
 
-        verify(gameRepository).findAll(any(PageRequest.class));
+        verify(gameRepository).findByFilters(any(), any(), any(Pageable.class));
     }
 
     @Test

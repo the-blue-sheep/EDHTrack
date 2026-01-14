@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import logo from '../../assets/EDHTrack-Logo.png';
+import { useAuth } from "../../auth/useAuth";
 
 export default function Navbar() {
+    const { user, logout } = useAuth();
     return (
         <header className="sticky top-0 z-50 bg-green-900">
             <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-4">
@@ -16,9 +18,16 @@ export default function Navbar() {
                     <Link to="/games" className="hover:text-blue-600">Games</Link>
                     <Link to="/players" className="hover:text-blue-600">Players</Link>
                     <Link to="/settings" className="hover:text-blue-600">Settings</Link>
-                    <Link to="/login" className="hover:text-blue-600">Login</Link>
                 </nav>
 
+                {user ? (
+                    <div className="flex gap-3 items-center text-lg font-medium">
+                        <span>{user.username} ({user.role})</span>
+                        <button onClick={logout}>Logout</button>
+                    </div>
+                ) : (
+                    <Link to="/login">Login</Link>
+                )}
             </div>
         </header>
     );

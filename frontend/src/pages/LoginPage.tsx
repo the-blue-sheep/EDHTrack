@@ -1,47 +1,71 @@
-// src/pages/LoginPage.tsx
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
+import axios from "axios";
+import * as React from "react";
+import {useAuth} from "../auth/useAuth.ts";
 
-export default function LoginPage(props:Readonly<any>) {
-    const login = useNavigate();
+interface AuthUser {
+    username: string;
+    role: "USER" | "ADMIN";
+    playerId?: number;
+}
 
-    function doLogin() {
-        //Login logik
-        login("/");
+
+export default function LoginPage() {
+    const navigate = useNavigate();
+
+    const [username, setUsername] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const { login } = useAuth();
+
+    function doLogin(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        axios.post<AuthUser>("/api/auth/login", {
+            username,
+            password
+        }).then(res => {
+            login(res.data);
+            navigate("/");
+        }).catch(() => {
+            alert("Invalid credentials");
+        });
+
     }
 
-    const [email, setEmail] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
-
     return (
-        <div className="p-6">
-            <h2 className="text-xl font-semibold text-purple-800 space-x-6 mb-6">Login Page</h2>
-            <form onSubmit={doLogin}>
-                <label className="text-purple-900 font-bold mr-2">
-                    E-mail:
-                </label>
-                    <input
-                        onChange={
-                        (e) =>
-                            setEmail(e.target.value)}
-                        placeholder="Enter your email"
-                        className="min-w-[200px] border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 mr-4"
-                    />
+        <div className="p-6 max-w-md mx-auto">
+            <h2 className="text-xl font-semibold text-purple-800 mb-6">
+                Login
+            </h2>
 
-                <label className="text-purple-900 font-bold mr-2">
-                    Password:
-                </label>
+            <form onSubmit={doLogin} className="space-y-4">
+                <div>
+                    <label className="block text-purple-900 font-bold mb-1">
+                        Username
+                    </label>
                     <input
-                        onChange={
-                        (e) =>
-                            setPassword(e.target.value)}
-                        placeholder="Enter your password"
-                        type="password"
-                        className="min-w-[200px] border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 mr-4"
+                        value={username}
+                        onChange={e => setUsername(e.target.value)}
+                        className="w-full border px-3 py-2 rounded-md"
                     />
+                </div>
+
+                <div>
+                    <label className="block text-purple-900 font-bold mb-1">
+                        Password
+                    </label>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        className="w-full border px-3 py-2 rounded-md"
+                    />
+                </div>
+
                 <button
-                    onClick={doLogin}
-                    className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800"
+                    type="submit"
+                    className="w-full px-6 py-2 bg-purple-700 text-white font-semibold rounded-md"
                 >
                     Login
                 </button>

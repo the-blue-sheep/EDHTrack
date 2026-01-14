@@ -99,4 +99,9 @@ public final class Utils {
         COLOR
     }
 
+    public enum Role {
+        USER,
+        ADMIN
+    }
+
 }
