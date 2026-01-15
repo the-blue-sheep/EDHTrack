@@ -26,7 +26,7 @@ export default function Navbar() {
                         <button onClick={logout}>Logout</button>
                     </div>
                 ) : (
-                    <Link to="/login">Login</Link>
+                    <Link to="/login" className={"text-white"}>Login</Link>
                 )}
             </div>
         </header>
