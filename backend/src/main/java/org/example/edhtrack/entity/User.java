@@ -7,6 +7,7 @@ import org.example.edhtrack.Utils.Role;
 
 @Entity
 @Data
+@Table(name = "users")
 public class User {
 
     @Id
