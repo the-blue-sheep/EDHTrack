@@ -25,6 +25,11 @@ interface DeckDTO {
     retired: boolean;
 }
 
+interface RetireDeckDTO {
+    deckId: number;
+    retired: boolean;
+}
+
 export default function UpdatePlayerAndDecksPage() {
     const [players, setPlayers] = useState<Player[]>([]);
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -102,6 +107,27 @@ export default function UpdatePlayerAndDecksPage() {
 
     function onChangeHandlerPlayer(playerId?: number) {
         setSelectedPlayerId(playerId);
+    }
+
+    function handleRetireDeck(deck: DeckDTO) {
+        if(selectedPlayerId !== null) {
+            const retireDeckDTO: RetireDeckDTO = {
+                deckId: deck.deckId,
+                retired: deck.retired
+            }
+
+            const toasty = toast.loading("Please wait...");
+
+            axios.post('/api/decks/retire', retireDeckDTO)
+                .then(res => {
+                    const updatedDeck = res.data;
+                    setDecks(prev =>
+                        prev.map(d => d.deckId === updatedDeck.deckId ? updatedDeck : d)
+                    );
+                    toast.update(toasty, { render: "Retire status changed", type: "success", isLoading: false, autoClose: 3000 });
+                })
+                .catch(() => {toast.update(toasty, {render: "Error", type: "error", isLoading: false, autoClose: 3000})});
+        }
     }
 
     function updatePlayer(newName: string) {
@@ -323,13 +349,27 @@ export default function UpdatePlayerAndDecksPage() {
                     </thead>
                     <tbody>
                     {decks.map(deck => (
-                        <tr key={deck.deckId}>
+                        <tr key={deck.deckId}
+                            className={deck.retired ? "bg-red-50" : ""}
+                        >
                             <td className="border px-4 py-2">
                                 {deck.commanders?.join(" // ") ?? ""}
                             </td>
                             <td className="border px-4 py-2">{deck.colors}</td>
                             <td className="border px-4 py-2">{deck.deckName}</td>
-                            <td className="border px-4 py-2">{deck.retired ? "Retired" : "Active"}</td>
+                            <td className="border px-4 py-2">
+                                <button
+                                    type="button"
+                                    className={`px-6 py-2 font-semibold rounded-md focus:ring-2 ${
+                                        deck.retired
+                                            ? "bg-red-600 text-white hover:bg-red-700 focus:ring-red-400"
+                                            : "bg-purple-700 text-white hover:bg-purple-800 focus:ring-green-400"
+                                    }`}
+                                    onClick={() => handleRetireDeck(deck)}
+                                >
+                                    {deck.retired ? "Retired" : "Active"}
+                                </button>
+                            </td>
                             <td className="border px-4 py-2">
                                 <button
                                     className="bg-purple-700 text-white px-4 py-2 rounded"

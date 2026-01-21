@@ -192,7 +192,9 @@ export default function decksPage() {
                         </thead>
                         <tbody>
                         {decks.map(deck => (
-                            <tr key={deck.deckId}>
+                            <tr key={deck.deckId}
+                                className={deck.retired ? "bg-red-50" : ""}
+                            >
                                 <td className="border border-gray-300 px-4 py-2">
                                     {Array.isArray(deck.commanders) ? deck.commanders?.filter(Boolean).join(" // ") : deck.commanders}
                                 </td>
@@ -203,7 +205,11 @@ export default function decksPage() {
 
                                     <button
                                         type="button"
-                                        className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800 focus:ring-2 focus:ring-green-400"
+                                        className={`px-6 py-2 font-semibold rounded-md focus:ring-2 ${
+                                            deck.retired
+                                                ? "bg-red-600 text-white hover:bg-red-700 focus:ring-red-400"
+                                                : "bg-purple-700 text-white hover:bg-purple-800 focus:ring-green-400"
+                                        }`}
                                         onClick={() => handleRetireDeck(deck)}
                                     >
                                         {deck.retired ? "Retired" : "Active"}
