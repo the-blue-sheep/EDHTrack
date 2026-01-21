@@ -259,7 +259,7 @@ class StatisticServiceTest {
                 .thenReturn(List.of(gp1, gp2, gp3));
 
         List<LeaderboardEntryDTO> leaderboard =
-                statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false);
+                statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false, "3,4,5,6");
 
         assertEquals(2, leaderboard.size());
 
