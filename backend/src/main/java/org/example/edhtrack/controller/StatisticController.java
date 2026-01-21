@@ -74,9 +74,10 @@ public class StatisticController {
             @RequestParam Utils.DeterminedType type,
             @RequestParam(defaultValue = "0") int minGames,
             @RequestParam(defaultValue = "false") boolean hideRetiredPlayers,
-            @RequestParam(defaultValue = "false") boolean hideRetiredDecks
+            @RequestParam(defaultValue = "false") boolean hideRetiredDecks,
+            @RequestParam(required = false, defaultValue = "3,4,5,6") String tableSizes
     ){
-        return statisticService.getLeaderboard(type, minGames, hideRetiredPlayers, hideRetiredDecks);
+        return statisticService.getLeaderboard(type, minGames, hideRetiredPlayers, hideRetiredDecks, tableSizes);
     }
 
     @GetMapping("/players/game-count")

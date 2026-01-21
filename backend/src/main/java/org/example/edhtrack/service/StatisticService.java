@@ -163,10 +163,29 @@ public class StatisticService {
             Utils.DeterminedType type,
             int minGames,
             boolean hideRetiredPlayers,
-            boolean hideRetiredDecks
+            boolean hideRetiredDecks,
+            String tableSizes
     ) {
 
+        List<Integer> sizes = Arrays.stream(tableSizes.split(","))
+                .map(Integer::parseInt)
+                .toList();
+
+        if (sizes.isEmpty()) {
+            return List.of();
+        }
+
         List<GameParticipant> participants = gameParticipantRepository.findAll();
+
+        participants = participants.stream()
+                .filter(p -> sizes.contains(p.getGame().getPlayers().size()))
+                .filter(p -> {
+                    if (hideRetiredPlayers && p.getPlayer().isRetired()) {
+                        return false;
+                    }
+                    return !hideRetiredDecks || p.getDeck() == null || !p.getDeck().isRetired();
+                })
+                .toList();
 
         participants = participants.stream()
                 .filter(p -> {
