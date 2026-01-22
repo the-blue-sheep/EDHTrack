@@ -119,32 +119,56 @@ class StatisticServiceTest {
     }
 
     @Test
-    void getWinRateAgainstOtherPlayer_shouldReturnCorrectRate() {
+    void getPlayerVsPlayerStats_withTableSizeFilter_shouldReturnCorrectStats() {
         Player alice = player("Alice");
         Player bob = player("Bob");
 
-        // Spiel 1 — Alice gewinnt
         Game g1 = new Game();
-        GameParticipant g1a = gp(g1, alice, null, true);
-        GameParticipant g1b = gp(g1, bob, null, false);
-        g1.setPlayers(List.of(g1a, g1b));
+        g1.setPlayers(List.of(
+                gp(g1, alice, null, true),
+                gp(g1, bob, null, false)
+        ));
 
-        // Spiel 2 — Bob gewinnt
         Game g2 = new Game();
-        GameParticipant g2a = gp(g2, alice, null, false);
-        GameParticipant g2b = gp(g2, bob, null, true);
-        g2.setPlayers(List.of(g2a, g2b));
+        g2.setPlayers(List.of(
+                gp(g2, alice, null, false),
+                gp(g2, bob, null, true),
+                gp(g2, player("Charlie"), null, false)
+        ));
+
+        GameParticipant g1a = g1.getPlayers().get(0);
+        GameParticipant g1b = g1.getPlayers().get(1);
+        GameParticipant g2a = g2.getPlayers().get(0);
+        GameParticipant g2b = g2.getPlayers().get(1);
 
         when(gameParticipantRepository.findByPlayer(alice)).thenReturn(List.of(g1a, g2a));
         when(gameParticipantRepository.findByPlayer(bob)).thenReturn(List.of(g1b, g2b));
 
-        PlayerVsPlayerDTO result =
-                statisticService.getWinRateAgainstOtherPlayer(alice, bob);
+        PlayerVsPlayerDTO dto = statisticService.getPlayerVsPlayerStats(alice, bob, "2");
 
-        assertNotNull(result);
-        assertEquals(alice.getName(), result.player1Name());
-        assertEquals(alice.getId(), result.player1Id());
-        assertEquals(0.5, result.winRate(), 0.0001);
+        assertNotNull(dto);
+
+        assertEquals(alice.getId(), dto.player1Id());
+        assertEquals(alice.getName(), dto.player1Name());
+        assertEquals(bob.getId(), dto.player2Id());
+        assertEquals(bob.getName(), dto.player2Name());
+
+        assertEquals(2, dto.totalGamesPlayer1());
+        assertEquals(2, dto.totalGamesPlayer2());
+
+        assertEquals(1, dto.gamesTogether());
+
+        assertEquals(1, dto.player1WinsHeadToHead());
+        assertEquals(0, dto.player2WinsHeadToHead());
+
+        assertEquals(0.5, dto.winRatePlayer1Overall(), 0.0001);
+        assertEquals(0.5, dto.winRatePlayer2Overall(), 0.0001);
+
+        assertEquals(1.0, dto.winRatePlayer1WithPlayer2(), 0.0001);
+        assertEquals(0.0, dto.winRatePlayer2WithPlayer1(), 0.0001);
+
+        assertEquals(0.5, dto.deltaPlayer1(), 0.0001);
+        assertEquals(-0.5, dto.deltaPlayer2(), 0.0001);
     }
 
     @Test

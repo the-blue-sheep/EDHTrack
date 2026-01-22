@@ -65,8 +65,16 @@ public class StatisticController {
     }
 
     @GetMapping("/player-vs-player-stat")
-    public PlayerVsPlayerDTO getWinRateAgainstAnotherPlayer(@RequestParam int playerId1, @RequestParam int playerId2) {
-        return statisticService.getWinRateAgainstOtherPlayer(playerService.getPlayerById(playerId1), playerService.getPlayerById(playerId2));
+    public PlayerVsPlayerDTO getPlayerVsPlayerStat(
+            @RequestParam int playerId1,
+            @RequestParam int playerId2,
+            @RequestParam(required = false, defaultValue = "3,4,5,6") String tableSizes
+    ) {
+        Player p1 = playerService.getPlayerById(playerId1);
+        Player p2 = playerService.getPlayerById(playerId2);
+
+
+        return statisticService.getPlayerVsPlayerStats(p1, p2, tableSizes);
     }
 
     @GetMapping("/leaderboard")
