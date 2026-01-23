@@ -42,6 +42,46 @@ export default function PlayerManagerPage() {
             .finally(() => setLoading(false));
     }, [hideRetired]);
 
+    function handleRetirePlayer(
+        e: React.MouseEvent<HTMLButtonElement>,
+        player: PlayerGamesCountDTO
+    ) {
+        e.stopPropagation();
+
+        const toasty = toast.loading("Please wait...");
+
+        const dto = {
+            id: player.playerId,
+            isRetired: !player.isRetired
+        };
+
+        axios.post("/api/players/retire", dto)
+            .then(() => {
+                setData(prev =>
+                    prev.map(p =>
+                        p.playerId === player.playerId
+                            ? { ...p, isRetired: !p.isRetired }
+                            : p
+                    )
+                );
+
+                toast.update(toasty, {
+                    render: "Player updated",
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 2000
+                });
+            })
+            .catch(() => {
+                toast.update(toasty, {
+                    render: "Error updating player",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+            });
+    }
+
     return (
         <div className="p-6">
             <h1 className="text-2xl font-bold text-purple-900 mb-6">
@@ -67,6 +107,7 @@ export default function PlayerManagerPage() {
                         <th className="px-3 py-2 text-left">#</th>
                         <th className="px-3 py-2 text-left">Player</th>
                         <th className="px-3 py-2 text-center">Games Played</th>
+                        <th className="px-3 py-2 text-center">Retired</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -74,7 +115,7 @@ export default function PlayerManagerPage() {
                         <tr
                             key={player.playerId}
                             onClick={() => navigate(`/players/${player.playerId}`)}
-                            className="border-b last:border-b-0 cursor-pointer hover:bg-purple-50"
+                            className={player.isRetired ? "bg-red-50 border-b last:border-b-0 cursor-pointer hover:bg-purple-50" : "border-b last:border-b-0 cursor-pointer hover:bg-purple-50"}
                         >
                             <td className="px-3 py-2">{index + 1}</td>
                             <td className={`px-3 py-2 font-medium ${
@@ -84,6 +125,19 @@ export default function PlayerManagerPage() {
                             </td>
                             <td className="px-3 py-2 text-center">
                                 {player.totalGames}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                                <button
+                                    type="button"
+                                    className={`px-6 py-2 font-semibold rounded-md focus:ring-2 ${
+                                        player.isRetired
+                                            ? "bg-red-600 text-white hover:bg-red-700 focus:ring-red-400"
+                                            : "bg-purple-700 text-white hover:bg-purple-800 focus:ring-green-400"
+                                    }`}
+                                    onClick={(e) => handleRetirePlayer(e, player)}
+                                >
+                                    {player?.isRetired ? "Active" : "Retire"}
+                                </button>
                             </td>
                         </tr>
 

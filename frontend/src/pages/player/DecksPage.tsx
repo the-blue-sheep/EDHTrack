@@ -168,9 +168,13 @@ export default function decksPage() {
                     }
                 </p>
             )}
-            {selectedPlayerId && (<button
+            {selectedPlayerId && selectedPlayer && (<button
                 type="button"
-                className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800 focus:ring-2 focus:ring-green-400"
+                className={`px-6 py-2 font-semibold rounded-md focus:ring-2 ${
+                    selectedPlayer.isRetired
+                        ? "bg-red-600 text-white hover:bg-red-700 focus:ring-red-400"
+                        : "bg-purple-700 text-white hover:bg-purple-800 focus:ring-green-400"
+                }`}
                 onClick={handleRetirePlayer}
             >
                 {selectedPlayer?.isRetired ? "Reactivate player" : "Retire player"}
