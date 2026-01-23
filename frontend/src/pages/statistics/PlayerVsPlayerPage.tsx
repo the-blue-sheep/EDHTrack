@@ -87,6 +87,84 @@ export default function PlayerVsPlayerPage() {
             .finally(() => setLoading(false));
     }
 
+    function renderDesktopStats(data: PlayerVsPlayerDTO) {
+        return (
+            <>
+                <h2 className="text-xl font-semibold mb-4">
+                    {data.player1Name} vs {data.player2Name}
+                </h2>
+
+                <h3 className="font-semibold mt-2">Overall Performance</h3>
+                <p>{data.player1Name}: {(data.winRatePlayer1Overall * 100).toFixed(1)}% over {data.totalGamesPlayer1} games</p>
+                <p>{data.player2Name}: {(data.winRatePlayer2Overall * 100).toFixed(1)}% over {data.totalGamesPlayer2} games</p>
+
+                <h3 className="font-semibold mt-4">
+                    Performance with {data.player2Name} present
+                </h3>
+
+                <p>
+                    {data.player1Name}: {(data.winRatePlayer1WithPlayer2 * 100).toFixed(1)}% over {data.gamesTogether} games
+                </p>
+
+                <p className="mt-2 font-bold">
+                    {data.player1Name}'s winrate{" "}
+                    <span className={data.deltaPlayer1 >= 0 ? "text-green-600" : "text-red-600"}>
+                      {data.deltaPlayer1 >= 0 ? "increases" : "drops"}
+                    </span>{" "}
+                    by {Math.abs(data.deltaPlayer1 * 100).toFixed(1)} percentage points when {data.player2Name} is at the table.
+                </p>
+
+                <h3 className="font-semibold mt-4">Head-to-Head</h3>
+                <p>Games together: {data.gamesTogether}</p>
+                <p>{data.player1Name} wins: {data.player1WinsHeadToHead}</p>
+                <p>{data.player2Name} wins: {data.player2WinsHeadToHead}</p>
+            </>
+        );
+    }
+
+    function renderMobileStats(data: PlayerVsPlayerDTO) {
+        return (
+            <>
+                <div className="border rounded p-4">
+                    <h2 className="font-bold text-lg mb-2">
+                        {data.player1Name} vs {data.player2Name}
+                    </h2>
+
+                    <p className="text-sm">
+                        {data.player1Name}: {(data.winRatePlayer1Overall * 100).toFixed(1)}%
+                    </p>
+                    <p className="text-sm">
+                        {data.player2Name}: {(data.winRatePlayer2Overall * 100).toFixed(1)}%
+                    </p>
+                </div>
+
+                <div className="border rounded p-4">
+                    <h3 className="font-semibold mb-1">
+                        With {data.player2Name} at the table
+                    </h3>
+
+                    <p className="text-sm">
+                        {data.player1Name}: {(data.winRatePlayer1WithPlayer2 * 100).toFixed(1)}%
+                    </p>
+
+                    <p className="mt-2 font-bold text-sm">
+                      <span className={data.deltaPlayer1 >= 0 ? "text-green-600" : "text-red-600"}>
+                        {data.deltaPlayer1 >= 0 ? "↑" : "↓"}
+                      </span>{" "}
+                        {Math.abs(data.deltaPlayer1 * 100).toFixed(1)} pp
+                    </p>
+                </div>
+
+                <div className="border rounded p-4">
+                    <h3 className="font-semibold mb-1">Head-to-Head</h3>
+                    <p className="text-sm">Games together: {data.gamesTogether}</p>
+                    <p className="text-sm">{data.player1Name}: {data.player1WinsHeadToHead}</p>
+                    <p className="text-sm">{data.player2Name}: {data.player2WinsHeadToHead}</p>
+                </div>
+            </>
+        );
+    }
+
     return (
         <div className="p-6">
             <h3 className="text-xl font-semibold text-purple-800 space-x-6">
@@ -167,38 +245,19 @@ export default function PlayerVsPlayerPage() {
 
             {loading ? <p className="mt-4">Loading...</p> : null}
 
-            {!loading && data ?
-                <div className="mt-6">
-                    <h2 className="text-xl font-semibold mb-4">
-                        {data.player1Name} vs {data.player2Name}
-                    </h2>
+            {!loading && data && (
+                <>
+                    {/* DESKTOP */}
+                    <div className="hidden md:block mt-6">
+                        {renderDesktopStats(data)}
+                    </div>
 
-                    <h3 className="font-semibold mt-2">Overall Performance</h3>
-                    <p>{data.player1Name}: {(data.winRatePlayer1Overall * 100).toFixed(1)}% over {data.totalGamesPlayer1} games</p>
-                    <p>{data.player2Name}: {(data.winRatePlayer2Overall * 100).toFixed(1)}% over {data.totalGamesPlayer2} games</p>
-
-                    <h3 className="font-semibold mt-4">Performance with {data.player2Name} present</h3>
-                    <p>{data.player1Name}: {(data.winRatePlayer1WithPlayer2 * 100).toFixed(1)}% over {data.gamesTogether} games</p>
-
-                    {(() => {
-                        // const deltaPercent = Math.abs(data.deltaPlayer1 * 100);
-                        return (
-                            <p className="mt-2 font-bold">
-                                {data.player1Name}'s winrate{' '}
-                                <span className={data.deltaPlayer1 >= 0 ? "text-green-600" : "text-red-600"}>
-                                    {data.deltaPlayer1 >= 0 ? "increases" : "drops"}
-                                </span>{' '}
-                                by {Math.abs(data.deltaPlayer1 * 100).toFixed(1)} percentage points when {data.player2Name} is at the table.
-                            </p>
-                        );
-                    })()}
-
-                    <h3 className="font-semibold mt-4">Head-to-Head</h3>
-                    <p>Games together: {data.gamesTogether}</p>
-                    <p>{data.player1Name} wins: {data.player1WinsHeadToHead} ({((data.player1WinsHeadToHead / data.gamesTogether) * 100).toFixed(1)}%)</p>
-                    <p>{data.player2Name} wins: {data.player2WinsHeadToHead} ({((data.player2WinsHeadToHead / data.gamesTogether) * 100).toFixed(1)}%)</p>
-                </div>
-            : null}
+                    {/* MOBILE */}
+                    <div className="md:hidden mt-6 space-y-4">
+                        {renderMobileStats(data)}
+                    </div>
+                </>
+            )}
 
             {data && (
                 <>
