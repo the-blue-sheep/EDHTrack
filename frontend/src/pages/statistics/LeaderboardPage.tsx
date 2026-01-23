@@ -115,8 +115,27 @@ export default function LeaderboardPage() {
 
             {loading ? <p>Loading...</p> : null}
 
+            {/* MOBILE VIEW */}
+            {!loading && data.length > 0 && (
+                <div className="md:hidden flex flex-col gap-3 mt-6">
+                    {data.map((entry, index) => (
+                        <div key={entry.playerName} className="border rounded p-3">
+                            <div className="font-bold">
+                                #{index + 1} {entry.playerName}
+                            </div>
+                            <div className="text-sm">
+                                Games: {entry.totalGames}<br />
+                                Wins: {entry.wins}<br />
+                                Winrate: {entry.winRate.toFixed(2)}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* DESKTOP VIEW */}
             {!loading && data.length > 0 ?
-                <table className="mt-6 w-full border-collapse">
+                <table className="hidden md:table mt-6 w-full border-collapse">
                     <thead>
                         <tr className="border-b">
                             <th className="px-3 py-2 text-left font-semibold">Place</th>
