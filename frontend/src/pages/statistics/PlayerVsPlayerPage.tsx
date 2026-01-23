@@ -13,7 +13,17 @@ interface PlayerVsPlayerDTO {
     player1Name: string;
     player2Id: number;
     player2Name: string;
-    winRate: number;
+    totalGamesPlayer1: number;
+    totalGamesPlayer2: number;
+    gamesTogether: number;
+    player1WinsHeadToHead: number;
+    player2WinsHeadToHead: number;
+    winRatePlayer1Overall: number;
+    winRatePlayer2Overall: number;
+    winRatePlayer1WithPlayer2: number;
+    winRatePlayer2WithPlayer1: number;
+    deltaPlayer1: number;
+    deltaPlayer: number;
 }
 
 
@@ -21,6 +31,7 @@ export default function PlayerVsPlayerPage() {
     const [players, setPlayers] = useState<Player[]>([]);
     const [player1Id, setPlayer1Id] = useState<number | null>(null);
     const [player2Id, setPlayer2Id] = useState<number | null>(null);
+    const [tableSizes, setTableSizes] = useState<number[]>([3, 4, 5, 6]);
 
     const [data, setData] = useState<PlayerVsPlayerDTO | null>(null);
     const [loading, setLoading] = useState(false);
@@ -49,7 +60,8 @@ export default function PlayerVsPlayerPage() {
             {
                 params: {
                     playerId1: player1Id,
-                    playerId2: player2Id
+                    playerId2: player2Id,
+                    tableSizes: tableSizes.join(",")
                 }
             }
         )
@@ -123,6 +135,28 @@ export default function PlayerVsPlayerPage() {
                 </div>
             </div>
 
+            <div className="flex flex-col gap-2 mb-6">
+                <label className="text-purple-900 font-bold">Table size</label>
+                <div className="flex gap-4">
+                    {[3, 4, 5, 6].map(size => (
+                        <label key={size} className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={tableSizes.includes(size)}
+                                onChange={e => {
+                                    setTableSizes(prev =>
+                                        e.target.checked
+                                            ? [...prev, size]
+                                            : prev.filter(s => s !== size)
+                                    );
+                                }}
+                            />
+                            {size} Players
+                        </label>
+                    ))}
+                </div>
+            </div>
+
             <button
                 onClick={loadStats}
                 className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800 disabled:bg-gray-400"
@@ -139,15 +173,41 @@ export default function PlayerVsPlayerPage() {
                         {data.player1Name} vs {data.player2Name}
                     </h2>
 
-                    <p className="text-lg">
-                        Winrate of <span className="font-bold">{data.player1Name}</span>:
-                        {" "}
-                        <span className="font-bold">
-                            {(data.winRate * 100).toFixed(1)}%
-                        </span>
-                    </p>
+                    <h3 className="font-semibold mt-2">Overall Performance</h3>
+                    <p>{data.player1Name}: {(data.winRatePlayer1Overall * 100).toFixed(1)}% over {data.totalGamesPlayer1} games</p>
+                    <p>{data.player2Name}: {(data.winRatePlayer2Overall * 100).toFixed(1)}% over {data.totalGamesPlayer2} games</p>
+
+                    <h3 className="font-semibold mt-4">Performance with {data.player2Name} present</h3>
+                    <p>{data.player1Name}: {(data.winRatePlayer1WithPlayer2 * 100).toFixed(1)}% over {data.gamesTogether} games</p>
+
+                    {(() => {
+                        return (
+                            <p className="mt-2 font-bold">
+                                {data.player1Name}'s winrate{' '}
+                                <span className={data.deltaPlayer1 >= 0 ? "text-green-600" : "text-red-600"}>
+                                    {data.deltaPlayer1 >= 0 ? "increases" : "drops"}
+                                </span>{' '}
+                                by {Math.abs(data.deltaPlayer1 * 100).toFixed(1)} percentage points when {data.player2Name} is at the table.
+                            </p>
+                        );
+                    })()}
+
+                    <h3 className="font-semibold mt-4">Head-to-Head</h3>
+                    <p>Games together: {data.gamesTogether}</p>
+                    <p>{data.player1Name} wins: {data.player1WinsHeadToHead} ({((data.player1WinsHeadToHead / data.gamesTogether) * 100).toFixed(1)}%)</p>
+                    <p>{data.player2Name} wins: {data.player2WinsHeadToHead} ({((data.player2WinsHeadToHead / data.gamesTogether) * 100).toFixed(1)}%)</p>
                 </div>
             : null}
+
+            {data && (
+                <>
+                    {data.gamesTogether < 5 && (
+                        <p className="mt-2 text-yellow-700 font-bold">
+                            ⚠️ Sample size too small for head-to-head analysis.
+                        </p>
+                    )}
+                </>
+            )}
         </div>
     );
 }
