@@ -15,6 +15,7 @@ export default function LeaderboardPage() {
     const [minGames, setMinGames] = useState<number>(0);
     const [hideRetiredPlayers, setHideRetiredPlayers] = useState<boolean>(false);
     const [hideRetiredDecks, setHideRetiredDecks] = useState<boolean>(false);
+    const [tableSizes, setTableSizes] = useState<number[]>([3, 4, 5, 6]);
 
     const [data, setData] = useState<LeaderboardEntryDTO[]>([]);
     const [loading, setLoading] = useState(false);
@@ -22,11 +23,17 @@ export default function LeaderboardPage() {
     async function loadLeaderboard() {
         setLoading(true);
 
+        if (tableSizes.length === 0) {
+            alert("Please select at least one table size");
+            return;
+        }
+
         const params = new URLSearchParams({
             type,
             minGames: String(minGames),
             hideRetiredPlayers: String(hideRetiredPlayers),
-            hideRetiredDecks: String(hideRetiredDecks)
+            hideRetiredDecks: String(hideRetiredDecks),
+            tableSizes: tableSizes.join(",")
         });
 
         const res = await fetch(`/api/stats/leaderboard?${params.toString()}`);
@@ -75,6 +82,28 @@ export default function LeaderboardPage() {
                         />
                         Hide retired Decks
                     </label>
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-2 mb-6">
+                <label className="text-purple-900 font-bold">Table size</label>
+                <div className="flex gap-4">
+                    {[3, 4, 5, 6].map(size => (
+                        <label key={size} className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={tableSizes.includes(size)}
+                                onChange={e => {
+                                    setTableSizes(prev =>
+                                        e.target.checked
+                                            ? [...prev, size]
+                                            : prev.filter(s => s !== size)
+                                    );
+                                }}
+                            />
+                            {size} Players
+                        </label>
+                    ))}
                 </div>
             </div>
 

@@ -181,6 +181,7 @@ export default function PlayerVsPlayerPage() {
                     <p>{data.player1Name}: {(data.winRatePlayer1WithPlayer2 * 100).toFixed(1)}% over {data.gamesTogether} games</p>
 
                     {(() => {
+                        // const deltaPercent = Math.abs(data.deltaPlayer1 * 100);
                         return (
                             <p className="mt-2 font-bold">
                                 {data.player1Name}'s winrate{' '}

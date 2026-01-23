@@ -3,10 +3,7 @@ package org.example.edhtrack.service;
 import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.player.*;
 import org.example.edhtrack.dto.stats.*;
-import org.example.edhtrack.entity.Commander;
-import org.example.edhtrack.entity.Deck;
-import org.example.edhtrack.entity.GameParticipant;
-import org.example.edhtrack.entity.Player;
+import org.example.edhtrack.entity.*;
 import org.example.edhtrack.repository.DeckRepository;
 import org.example.edhtrack.repository.GameParticipantRepository;
 import org.example.edhtrack.repository.PlayerRepository;
@@ -22,7 +19,11 @@ public class StatisticService {
     private final DeckRepository deckRepository;
     private final PlayerRepository playerRepository;
 
-    public StatisticService(GameParticipantRepository gameParticipantRepository, DeckRepository deckRepository, PlayerRepository playerRepository) {
+    public StatisticService(
+            GameParticipantRepository gameParticipantRepository,
+            DeckRepository deckRepository,
+            PlayerRepository playerRepository
+    ) {
         this.gameParticipantRepository = gameParticipantRepository;
         this.deckRepository = deckRepository;
         this.playerRepository = playerRepository;
@@ -86,28 +87,69 @@ public class StatisticService {
         return new ColorStatDTO(colors, gamesIn, gamesWon, winRate);
     }
 
-    public PlayerVsPlayerDTO getWinRateAgainstOtherPlayer(Player player1, Player player2) {
-        List<GameParticipant> participants1 = gameParticipantRepository.findByPlayer(player1);
-        List<GameParticipant> participants2 =  gameParticipantRepository.findByPlayer(player2);
-        List<GameParticipant> participants = new ArrayList<>();
-        for (GameParticipant p1 : participants1) {
-            for (GameParticipant p2 : participants2) {
-                if (p1.getGame().equals(p2.getGame())) {
-                    participants.add(p1);
-                }
-            }
+    public PlayerVsPlayerDTO getPlayerVsPlayerStats(Player player1, Player player2, String tableSizes) {
+        List<Integer> sizes = Arrays.stream(tableSizes.split(","))
+                .map(Integer::parseInt)
+                .toList();
+
+        List<GameParticipant> allP1 = gameParticipantRepository.findByPlayer(player1);
+        List<GameParticipant> allP2 = gameParticipantRepository.findByPlayer(player2);
+
+        int totalGamesP1 = allP1.size();
+        int totalGamesP2 = allP2.size();
+
+        int totalWinsP1 = (int) allP1.stream().filter(GameParticipant::isWinner).count();
+        int totalWinsP2 = (int) allP2.stream().filter(GameParticipant::isWinner).count();
+
+        double winRateP1Overall = totalGamesP1 == 0 ? 0 : (double) totalWinsP1 / totalGamesP1;
+        double winRateP2Overall = totalGamesP2 == 0 ? 0 : (double) totalWinsP2 / totalGamesP2;
+
+        List<Game> gamesTogetherList = allP1.stream()
+                .map(GameParticipant::getGame)
+                .filter(game -> allP2.stream().anyMatch(p2 -> p2.getGame().equals(game)))
+                .filter(game -> sizes.isEmpty()
+                        || sizes.contains(game.getPlayers().size()))
+                .distinct()
+                .toList();
+        int gamesTogetherCount = gamesTogetherList.size();
+
+        int player1WinsH2H = 0;
+        int player2WinsH2H = 0;
+
+        for (Game g : gamesTogetherList) {
+            List<GameParticipant> participants = g.getPlayers();
+            boolean p1Won = participants.stream()
+                    .anyMatch(p -> p.getPlayer().equals(player1) && p.isWinner());
+            boolean p2Won = participants.stream()
+                    .anyMatch(p -> p.getPlayer().equals(player2) && p.isWinner());
+
+            if (p1Won) player1WinsH2H++;
+            if (p2Won) player2WinsH2H++;
         }
 
-        int gamesIn = participants.size();
-        int gamesWon = Utils.countWins(participants);
 
-        double winRate = gamesIn == 0 ? 0 : (double) gamesWon / gamesIn;
+        double winRateP1WithP2 = gamesTogetherCount == 0 ? 0 : (double) player1WinsH2H / gamesTogetherCount;
+        double winRateP2WithP1 = gamesTogetherCount == 0 ? 0 : (double) player2WinsH2H / gamesTogetherCount;
+
+        double deltaP1 = winRateP1WithP2 - winRateP1Overall;
+        double deltaP2 = winRateP2WithP1 - winRateP2Overall;
+
         return new PlayerVsPlayerDTO(
                 player1.getId(),
                 player1.getName(),
                 player2.getId(),
                 player2.getName(),
-                winRate
+                totalGamesP1,
+                totalGamesP2,
+                gamesTogetherCount,
+                player1WinsH2H,
+                player2WinsH2H,
+                winRateP1Overall,
+                winRateP2Overall,
+                winRateP1WithP2,
+                winRateP2WithP1,
+                deltaP1,
+                deltaP2
         );
     }
 
@@ -163,10 +205,29 @@ public class StatisticService {
             Utils.DeterminedType type,
             int minGames,
             boolean hideRetiredPlayers,
-            boolean hideRetiredDecks
+            boolean hideRetiredDecks,
+            String tableSizes
     ) {
 
+        List<Integer> sizes = Arrays.stream(tableSizes.split(","))
+                .map(Integer::parseInt)
+                .toList();
+
+        if (sizes.isEmpty()) {
+            return List.of();
+        }
+
         List<GameParticipant> participants = gameParticipantRepository.findAll();
+
+        participants = participants.stream()
+                .filter(p -> sizes.contains(p.getGame().getPlayers().size()))
+                .filter(p -> {
+                    if (hideRetiredPlayers && p.getPlayer().isRetired()) {
+                        return false;
+                    }
+                    return !hideRetiredDecks || p.getDeck() == null || !p.getDeck().isRetired();
+                })
+                .toList();
 
         participants = participants.stream()
                 .filter(p -> {

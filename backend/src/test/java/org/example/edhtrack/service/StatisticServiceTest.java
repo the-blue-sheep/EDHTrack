@@ -119,32 +119,56 @@ class StatisticServiceTest {
     }
 
     @Test
-    void getWinRateAgainstOtherPlayer_shouldReturnCorrectRate() {
+    void getPlayerVsPlayerStats_withTableSizeFilter_shouldReturnCorrectStats() {
         Player alice = player("Alice");
         Player bob = player("Bob");
 
-        // Spiel 1 — Alice gewinnt
         Game g1 = new Game();
-        GameParticipant g1a = gp(g1, alice, null, true);
-        GameParticipant g1b = gp(g1, bob, null, false);
-        g1.setPlayers(List.of(g1a, g1b));
+        g1.setPlayers(List.of(
+                gp(g1, alice, null, true),
+                gp(g1, bob, null, false)
+        ));
 
-        // Spiel 2 — Bob gewinnt
         Game g2 = new Game();
-        GameParticipant g2a = gp(g2, alice, null, false);
-        GameParticipant g2b = gp(g2, bob, null, true);
-        g2.setPlayers(List.of(g2a, g2b));
+        g2.setPlayers(List.of(
+                gp(g2, alice, null, false),
+                gp(g2, bob, null, true),
+                gp(g2, player("Charlie"), null, false)
+        ));
+
+        GameParticipant g1a = g1.getPlayers().get(0);
+        GameParticipant g1b = g1.getPlayers().get(1);
+        GameParticipant g2a = g2.getPlayers().get(0);
+        GameParticipant g2b = g2.getPlayers().get(1);
 
         when(gameParticipantRepository.findByPlayer(alice)).thenReturn(List.of(g1a, g2a));
         when(gameParticipantRepository.findByPlayer(bob)).thenReturn(List.of(g1b, g2b));
 
-        PlayerVsPlayerDTO result =
-                statisticService.getWinRateAgainstOtherPlayer(alice, bob);
+        PlayerVsPlayerDTO dto = statisticService.getPlayerVsPlayerStats(alice, bob, "2");
 
-        assertNotNull(result);
-        assertEquals(alice.getName(), result.player1Name());
-        assertEquals(alice.getId(), result.player1Id());
-        assertEquals(0.5, result.winRate(), 0.0001);
+        assertNotNull(dto);
+
+        assertEquals(alice.getId(), dto.player1Id());
+        assertEquals(alice.getName(), dto.player1Name());
+        assertEquals(bob.getId(), dto.player2Id());
+        assertEquals(bob.getName(), dto.player2Name());
+
+        assertEquals(2, dto.totalGamesPlayer1());
+        assertEquals(2, dto.totalGamesPlayer2());
+
+        assertEquals(1, dto.gamesTogether());
+
+        assertEquals(1, dto.player1WinsHeadToHead());
+        assertEquals(0, dto.player2WinsHeadToHead());
+
+        assertEquals(0.5, dto.winRatePlayer1Overall(), 0.0001);
+        assertEquals(0.5, dto.winRatePlayer2Overall(), 0.0001);
+
+        assertEquals(1.0, dto.winRatePlayer1WithPlayer2(), 0.0001);
+        assertEquals(0.0, dto.winRatePlayer2WithPlayer1(), 0.0001);
+
+        assertEquals(0.5, dto.deltaPlayer1(), 0.0001);
+        assertEquals(-0.5, dto.deltaPlayer2(), 0.0001);
     }
 
     @Test
@@ -230,6 +254,9 @@ class StatisticServiceTest {
         Player alice = player("Alice");
         alice.setPlayerId(1);
 
+        Player stanley = player("Stanley");
+        stanley.setPlayerId(2);
+
         Player harold = player("Harold");
         harold.setPlayerId(3);
 
@@ -238,41 +265,61 @@ class StatisticServiceTest {
         deckAlice.setColors("WUBG");
         deckAlice.setPlayer(alice);
 
+        Deck deckStanley = deck("Atraxa");
+        deckStanley.setDeckId(1);
+        deckStanley.setColors("WUBG");
+        deckStanley.setPlayer(stanley);
+
         Deck deckHarold = deck("Atraxa");
         deckHarold.setDeckId(2);
         deckHarold.setColors("WUBG");
         deckHarold.setPlayer(harold);
 
         Game g1 = new Game();
-        GameParticipant gp1 = gp(g1, alice, deckAlice, true);
-        g1.setPlayers(List.of(gp1));
+        GameParticipant g1p1 = gp(g1, alice, deckAlice, true);
+        GameParticipant g1p2 = gp(g1, stanley, deckStanley, false);
+        GameParticipant g1p3 = gp(g1, harold, deckHarold, false);
+        g1.setPlayers(List.of(g1p1, g1p2, g1p3));
 
         Game g2 = new Game();
-        GameParticipant gp2 = gp(g2, alice, deckAlice, true);
-        g2.setPlayers(List.of(gp2));
+        GameParticipant g2p1 = gp(g2, alice, deckAlice, true);
+        GameParticipant g2p2 = gp(g2, stanley, deckStanley, false);
+        GameParticipant g2p3 = gp(g2, harold, deckHarold, false);
+        g2.setPlayers(List.of(g2p1, g2p2, g2p3));
 
         Game g3 = new Game();
-        GameParticipant gp3 = gp(g3, harold, deckHarold, false);
-        g3.setPlayers(List.of(gp3));
+        GameParticipant g3p1 = gp(g3, harold, deckHarold, false);
+        GameParticipant g3p2 = gp(g3, stanley, deckStanley, true);
+        GameParticipant g3p3 = gp(g3, alice, deckAlice, false);
+        g3.setPlayers(List.of(g3p1, g3p2, g3p3));
 
         when(gameParticipantRepository.findAll())
-                .thenReturn(List.of(gp1, gp2, gp3));
+                .thenReturn(List.of(
+                        g1p1, g1p2, g1p3,
+                        g2p1, g2p2, g2p3,
+                        g3p1, g3p2, g3p3
+                ));
 
         List<LeaderboardEntryDTO> leaderboard =
-                statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false);
+                statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false, "3,4,5,6");
 
-        assertEquals(2, leaderboard.size());
+        assertEquals(3, leaderboard.size());
 
         LeaderboardEntryDTO first = leaderboard.get(0);
         LeaderboardEntryDTO second = leaderboard.get(1);
+        LeaderboardEntryDTO third = leaderboard.get(2);
 
         assertEquals("Alice", first.playerName());
-        assertEquals(2, first.totalGames());
+        assertEquals(3, first.totalGames());
         assertEquals(2, first.wins());
 
-        assertEquals("Harold", second.playerName());
-        assertEquals(1, second.totalGames());
-        assertEquals(0, second.wins());
+        assertEquals("Stanley", second.playerName());
+        assertEquals(3, second.totalGames());
+        assertEquals(1, second.wins());
+
+        assertEquals("Harold", third.playerName());
+        assertEquals(3, third.totalGames());
+        assertEquals(0, third.wins());
     }
 
     @Test
