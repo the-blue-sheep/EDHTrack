@@ -9,5 +9,6 @@ import java.util.List;
 public record CreateGameResponseDTO(
     int gameId,
     LocalDate date,
-    List<PlayerResultDTO> players
+    List<PlayerResultDTO> players,
+    int groupId
 ) {}

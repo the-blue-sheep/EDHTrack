@@ -2,6 +2,8 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
+import {BRACKET_LABELS} from "../../utils.ts";
+import {usePlayers} from "../../hooks/usePlayers.ts";
 
 interface Player {
     id: number;
@@ -15,6 +17,7 @@ interface DeckDTO {
     deckName: string,
     colors: string,
     retired: boolean,
+    bracket: string;
 }
 
 interface RetireDeckDTO {
@@ -28,20 +31,10 @@ interface RetirePlayerDTO {
 }
 
 export default function decksPage() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [decks, setDecks] = useState<DeckDTO[]>([]);
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-
-    useEffect(() => {
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(Array.isArray(response.data) ? response.data : []);
-            })
-            .catch(error => {
-                console.error("Error while loading players:", error);
-            });
-    }, []);
 
     useEffect(() => {
         if (selectedPlayerId == null) return;
@@ -187,10 +180,11 @@ export default function decksPage() {
                 {decks.length > 0 ?
                     <table className="min-w-full border-collapse border border-gray-300">
                         <thead className="bg-gray-100">
-                        <tr>
+                        <tr key={decks.length}>
                             <th className="border border-gray-300 px-4 py-2">Commanders</th>
                             <th className="border border-gray-300 px-4 py-2">Colors</th>
                             <th className="border border-gray-300 px-4 py-2">Deck Name</th>
+                            <th className="border border-gray-300 px-4 py-2">Bracket</th>
                             <th className="border border-gray-300 px-4 py-2">Status</th>
                         </tr>
                         </thead>
@@ -204,6 +198,9 @@ export default function decksPage() {
                                 </td>
                                 <td className="border border-gray-300 px-4 py-2">{deck.colors}</td>
                                 <td className="border border-gray-300 px-4 py-2">{deck.deckName}</td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                    {BRACKET_LABELS[deck.bracket] ?? deck.bracket}
+                                </td>
 
                                 <td className="border border-gray-300 px-4 py-2">
 

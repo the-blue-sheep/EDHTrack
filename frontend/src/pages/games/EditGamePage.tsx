@@ -22,15 +22,32 @@ interface ParticipantInput {
     isWinner: boolean;
 }
 
+interface PlayerGroup {
+    id: number;
+    name: string;
+}
+
 export default function EditGamePage() {
     const { id } = useParams();
+    const [groups, setGroups] = useState<PlayerGroup[]>([]);
+    const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
     const [game, setGame] = useState<GameEditDTO>(new GameEditDTO());
     const navigate = useNavigate();
 
     useEffect(() => {
         axios.get(`/api/games/${id}`)
             .then(r => setGame(r.data));
+
+        axios.get<PlayerGroup[]>("/api/groups")
+            .then(res => setGroups(res.data))
+            .catch(err => console.error("Error loading groups:", err));
     }, [id]);
+
+    useEffect(() => {
+        if (groups.length > 0 && selectedGroupId === undefined) {
+            setSelectedGroupId(groups[0].id);
+        }
+    }, [groups]);
 
     function toggleWinner(index: number, isWinner: boolean) {
         setGame(prev => {

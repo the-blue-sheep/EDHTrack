@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import { computeColorsFromCommanders } from "../../services/scryfall.ts";
 import { AutocompleteInput } from "../../components/AutocompleteInput.tsx";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
+import * as React from "react";
+import { BRACKET_LABELS } from "../../utils.ts"
 
 interface Player {
     id: number;
@@ -22,6 +24,7 @@ interface DeckDTO {
     commanders: string[];
     deckName: string;
     colors: string;
+    bracket: string;
     retired: boolean;
 }
 
@@ -30,8 +33,13 @@ interface RetireDeckDTO {
     retired: boolean;
 }
 
+interface BracketDTO {
+    name: string;
+    displayName: string;
+}
+
 export default function UpdatePlayerAndDecksPage() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const [players, setPlayers] = useState<Player[]>([]); //Kein Custom hook weil setPlayers hier auch anderweitig verwendet wird
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [newName, setNewName] = useState("");
@@ -40,14 +48,20 @@ export default function UpdatePlayerAndDecksPage() {
     const [editForm, setEditForm] = useState({
         deckName: "",
         commanders: [] as string[],
-        colors: ""
+        colors: "",
+        bracket: ""
     });
+    const [brackets, setBrackets] = useState<BracketDTO[]>([]);
 
     useEffect(() => {
         axios.get<Player[]>("/api/players")
             .then(response => {
                 setPlayers(Array.isArray(response.data) ? response.data : []);
             });
+
+        axios.get<BracketDTO[]>("/api/decks/brackets")
+            .then(res => setBrackets(res.data))
+            .catch(() => console.error("Failed to load brackets"));
     }, []);
 
     useEffect(() => {
@@ -173,7 +187,8 @@ export default function UpdatePlayerAndDecksPage() {
         setEditForm({
             deckName: deck.deckName,
             commanders: deck.commanders ?? [],
-            colors: deck.colors
+            colors: deck.colors,
+            bracket: deck.bracket
         });
     }
 
@@ -191,7 +206,8 @@ export default function UpdatePlayerAndDecksPage() {
             deckId,
             deckName: editForm.deckName!,
             commanders: editForm.commanders!,
-            colors: newColors
+            colors: newColors,
+            bracket: editForm.bracket
         };
 
         const toasty = toast.loading("Saving deck...");
@@ -221,6 +237,14 @@ export default function UpdatePlayerAndDecksPage() {
         computeColorsFromCommanders(editForm.commanders).then(colors => {
             setEditForm(prev => ({ ...prev, colors }));
         });
+    }
+
+    function onChangeHandleBracket(e: React.ChangeEvent<HTMLSelectElement>) {
+        const value = e.target.value;
+        setEditForm(prev => ({
+            ...prev,
+            bracket: value
+        }));
     }
 
     return (
@@ -306,6 +330,22 @@ export default function UpdatePlayerAndDecksPage() {
                         </div>
                     </div>
 
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Bracket
+                        </label>
+                        <select
+                            name="bracket"
+                            value={editForm.bracket}
+                            onChange={onChangeHandleBracket}
+                            className="min-w-[200px] border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        >
+                            <option value="" disabled>Select bracket</option>
+                            {brackets.map(b => (
+                                <option key={b.name} value={b.name}>{b.displayName}</option>
+                            ))}
+                        </select>
+                    </div>
 
                     <div className="flex flex-col space-y-2">
                         <label className="text-sm font-medium text-gray-700">
@@ -343,6 +383,7 @@ export default function UpdatePlayerAndDecksPage() {
                         <th className="border px-4 py-2">Commanders</th>
                         <th className="border px-4 py-2">Colors</th>
                         <th className="border px-4 py-2">Deck Name</th>
+                        <th className="border px-4 py-2">Bracket</th>
                         <th className="border px-4 py-2">Status</th>
                         <th className="border px-4 py-2">Actions</th>
                     </tr>
@@ -357,6 +398,9 @@ export default function UpdatePlayerAndDecksPage() {
                             </td>
                             <td className="border px-4 py-2">{deck.colors}</td>
                             <td className="border px-4 py-2">{deck.deckName}</td>
+                            <td className="border px-4 py-2">
+                                {BRACKET_LABELS[deck.bracket] ?? deck.bracket}
+                            </td>
                             <td className="border px-4 py-2">
                                 <button
                                     type="button"

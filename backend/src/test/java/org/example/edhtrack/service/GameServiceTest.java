@@ -36,12 +36,15 @@ class GameServiceTest {
     @Mock
     DeckRepository deckRepository;
 
+    @Mock
+    PlayerGroupRepository playerGroupRepository;
+
     GameService gameService;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
-        gameService = new GameService(gameRepository, gameParticipantRepository, playerRepository, deckRepository);
+        gameService = new GameService(gameRepository, gameParticipantRepository, playerRepository, deckRepository, playerGroupRepository);
     }
 
     @Test
@@ -55,7 +58,8 @@ class GameServiceTest {
                 List.of(
                         new GameParticipantDTO(1, 10, true),
                         new GameParticipantDTO(2, 20, false)
-                )
+                ),
+                1
         );
 
         Player p1 = new Player();
@@ -130,10 +134,11 @@ class GameServiceTest {
         when(gameRepository.findByFilters(
                 any(),
                 any(),
+                any(),
                 any(Pageable.class)
         )).thenReturn(page);
 
-        Page<GameOverviewDTO> result = gameService.getGames(0, 10, 0, "");
+        Page<GameOverviewDTO> result = gameService.getGames(0, 10, 0, "", "1");
 
         assertThat(result.getContent()).hasSize(1);
 
@@ -149,7 +154,7 @@ class GameServiceTest {
         assertThat(partDto.deckName()).isEqualTo("DeckC");
         assertThat(partDto.isWinner()).isTrue();
 
-        verify(gameRepository).findByFilters(any(), any(), any(Pageable.class));
+        verify(gameRepository).findByFilters(any(), any(), any(), any(Pageable.class));
     }
 
     @Test
@@ -157,7 +162,8 @@ class GameServiceTest {
         CreateGameDTO dto = new CreateGameDTO(
                 null,
                 "Notes",
-                List.of(new GameParticipantDTO(1, 10, true))
+                List.of(new GameParticipantDTO(1, 10, true)),
+                1
         );
 
         Player p1 = new Player();
@@ -256,7 +262,8 @@ class GameServiceTest {
         GameEditDTO dto = new GameEditDTO(
                 LocalDate.of(2025, 5, 5),
                 "Updated",
-                List.of(participantDTO)
+                List.of(participantDTO),
+                1
         );
 
         // when

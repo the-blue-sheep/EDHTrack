@@ -49,7 +49,7 @@ class StatisticControllerTest {
                 new LeaderboardEntryDTO("Alice", 10, 6, 0.6)
         );
 
-        when(statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false, "3,4,5,6"))
+        when(statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false, "3,4,5,6", "1"))
                 .thenReturn(mockList);
 
         // WHEN + THEN

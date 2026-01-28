@@ -4,38 +4,38 @@ import { computeColorsFromCommanders } from "../../services/scryfall.ts";
 import { toast } from "react-toastify";
 import { AutocompleteInput } from "../../components/AutocompleteInput.tsx";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
-
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
+import * as React from "react";
+import {usePlayers} from "../../hooks/usePlayers.ts";
 
 interface CreateDeckDTO {
     playerId: number;
     commanders: string[];
     deckName: string;
     colors: string;
+    bracket: string;
+}
+
+interface BracketDTO {
+    name: string;
+    displayName: string;
 }
 
 export default function AddDeckPage() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [formData, setFormData] = useState<CreateDeckDTO>({
         playerId: 0,
         commanders: ["", ""],
         deckName: "",
-        colors: ""
+        colors: "",
+        bracket: ""
     });
+    const [brackets, setBrackets] = useState<BracketDTO[]>([]);
 
     useEffect(() => {
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(Array.isArray(response.data) ? response.data : []);
-            })
-            .catch(error => {
-                console.error("Error while loading players:", error);
-            });
+        axios.get<BracketDTO[]>("/api/decks/brackets")
+            .then(res => setBrackets(res.data))
+            .catch(() => console.error("Failed to load brackets"));
     }, []);
 
     function onChangeHandler(e: ChangeEvent<HTMLInputElement>) {
@@ -66,6 +66,14 @@ export default function AddDeckPage() {
         });
     }
 
+    function onChangeHandleBracket(e: React.ChangeEvent<HTMLSelectElement>) {
+        const value = e.target.value;
+        setFormData(prev => ({
+            ...prev,
+            bracket: value
+        }));
+    }
+
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const toasty = toast.loading("Please wait...");
@@ -84,7 +92,8 @@ export default function AddDeckPage() {
                     playerId: 0,
                     commanders: ["", ""],
                     deckName: "",
-                    colors: ""
+                    colors: "",
+                    bracket: ""
                 });
             })
             .catch(() => {toast.update(toasty, {render: "Error", type: "error", isLoading: false})});
@@ -96,9 +105,10 @@ export default function AddDeckPage() {
 
     return (
         <div className="p-6">
-            <h3 className="text-xl font-semibold text-purple-800 space-x-6">
+            <h3 className="text-xl font-semibold text-purple-800 mb-6">
                 Add a new deck
             </h3>
+
             <div className="mb-6">
                 <PlayerSelect
                     players={players}
@@ -108,38 +118,59 @@ export default function AddDeckPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Commander
-                    </label>
-                    <AutocompleteInput
-                        value={formData.commanders[0]}
-                        onChange={val => onChangeHandleCommanders(0, val)}
-                    />
+                <div className="flex gap-4">
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Commander
+                        </label>
+                        <AutocompleteInput
+                            value={formData.commanders[0]}
+                            onChange={val => onChangeHandleCommanders(0, val)}
+                        />
+                    </div>
+
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Partner / Background
+                        </label>
+                        <AutocompleteInput
+                            value={formData.commanders[1]}
+                            onChange={val => onChangeHandleCommanders(1, val)}
+                        />
+                    </div>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Partner / Background
-                    </label>
-                    <AutocompleteInput
-                        value={formData.commanders[1]}
-                        onChange={val => onChangeHandleCommanders(1, val)}
-                    />
-                </div>
+                <div className="flex gap-4">
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Deckname
+                        </label>
+                        <input
+                            name="deckName"
+                            type="text"
+                            value={formData.deckName}
+                            onChange={onChangeHandler}
+                            placeholder="Optional Deckname"
+                            className="min-w-[200px] border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        />
+                    </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Deckname
-                    </label>
-                    <input
-                        name="deckName"
-                        type="text"
-                        value={formData.deckName}
-                        onChange={onChangeHandler}
-                        placeholder="Optional Deckname"
-                        className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    />
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Bracket
+                        </label>
+                        <select
+                            name="bracket"
+                            value={formData.bracket}
+                            onChange={onChangeHandleBracket}
+                            className="min-w-[200px] border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        >
+                            <option value="" disabled>Select bracket</option>
+                            {brackets.map(b => (
+                                <option key={b.name} value={b.name}>{b.displayName}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 <div>

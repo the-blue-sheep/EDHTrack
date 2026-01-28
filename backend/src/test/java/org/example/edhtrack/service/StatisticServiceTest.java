@@ -301,7 +301,7 @@ class StatisticServiceTest {
                 ));
 
         List<LeaderboardEntryDTO> leaderboard =
-                statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false, "3,4,5,6");
+                statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false, "3,4,5,6", "1");
 
         assertEquals(3, leaderboard.size());
 

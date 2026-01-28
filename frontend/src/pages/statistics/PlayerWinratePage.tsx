@@ -4,12 +4,8 @@ import {toast} from "react-toastify";
 import DeckStatsTable from "../../components/DeckStatsTable.tsx";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import MinGamesInput from "../../components/MinGamesInput.tsx";
+import {usePlayers} from "../../hooks/usePlayers.ts";
 
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
 
 interface WinrateByPlayerDTO {
     playerId: number;
@@ -29,7 +25,7 @@ interface DeckStatDTO {
 }
 
 export default function PlayerWinratePage() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [data, setData] = useState<WinrateByPlayerDTO | null>(null);
     const [loading] = useState(false);
@@ -56,16 +52,6 @@ export default function PlayerWinratePage() {
 
         return top;
     }
-
-    useEffect(() => {
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(Array.isArray(response.data) ? response.data : []);
-            })
-            .catch(error => {
-                console.error("Error while loading players:", error);
-            });
-    }, []);
 
     useEffect(() => {
         setTopPlayedFiltered(getTopDecks(topPlayed, hideRetiredDecks));

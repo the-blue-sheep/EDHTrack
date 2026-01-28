@@ -1,5 +1,7 @@
 package org.example.edhtrack.dto.deck;
 
+import org.example.edhtrack.Utils;
+
 import java.util.Set;
 
 public record DeckDTO(
@@ -7,5 +9,6 @@ public record DeckDTO(
         Set<String> commanders,
         String deckName,
         String colors,
+        Utils.Bracket bracket,
         boolean retired
 ) {}

@@ -3,12 +3,7 @@ import {toast} from "react-toastify";
 import axios from "axios";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import DeckOptionsForPlayer from "../../components/DeckOptionsForPlayer.tsx";
-
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
+import {usePlayers} from "../../hooks/usePlayers.ts";
 
 interface WinratePointDTO {
     gamesPlayed: number;
@@ -26,34 +21,11 @@ interface WinrateOverTimeDTO {
 }
 
 export default function WinrateOverTime() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>();
     const [selectedDeckId, setSelectedDeckId] = useState<number | undefined>();
     const [stepSize, setStepSize] = useState<number>(3);
     const [winrate, setWinrate] = useState<WinrateOverTimeDTO | null>(null);
-
-    useEffect(() => {
-        const toasty = toast.loading("Please wait...");
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(response.data ?? []);
-                toast.update(toasty, {
-                    render: "Player updated",
-                    type: "success",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-            })
-            .catch(error => {
-                console.error("Error while loading players:", error);
-                toast.update(toasty, {
-                    render: "Error",
-                    type: "error",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-            });
-    }, []);
 
     useEffect(() => {
         if (!selectedPlayerId || !selectedDeckId) return;

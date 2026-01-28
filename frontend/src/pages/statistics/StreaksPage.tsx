@@ -1,34 +1,19 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
+import {usePlayers} from "../../hooks/usePlayers.ts";
 
 interface StreakDTO {
     playerName: string;
     streaks: number[];
 }
 
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
-
 export default function StreaksPage() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [data, setData] = useState<StreakDTO | null>(null);
     const [loading] = useState(false);
-
-    useEffect(() => {
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(Array.isArray(response.data) ? response.data : []);
-            })
-            .catch(error => {
-                console.error("Error while loading players:", error);
-            });
-    }, []);
 
     function onChangeHandlerPlayer(playerId?: number) {
         const val = playerId;

@@ -206,7 +206,8 @@ public class StatisticService {
             int minGames,
             boolean hideRetiredPlayers,
             boolean hideRetiredDecks,
-            String tableSizes
+            String tableSizes,
+            String groupIds
     ) {
 
         List<Integer> sizes = Arrays.stream(tableSizes.split(","))
@@ -215,6 +216,15 @@ public class StatisticService {
 
         if (sizes.isEmpty()) {
             return List.of();
+        }
+
+        List<Integer> groupIdList = null;
+
+        if (groupIds != null && !groupIds.isBlank()) {
+            groupIdList = Arrays.stream(groupIds.split(","))
+                    .map(String::trim)
+                    .map(Integer::parseInt)
+                    .toList();
         }
 
         List<GameParticipant> participants = gameParticipantRepository.findAll();
@@ -229,14 +239,27 @@ public class StatisticService {
                 })
                 .toList();
 
-        participants = participants.stream()
-                .filter(p -> {
-                    if (hideRetiredPlayers && p.getPlayer().isRetired()) {
-                        return false;
-                    }
-                    return !hideRetiredDecks || p.getDeck() == null || !p.getDeck().isRetired();
-                })
-                .toList();
+//        participants = participants.stream()
+//                .filter(p -> {
+//                    if (hideRetiredPlayers && p.getPlayer().isRetired()) {
+//                        return false;
+//                    }
+//                    return !hideRetiredDecks || p.getDeck() == null || !p.getDeck().isRetired();
+//                })
+//                .toList();
+
+        if (groupIdList != null && !groupIdList.isEmpty()) {
+            List<Integer> finalGroupIdList = groupIdList;
+
+            participants = participants.stream()
+                    .filter(p ->
+                            p.getPlayer()
+                                    .getGroups()
+                                    .stream()
+                                    .anyMatch(g -> finalGroupIdList.contains(g.getGroupId()))
+                    )
+                    .toList();
+        }
 
         Map<String, List<GameParticipant>> grouped;
         switch (type) {

@@ -9,10 +9,7 @@ import org.example.edhtrack.dto.game.GameOverviewDTO;
 import org.example.edhtrack.dto.player.PlayerResultDTO;
 import org.example.edhtrack.Utils;
 import org.example.edhtrack.entity.*;
-import org.example.edhtrack.repository.DeckRepository;
-import org.example.edhtrack.repository.GameParticipantRepository;
-import org.example.edhtrack.repository.GameRepository;
-import org.example.edhtrack.repository.PlayerRepository;
+import org.example.edhtrack.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,12 +28,14 @@ public class GameService {
     private final GameParticipantRepository gameParticipantRepository;
     private final PlayerRepository playerRepository;
     private final DeckRepository deckRepository;
+    private final PlayerGroupRepository playerGroupRepository;
 
-    public GameService(GameRepository gameRepository, GameParticipantRepository gameParticipantRepository, PlayerRepository playerRepository, DeckRepository deckRepository) {
+    public GameService(GameRepository gameRepository, GameParticipantRepository gameParticipantRepository, PlayerRepository playerRepository, DeckRepository deckRepository, PlayerGroupRepository playerGroupRepository) {
         this.gameRepository = gameRepository;
         this.gameParticipantRepository = gameParticipantRepository;
         this.playerRepository = playerRepository;
         this.deckRepository = deckRepository;
+        this.playerGroupRepository = playerGroupRepository;
     }
 
     public CreateGameResponseDTO createGame(CreateGameDTO dto) {
@@ -44,6 +44,15 @@ public class GameService {
         game.setDate(dto.date() == null ? LocalDate.now() : dto.date());
         game.setNotes(dto.notes());
 
+        PlayerGroup group;
+        if (dto.groupId() == null) {
+            group = playerGroupRepository.findByIsDefaultTrue()
+                    .orElseThrow(() -> new IllegalStateException("No default group found"));
+        } else {
+            group = playerGroupRepository.findById(dto.groupId())
+                    .orElseThrow(() -> new IllegalArgumentException("Group not found: " + dto.groupId()));
+        }
+        game.setGroup(group);
         Game savedGame = gameRepository.save(game);
 
         List<GameParticipant> gameParticipants = dto.participants().stream()
@@ -70,7 +79,8 @@ public class GameService {
         return new CreateGameResponseDTO(
                 savedGame.getId(),
                 savedGame.getDate(),
-                playerResults
+                playerResults,
+                savedGame.getGroup().getGroupId()
         );
     }
 
@@ -90,7 +100,8 @@ public class GameService {
                                 p.getDeck().getDeckName(),
                                 p.isWinner()
                         ))
-                        .toList()
+                        .toList(),
+                game.getGroup().getGroupId()
         );
     }
 
@@ -98,8 +109,24 @@ public class GameService {
             int page,
             int size,
             Integer playerId,
-            String commander
+            String commander,
+            String groupIds
     ) {
+
+        if (commander != null && !commander.isBlank()) {
+            commander = "%" + commander.toLowerCase() + "%";
+        } else {
+            commander = null;
+        }
+
+        List<Integer> groups = null;
+
+        if (groupIds != null && !groupIds.isBlank()) {
+            groups = Arrays.stream(groupIds.split(","))
+                    .map(Integer::parseInt)
+                    .toList();
+        }
+
         Pageable pageable = PageRequest.of(
                 page,
                 size,
@@ -107,7 +134,7 @@ public class GameService {
         );
 
         return gameRepository
-                .findByFilters(playerId, commander, pageable)
+                .findByFilters(playerId, commander, groups, pageable )
                 .map(this::mapToOverviewDTO);
     }
 

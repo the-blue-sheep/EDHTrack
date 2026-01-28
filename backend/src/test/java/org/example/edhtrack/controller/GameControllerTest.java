@@ -54,7 +54,8 @@ class GameControllerTest {
                 100,
                 LocalDate.of(2025, 12, 1),
                 "Fun game",
-                List.of(p1, p2)
+                List.of(p1, p2),
+                1
         );
 
         Page<GameOverviewDTO> page = new PageImpl<>(
@@ -63,7 +64,7 @@ class GameControllerTest {
                 1
         );
 
-        when(gameService.getGames(1, 10, 0, "")).thenReturn(page);
+        when(gameService.getGames(1, 10, 0, "", "1")).thenReturn(page);
 
         mockMvc.perform(get("/api/games")
                         .param("page", "1")
@@ -120,7 +121,8 @@ class GameControllerTest {
         CreateGameResponseDTO response = new CreateGameResponseDTO(
                 2,
                 date,
-                playerResultDTOs
+                playerResultDTOs,
+                1
         );
 
 

@@ -3,13 +3,8 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import {useEffect, useState} from "react";
+import {usePlayers} from "../../hooks/usePlayers.ts";
 
-
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
 
 interface DeckDTO {
     deckId: number,
@@ -20,20 +15,11 @@ interface DeckDTO {
 }
 
 export default function DeletePage() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [decks, setDecks] = useState<DeckDTO[]>([]);
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(Array.isArray(response.data) ? response.data : []);
-            })
-            .catch(error => {
-                console.error("Error while loading players:", error);
-            });
-    }, []);
 
     useEffect(() => {
         if (selectedPlayerId == null) return;

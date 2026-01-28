@@ -2,12 +2,7 @@ import PlayerSelect from "../../components/PlayerSelect.tsx";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
-
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
+import {usePlayers} from "../../hooks/usePlayers.ts";
 
 interface TableSizeWinrateDTO {
     tableSize: number;
@@ -22,32 +17,9 @@ interface TableSizeWinrateResponseDTO {
 }
 
 export default function TableSizeWinrate() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [tableSizeWinrate, setTableSizeWinrate] = useState<TableSizeWinrateResponseDTO | undefined>(undefined);
-
-    useEffect(() => {
-        const toasty = toast.loading("Please wait...");
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(Array.isArray(response.data) ? response.data : []);
-                toast.update(toasty, {
-                    render: "Player updated",
-                    type: "success",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-            })
-            .catch(error => {
-                console.error("Error while loading players:", error);
-                toast.update(toasty, {
-                    render: "Error",
-                    type: "error",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-            });
-    }, []);
 
     useEffect(() => {
         if (!selectedPlayerId) return;

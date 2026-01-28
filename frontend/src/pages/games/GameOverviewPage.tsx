@@ -3,6 +3,8 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import { useCommanders } from "../../hooks/useCommanders";
+import { usePlayers } from "../../hooks/usePlayers.ts";
+import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
 
 interface GameParticipant {
     playerName: string;
@@ -26,25 +28,28 @@ interface PageResponse<T> {
     size: number;
 }
 
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
-
 export default function GameOverviewPage() {
-    const [players, setPlayers] = useState<Player[]>([]);
-    const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>();
-    const [playerFilterId, setPlayerFilterId] = useState<number | undefined>();
-    const [games, setGames] = useState<GameOverviewDTO[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-    const [commanderInput, setCommanderInput] = useState("");
-    const [commanderFilter, setCommanderFilter] = useState("");
-    const [hasLoaded, setHasLoaded] = useState(false);
+    const { players } = usePlayers();
     const { commanders: allCommanders, loading: commandersLoading } = useCommanders();
 
+    // --- Input States ---
+    const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>();
+    const [commanderInput, setCommanderInput] = useState("");
+    const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+
+    // --- Filter States (Anwendung der Filter) ---
+    const [playerFilterId, setPlayerFilterId] = useState<number | null>(null);
+    const [commanderFilter, setCommanderFilter] = useState<string | null>(null);
+    const [groupFilterIds, setGroupFilterIds] = useState<number[] | null>(null);
+
+    // --- Table / Pagination ---
+    const [games, setGames] = useState<GameOverviewDTO[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [hasLoaded, setHasLoaded] = useState(false);
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
+    // --- Fetch Games ---
     useEffect(() => {
         setLoading(true);
 
@@ -53,8 +58,9 @@ export default function GameOverviewPage() {
                 page,
                 size: 20,
                 playerId: playerFilterId,
-                commander: commanderFilter || undefined
-            }
+                commander: commanderFilter,
+                groupIds: groupFilterIds ? groupFilterIds.join(",") : null,
+            },
         })
             .then(resp => {
                 setGames(resp.data.content ?? []);
@@ -62,14 +68,25 @@ export default function GameOverviewPage() {
                 setHasLoaded(true);
             })
             .finally(() => setLoading(false));
-    }, [page, playerFilterId, commanderFilter]);
+    }, [page, playerFilterId, commanderFilter, groupFilterIds]);
 
-    useEffect(() => {
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(Array.isArray(response.data) ? response.data : []);
-            });
-    }, []);
+    // --- Apply / Reset Handler ---
+    const handleApply = () => {
+        setPage(0);
+        setPlayerFilterId(selectedPlayerId ?? null);
+        setCommanderFilter(commanderInput.trim() || null);
+        setGroupFilterIds(selectedGroupIds.length > 0 ? [...selectedGroupIds] : null);
+    };
+
+    const handleReset = () => {
+        setPage(0);
+        setSelectedPlayerId(undefined);
+        setCommanderInput("");
+        setSelectedGroupIds([]);
+        setPlayerFilterId(null);
+        setCommanderFilter(null);
+        setGroupFilterIds(null);
+    };
 
     if (loading && !hasLoaded) {
         return <p className="p-6 text-lg font-medium">Loading…</p>;
@@ -77,26 +94,19 @@ export default function GameOverviewPage() {
 
     return (
         <div className="p-4 md:p-6">
-            <h3 className="text-xl font-semibold text-purple-800 mb-4">
-                Game Overview
-            </h3>
+            <h3 className="text-xl font-semibold text-purple-800 mb-4">Game Overview</h3>
 
             {/* FILTERS */}
             <div className="flex flex-col gap-4 md:flex-row md:items-end mb-6">
                 <PlayerSelect
                     players={players}
                     value={selectedPlayerId}
-                    onChange={(id) => {
-                        setPage(0);
-                        setSelectedPlayerId(id);
-                    }}
+                    onChange={setSelectedPlayerId}
                     label="Player"
                 />
 
                 <div className="w-full md:w-auto">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Commander
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Commander</label>
                     <input
                         list="commanders"
                         value={commanderInput}
@@ -113,25 +123,20 @@ export default function GameOverviewPage() {
                     </datalist>
                 </div>
 
+                <GroupMultiSelect
+                    value={selectedGroupIds}
+                    onChange={setSelectedGroupIds}
+                />
+
                 <button
-                    onClick={() => {
-                        setPage(0);
-                        setCommanderFilter(commanderInput.trim());
-                        setPlayerFilterId(selectedPlayerId);
-                    }}
+                    onClick={handleApply}
                     className="w-full md:w-auto px-4 py-2 rounded-md bg-purple-700 text-white font-semibold"
                 >
                     Apply
                 </button>
 
                 <button
-                    onClick={() => {
-                        setPage(0);
-                        setSelectedPlayerId(undefined);
-                        setCommanderInput("");
-                        setPlayerFilterId(undefined);
-                        setCommanderFilter("");
-                    }}
+                    onClick={handleReset}
                     className="w-full md:w-auto px-4 py-2 rounded-md bg-red-600 text-white font-semibold"
                 >
                     Reset
@@ -139,11 +144,9 @@ export default function GameOverviewPage() {
             </div>
 
             {/* EMPTY STATE */}
-            {hasLoaded && games.length === 0 && (
-                <p>No games found</p>
-            )}
+            {hasLoaded && games.length === 0 && <p>No games found</p>}
 
-            {/* DESKTOP TABLE */}
+            {/* TABLE */}
             <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full border-collapse border border-gray-300">
                     <thead className="bg-gray-100">
@@ -168,10 +171,10 @@ export default function GameOverviewPage() {
                                         >
                                             <span>{p.playerName}</span>
                                             <span className="text-gray-600">
-                                                {Array.isArray(p.commanders)
-                                                    ? p.commanders.filter(Boolean).join(" // ")
-                                                    : p.commanders}
-                                            </span>
+                                                    {Array.isArray(p.commanders)
+                                                        ? p.commanders.filter(Boolean).join(" // ")
+                                                        : p.commanders}
+                                                </span>
                                         </li>
                                     ))}
                                 </ul>
@@ -193,9 +196,7 @@ export default function GameOverviewPage() {
             <div className="md:hidden space-y-4">
                 {games.map(game => (
                     <div key={game.gameId} className="border rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-2">
-                            {game.date}
-                        </div>
+                        <div className="text-sm text-gray-600 mb-2">{game.date}</div>
 
                         <ul className="space-y-1 mb-2">
                             {game.participants.map(p => (
@@ -216,9 +217,7 @@ export default function GameOverviewPage() {
                         </ul>
 
                         {game.notes && (
-                            <p className="text-sm text-gray-700 line-clamp-2 mb-2">
-                                {game.notes}
-                            </p>
+                            <p className="text-sm text-gray-700 line-clamp-2 mb-2">{game.notes}</p>
                         )}
 
                         <Link

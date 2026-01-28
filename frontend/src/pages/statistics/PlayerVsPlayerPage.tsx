@@ -1,12 +1,7 @@
-import {type ChangeEvent, useEffect, useState} from "react";
+import {type ChangeEvent, useState} from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
+import {usePlayers} from "../../hooks/usePlayers.ts";
 
 interface PlayerVsPlayerDTO {
     player1Id: number;
@@ -28,22 +23,12 @@ interface PlayerVsPlayerDTO {
 
 
 export default function PlayerVsPlayerPage() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [player1Id, setPlayer1Id] = useState<number | null>(null);
     const [player2Id, setPlayer2Id] = useState<number | null>(null);
     const [tableSizes, setTableSizes] = useState<number[]>([3, 4, 5, 6]);
-
     const [data, setData] = useState<PlayerVsPlayerDTO | null>(null);
     const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        axios.get<Player[]>("/api/players")
-            .then(res => setPlayers(res.data))
-            .catch(err => {
-                console.error(err);
-                toast.error("Failed to load players");
-            });
-    }, []);
 
     function loadStats() {
         if (player1Id === null || player2Id === null) return;

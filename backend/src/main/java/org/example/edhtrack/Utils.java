@@ -1,5 +1,6 @@
 package org.example.edhtrack;
 
+import lombok.Getter;
 import org.example.edhtrack.dto.deck.DeckDTO;
 import org.example.edhtrack.dto.player.PlayerResultDTO;
 import org.example.edhtrack.entity.Commander;
@@ -79,6 +80,7 @@ public final class Utils {
                 commanders,
                 deck.getDeckName(),
                 deck.getColors(),
+                deck.getBracket(),
                 deck.isRetired()
         );
     }
@@ -101,7 +103,26 @@ public final class Utils {
 
     public enum Role {
         USER,
+        SUPERUSER,
         ADMIN
     }
 
+    @Getter
+    public enum Bracket {
+        BRACKET1("Bracket 1"),
+        BRACKET2("Bracket 2"),
+        BRACKET3("Bracket 3"),
+        BRACKET4("Bracket 4"),
+        CEDH("cEdh");
+
+        private final String displayName;
+
+        Bracket(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
 }

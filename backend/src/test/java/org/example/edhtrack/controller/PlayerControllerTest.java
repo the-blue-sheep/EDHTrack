@@ -1,5 +1,6 @@
 package org.example.edhtrack.controller;
 
+import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.deck.DeckDTO;
 import org.example.edhtrack.dto.player.PlayerCreateDTO;
 import org.example.edhtrack.dto.player.PlayerResponseDTO;
@@ -150,9 +151,9 @@ class PlayerControllerTest {
     void findDecks_shouldReturnListOfDecks_whenCalled() throws Exception {
         int playerId = 10;
 
-        DeckDTO atraxa = new DeckDTO(1, Set.of("Atraxa, Praetor's Voice"), "Atraxa Superfriends", "WUBG", false );
+        DeckDTO atraxa = new DeckDTO(1, Set.of("Atraxa, Praetor's Voice"), "Atraxa Superfriends", "WUBG", Utils.Bracket.BRACKET1, false );
 
-        DeckDTO krenko = new DeckDTO(2, Set.of("Krenko, Mob Boss"), "krenko Goblinhorde", "R", false );
+        DeckDTO krenko = new DeckDTO(2, Set.of("Krenko, Mob Boss"), "krenko Goblinhorde", "R", Utils.Bracket.BRACKET1, false );
 
         Set<DeckDTO> decks = Set.of(
                 atraxa,

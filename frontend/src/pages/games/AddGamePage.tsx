@@ -3,11 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import DeckOptionsForPlayer from '../../components/DeckOptionsForPlayer.tsx'
 import { useNavigate } from "react-router-dom";
-
-interface Player {
-    id: number;
-    name: string;
-}
+import {usePlayers} from "../../hooks/usePlayers.ts";
 
 interface ParticipantInput {
     playerId?: number;
@@ -15,8 +11,15 @@ interface ParticipantInput {
     isWinner: boolean;
 }
 
+interface PlayerGroup {
+    id: number;
+    name: string;
+}
+
 export default function AddGamePage() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
+    const [groups, setGroups] = useState<PlayerGroup[]>([]);
+    const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
     const [participants, setParticipants] = useState<ParticipantInput[]>([]);
     const [numberOfPlayers, setNumberOfPlayers] = useState<number>(4);
     const [comment, setComment] = useState("");
@@ -24,10 +27,16 @@ export default function AddGamePage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get<Player[]>("/api/players")
-            .then(res => setPlayers(res.data))
-            .catch(err => console.error("Error loading players:", err));
+        axios.get<PlayerGroup[]>("/api/groups")
+            .then(res => setGroups(res.data))
+            .catch(err => console.error("Error loading groups:", err));
     }, []);
+
+    useEffect(() => {
+        if (groups.length > 0 && selectedGroupId === undefined) {
+            setSelectedGroupId(groups[0].id);
+        }
+    }, [groups]);
 
     // Array Länge passend zur Spieleranzahl
     useEffect(() => {
@@ -86,7 +95,8 @@ export default function AddGamePage() {
                 playerId: p.playerId!,
                 deckId: p.deckId!,
                 isWinner: p.isWinner
-            }))
+            })),
+            groupId: selectedGroupId
         };
 
         axios.post("/api/games", body)
@@ -115,18 +125,38 @@ export default function AddGamePage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Number of Players
-                    </label>
-                    <input
-                        type="number"
-                        min={1}
-                        value={numberOfPlayers}
-                        onChange={handleNumberChange}
-                        className="border px-2 py-1 rounded w-20"
-                    />
+                <div className={"flex flex-wrap"}>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1 mr-10">
+                            Number of Players
+                        </label>
+                        <input
+                            type="number"
+                            min={1}
+                            value={numberOfPlayers}
+                            onChange={handleNumberChange}
+                            className="border px-2 py-1 rounded w-20"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Group played in
+                        </label>
+                        <select
+                            value={selectedGroupId ?? ""}
+                            onChange={(e) => setSelectedGroupId(Number(e.target.value))}
+                            className="border border-gray-300 px-3 py-2 rounded-md"
+                        >
+                            {groups.map(g => (
+                                <option key={g.id} value={g.id}>
+                                    {g.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
+
 
                 {participants.map((p, idx) => (
                     <div key={idx} className="flex items-center gap-4 mb-2">
