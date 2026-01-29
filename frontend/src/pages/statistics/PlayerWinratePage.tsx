@@ -5,6 +5,7 @@ import DeckStatsTable from "../../components/DeckStatsTable.tsx";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import MinGamesInput from "../../components/MinGamesInput.tsx";
 import {usePlayers} from "../../hooks/usePlayers.ts";
+import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
 
 
 interface WinrateByPlayerDTO {
@@ -35,6 +36,7 @@ export default function PlayerWinratePage() {
     const [topPlayedFiltered, setTopPlayedFiltered] = useState<DeckStatDTO[]>([]);
     const [topSuccessfulFiltered, setTopSuccessfulFiltered] = useState<DeckStatDTO[]>([]);
     const [minGames, setMinGames] = useState<number>(1);
+    const [groupIds, setGroupIds] = useState<number[]>([]);
 
     function getTopDecks(decks: DeckStatDTO[], hideRetired: boolean) {
         if (!decks) return [];
@@ -60,68 +62,55 @@ export default function PlayerWinratePage() {
 
     useEffect(() => {
         if (!selectedPlayerId) return;
-        const toasty = toast.loading("Loading details...");
 
-        axios.get<DeckStatDTO[]>(`/api/stats/players/${selectedPlayerId}/top-played-decks`, {params: {limit:100}})
-            .then(res => {
-                setTopPlayed(res.data)
-                toast.update(toasty, {
-                    render: "Details loaded",
-                    type: "success",
-                    isLoading: false,
-                    autoClose: 2000
-                });
-            });
+        const toastId = toast.loading("Loading details...");
 
-        axios.get<DeckStatDTO[]>(`/api/stats/players/${selectedPlayerId}/top-successful-decks`, {params: {limit:100, minGames: minGames }} )
-            .then(res => {
-                setTopSuccessful(res.data)
-                toast.update(toasty, {
-                    render: "Details loaded",
-                    type: "success",
-                    isLoading: false,
-                    autoClose: 2000
-                });
+        const groupParam =
+            groupIds.length > 0 ? groupIds.join(",") : null;
+
+        axios.get<DeckStatDTO[]>(
+            `/api/stats/players/${selectedPlayerId}/top-played-decks`,
+            { params: { limit: 100, groupIds: groupParam } }
+        ).then(res => {
+            setTopPlayed(res.data);
+        });
+
+        axios.get<DeckStatDTO[]>(
+            `/api/stats/players/${selectedPlayerId}/top-successful-decks`,
+            { params: { limit: 100, minGames, groupIds: groupParam } }
+        ).then(res => {
+            setTopSuccessful(res.data);
+        });
+
+        axios.get<WinrateByPlayerDTO>(
+            `/api/stats/player-winrate`,
+            { params: { playerId: selectedPlayerId, groupIds: groupParam } }
+        ).then(response => {
+            setData(response.data);
+
+            toast.update(toastId, {
+                render: "Details loaded",
+                type: "success",
+                isLoading: false,
+                autoClose: 2000
             });
-    }, [selectedPlayerId, minGames]);
+        }).catch(() => {
+            setData(null);
+            toast.update(toastId, {
+                render: "Error loading details",
+                type: "error",
+                isLoading: false,
+                autoClose: 3000
+            });
+        });
+
+    }, [selectedPlayerId, minGames, groupIds]);
+
 
     function onChangeHandlerPlayer(playerId?: number) {
-        const val = playerId;
-
-        if (!val) {
-            setSelectedPlayerId(undefined);
-            setData(null);
-            return;
-        }
-
-        const id = Number(val);
-        setSelectedPlayerId(id);
-
-        const toastId = toast.loading("Loading winrate...");
-
-        axios.get<WinrateByPlayerDTO>(`/api/stats/player-winrate?playerId=${id}`)
-            .then(response => {
-                setData(response.data);
-
-                toast.update(toastId, {
-                    render: "Winrate loaded",
-                    type: "success",
-                    isLoading: false,
-                    autoClose: 2000
-                });
-            })
-            .catch(err => {
-                console.error(err);
-                setData(null);
-
-                toast.update(toastId, {
-                    render: "Error loading winrate",
-                    type: "error",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-            });
+        setSelectedPlayerId(playerId);
     }
+
 
     return (
         <div className="p-6">
@@ -143,6 +132,11 @@ export default function PlayerWinratePage() {
                             />
                             Hide retired Decks
                         </label>
+
+                        <GroupMultiSelect
+                            value={groupIds}
+                            onChange={setGroupIds}
+                        />
 
                         <MinGamesInput
                             value={minGames}

@@ -17,7 +17,6 @@ export default function WinrateByCommander() {
     const [data, setData] = useState<CommanderWinRateDTO | null>(null);
     const [loading, setLoading] = useState(false);
     const [allData, setAllData] = useState<CommanderWinRateDTO[]>([]);
-    // const [allCommanders, setAllCommanders] = useState<string[]>([]);
     const [minGames, setMinGames] = useState<number>(1);
     const { commanders: allCommanders, loading: commandersLoading } = useCommanders();
 

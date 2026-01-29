@@ -4,6 +4,7 @@ import axios from "axios";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import DeckOptionsForPlayer from "../../components/DeckOptionsForPlayer.tsx";
 import {usePlayers} from "../../hooks/usePlayers.ts";
+import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
 
 interface WinratePointDTO {
     gamesPlayed: number;
@@ -26,15 +27,23 @@ export default function WinrateOverTime() {
     const [selectedDeckId, setSelectedDeckId] = useState<number | undefined>();
     const [stepSize, setStepSize] = useState<number>(3);
     const [winrate, setWinrate] = useState<WinrateOverTimeDTO | null>(null);
+    const [groupIds, setGroupIds] = useState<number[]>([]);
 
     useEffect(() => {
-        if (!selectedPlayerId || !selectedDeckId) return;
+        if (!selectedPlayerId || !selectedDeckId || stepSize < 1) return;
 
         const toasty = toast.loading("Loading statistics...");
 
         axios.get<WinrateOverTimeDTO>(
             `/api/stats/players/${selectedPlayerId}/decks/${selectedDeckId}/winrate-over-time`,
-            { params: { stepSize } }
+            {
+                params: {
+                    stepSize,
+                    groupIds: groupIds.length > 0
+                        ? groupIds.join(",")
+                        : null
+                }
+            }
         )
             .then(res => {
                 setWinrate(res.data);
@@ -52,17 +61,8 @@ export default function WinrateOverTime() {
                     isLoading: false
                 });
             });
-    }, [selectedPlayerId, selectedDeckId, stepSize]);
 
-    useEffect(() => {
-        if (!selectedPlayerId || !selectedDeckId || stepSize < 1) return;
-
-        axios.get<WinrateOverTimeDTO>(
-            `/api/stats/players/${selectedPlayerId}/decks/${selectedDeckId}/winrate-over-time`,
-            { params: { stepSize } }
-        ).then(res => setWinrate(res.data));
-    }, [selectedPlayerId, selectedDeckId, stepSize]);
-
+    }, [selectedPlayerId, selectedDeckId, stepSize, groupIds]);
 
     function onChangeHandlerPlayer(playerId?: number) {
         setSelectedPlayerId(playerId);
@@ -102,20 +102,27 @@ export default function WinrateOverTime() {
                         )}
                     </select>
                 </div>
-            </div>
-
-            <div className="w-48">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Games per step
-                </label>
-                <input
-                    type="number"
-                    min={1}
-                    max={50}
-                    value={stepSize}
-                    onChange={e => setStepSize(Number(e.target.value))}
-                    className="w-full border px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500"
-                />
+                <div className="flex flex-col">
+                    <div className="mb-6">
+                        <GroupMultiSelect
+                            value={groupIds}
+                            onChange={setGroupIds}
+                        />
+                    </div>
+                </div>
+                <div className="w-48">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Games per step
+                    </label>
+                    <input
+                        type="number"
+                        min={1}
+                        max={50}
+                        value={stepSize}
+                        onChange={e => setStepSize(Number(e.target.value))}
+                        className="w-full border px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500"
+                    />
+                </div>
             </div>
 
             {winrate && winrate.points ?

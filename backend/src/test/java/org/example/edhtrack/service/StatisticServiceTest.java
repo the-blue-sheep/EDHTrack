@@ -81,7 +81,7 @@ class StatisticServiceTest {
         when(gameParticipantRepository.findByPlayer(player))
                 .thenReturn(List.of(participant));
 
-        WinrateByPlayerDTO result = statisticService.getWinRateByPlayer(player);
+        WinrateByPlayerDTO result = statisticService.getWinRateByPlayer(player, "");
 
         assertEquals(1.0, result.winRate());
     }
@@ -204,7 +204,7 @@ class StatisticServiceTest {
 
         when(gameParticipantRepository.findByPlayer(player)).thenReturn(participants);
 
-        StreakDTO result = statisticService.getStreaksByPlayer(player);
+        StreakDTO result = statisticService.getStreaksByPlayer(player, "");
 
         assertEquals(player.getName(), result.playerName());
         assertEquals(List.of(2, -2, 1), result.streaks());
@@ -458,9 +458,9 @@ class StatisticServiceTest {
         StatisticService spyService = org.mockito.Mockito.spy(statisticService);
 
         org.mockito.Mockito.doReturn(List.of(deck1, deck2, deck3))
-                .when(spyService).getDeckStatsForPlayer(player);
+                .when(spyService).getDeckStatsForPlayer(player, new ArrayList<>());
 
-        List<DeckStatDTO> result = spyService.getTopPlayedDecks(player, 3, 2);
+        List<DeckStatDTO> result = spyService.getTopPlayedDecks(player, 3, 2, "");
 
         assertEquals(2, result.size());
 
@@ -482,9 +482,9 @@ class StatisticServiceTest {
         StatisticService spyService = org.mockito.Mockito.spy(statisticService);
 
         org.mockito.Mockito.doReturn(List.of(deck1, deck2, deck3, deck4))
-                .when(spyService).getDeckStatsForPlayer(player);
+                .when(spyService).getDeckStatsForPlayer(player, new ArrayList<>());
 
-        List<DeckStatDTO> result = spyService.getTopSuccessfulDecks(player, 3, 2);
+        List<DeckStatDTO> result = spyService.getTopSuccessfulDecks(player, 3, 2, "");
 
         assertEquals(2, result.size());
 
@@ -518,7 +518,7 @@ class StatisticServiceTest {
         when(gameParticipantRepository.findByPlayer(player))
                 .thenReturn(List.of(gp1, gp2, gp3));
 
-        List<DeckStatDTO> result = statisticService.getDeckStatsForPlayer(player);
+        List<DeckStatDTO> result = statisticService.getDeckStatsForPlayer(player, new ArrayList<>());
 
         assertEquals(2, result.size());
 
@@ -577,7 +577,7 @@ class StatisticServiceTest {
         //WHEN & THEN
         when(gameParticipantRepository.findByPlayer(player)).thenReturn(allParticipants);
 
-        TableSizeWinrateResponseDTO result = statisticService.getTableSizeWinRateByPlayer(player);
+        TableSizeWinrateResponseDTO result = statisticService.getTableSizeWinRateByPlayer(player, "");
 
         assertEquals(player.getId(), result.playerId());
         assertEquals(player.getName(), result.playerName());
@@ -632,7 +632,7 @@ class StatisticServiceTest {
 
         // WHEN
         WinrateOverTimeDTO result =
-                statisticService.getWinrateOverTime(player, deck, stepSize);
+                statisticService.getWinrateOverTime(player, deck, stepSize, "");
 
         // THEN
         assertThat(result.playerId()).isEqualTo(1);

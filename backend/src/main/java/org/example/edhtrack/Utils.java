@@ -125,4 +125,15 @@ public final class Utils {
             return displayName;
         }
     }
+
+    public static List<Integer> parseGroups(String groupIds) {
+        if (groupIds == null || groupIds.isBlank()) {
+            return null;
+        }
+
+        return Arrays.stream(groupIds.split(","))
+                .map(Integer::parseInt)
+                .toList();
+    }
+
 }

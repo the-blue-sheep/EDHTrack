@@ -27,8 +27,11 @@ public class StatisticController {
     }
 
     @GetMapping("/streaks")
-    public StreakDTO getStreak(@RequestParam int playerId){
-        return statisticService.getStreaksByPlayer(playerService.getPlayerById(playerId));
+    public StreakDTO getStreak(
+            @RequestParam int playerId,
+            @RequestParam(required = false) String groupIds
+    ){
+        return statisticService.getStreaksByPlayer(playerService.getPlayerById(playerId), groupIds);
     }
 
     @GetMapping("/commander-winrate")
@@ -55,8 +58,11 @@ public class StatisticController {
     }
 
     @GetMapping("/player-winrate")
-    public WinrateByPlayerDTO getWinRateByPlayer(@RequestParam int playerId) {
-        return statisticService.getWinRateByPlayer(playerService.getPlayerById(playerId));
+    public WinrateByPlayerDTO getWinRateByPlayer(
+            @RequestParam int playerId,
+            @RequestParam(required = false) String groupIds
+    ) {
+        return statisticService.getWinRateByPlayer(playerService.getPlayerById(playerId), groupIds);
     }
 
     @GetMapping("/commander-winrates")
@@ -106,37 +112,44 @@ public class StatisticController {
     public List<DeckStatDTO> getTopPlayedDecks(
             @PathVariable int id,
             @RequestParam(defaultValue = "0") int minGames,
-            @RequestParam(defaultValue = "6") int limit
+            @RequestParam(defaultValue = "6") int limit,
+            @RequestParam(required = false) String groupIds
+
     ) {
         Player player = playerService.getPlayerById(id);
-        return statisticService.getTopPlayedDecks(player, minGames, limit);
+        return statisticService.getTopPlayedDecks(player, minGames, limit, groupIds);
     }
 
     @GetMapping("/players/{id}/top-successful-decks")
     public List<DeckStatDTO> getTopSuccessfulDecks(
             @PathVariable int id,
             @RequestParam(defaultValue = "0") int minGames,
-            @RequestParam(defaultValue = "6") int limit
+            @RequestParam(defaultValue = "6") int limit,
+            @RequestParam(required = false) String groupIds
     ) {
         Player player = playerService.getPlayerById(id);
-        return statisticService.getTopSuccessfulDecks(player, minGames, limit);
+        return statisticService.getTopSuccessfulDecks(player, minGames, limit, groupIds);
     }
 
     @GetMapping("/players/{id}/table-size-winrate")
-    public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(@PathVariable int id) {
+    public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(
+            @PathVariable int id,
+            @RequestParam(required = false) String groupIds
+    ) {
         Player player = playerService.getPlayerById(id);
-        return statisticService.getTableSizeWinRateByPlayer(player);
+        return statisticService.getTableSizeWinRateByPlayer(player, groupIds);
     }
 
     @GetMapping("/players/{playerId}/decks/{deckId}/winrate-over-time")
     public WinrateOverTimeDTO getWinrateOverTime(
             @PathVariable int playerId,
             @PathVariable int deckId,
-            @RequestParam(defaultValue = "3") int stepSize
+            @RequestParam(defaultValue = "3") int stepSize,
+            @RequestParam(required = false) String groupIds
     ) {
         Player player = playerService.getPlayerById(playerId);
         Deck deck = deckService.getDeckById(deckId);
 
-        return statisticService.getWinrateOverTime(player, deck, stepSize);
+        return statisticService.getWinrateOverTime(player, deck, stepSize, groupIds);
     }
 }

@@ -33,6 +33,12 @@ export default function GroupMultiSelect({ value, onChange }: Props) {
         <div>
             <label className="text-purple-900 font-bold block mb-1">
                 Player Groups
+                <button
+                    onClick={() => onChange([])}
+                    className="px-3 py-1 rounded bg-gray-300 text-sm font-semibold"
+                >
+                    All Groups
+                </button>
             </label>
 
             <select

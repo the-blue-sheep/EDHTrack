@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.example.edhtrack.Utils.parseGroups;
+
 
 @Service
 public class StatisticService {
@@ -29,14 +31,33 @@ public class StatisticService {
         this.playerRepository = playerRepository;
     }
 
-    public WinrateByPlayerDTO getWinRateByPlayer(Player player) {
-        List<GameParticipant> participants = gameParticipantRepository.findByPlayer(player);
-        int gamesIn = participants.size();
+    public WinrateByPlayerDTO getWinRateByPlayer(Player player, String groupIds) {
 
+
+        List<Integer> groups = parseGroups(groupIds);
+
+        List<GameParticipant> participants;
+
+        if (groups == null || groups.isEmpty()) {
+            participants = gameParticipantRepository.findByPlayer(player);
+        } else {
+            participants =
+                    gameParticipantRepository
+                            .findByPlayerAndGame_Group_GroupIdIn(player, groups);
+        }
+
+        int gamesIn = participants.size();
         int gamesWon = Utils.countWins(participants);
 
         double winRate = gamesIn == 0 ? 0 : (double) gamesWon / gamesIn;
-        return new WinrateByPlayerDTO(player.getId(), player.getName(), gamesIn, gamesWon, winRate);
+
+        return new WinrateByPlayerDTO(
+                player.getId(),
+                player.getName(),
+                gamesIn,
+                gamesWon,
+                winRate
+        );
     }
 
     public CommanderWinRateDTO getWinRateByCommander(String commanderName, int minGames) {
@@ -153,25 +174,32 @@ public class StatisticService {
         );
     }
 
-    public StreakDTO getStreaksByPlayer(Player player){
-        List<GameParticipant> participants = gameParticipantRepository.findByPlayer(player);
-        List<Boolean> results = participants.stream()
-                .map(GameParticipant::isWinner)
-                .toList();
+    public StreakDTO getStreaksByPlayer(Player player, String groupIds) {
+
+        List<Integer> groups = parseGroups(groupIds);
+
+        List<GameParticipant> participants =
+                gameParticipantRepository.findByPlayerAndGroups(player, groups);
+
+        if (participants.isEmpty()) {
+            return new StreakDTO(player.getName(), List.of());
+        }
 
         List<Integer> streaks = new ArrayList<>();
-        boolean current = results.getFirst();
+        boolean current = participants.getFirst().isWinner();
         int count = 1;
 
-        for (int i = 1; i < results.size(); i++) {
-            if (results.get(i) == current) {
+        for (int i = 1; i < participants.size(); i++) {
+            boolean win = participants.get(i).isWinner();
+            if (win == current) {
                 count++;
             } else {
                 streaks.add(current ? count : -count);
-                current = results.get(i);
+                current = win;
                 count = 1;
             }
         }
+
         streaks.add(current ? count : -count);
 
         return new StreakDTO(player.getName(), streaks);
@@ -238,15 +266,6 @@ public class StatisticService {
                     return !hideRetiredDecks || p.getDeck() == null || !p.getDeck().isRetired();
                 })
                 .toList();
-
-//        participants = participants.stream()
-//                .filter(p -> {
-//                    if (hideRetiredPlayers && p.getPlayer().isRetired()) {
-//                        return false;
-//                    }
-//                    return !hideRetiredDecks || p.getDeck() == null || !p.getDeck().isRetired();
-//                })
-//                .toList();
 
         if (groupIdList != null && !groupIdList.isEmpty()) {
             List<Integer> finalGroupIdList = groupIdList;
@@ -345,37 +364,54 @@ public class StatisticService {
         );
     }
 
-    public List<DeckStatDTO> getTopPlayedDecks(Player player, int minGames, int limit) {
-        return getDeckStatsForPlayer(player).stream()
+    public List<DeckStatDTO> getTopPlayedDecks(Player player, int minGames, int limit, String groupIds) {
+        List<Integer> groups = parseGroups(groupIds);
+
+        return getDeckStatsForPlayer(player, groups).stream()
                 .filter(dto -> dto.totalGames() >= minGames)
                 .sorted(Comparator.comparing(DeckStatDTO::totalGames).reversed())
                 .limit(limit)
                 .toList();
     }
 
-    public List<DeckStatDTO> getTopSuccessfulDecks(Player player, int minGames, int limit) {
-        return getDeckStatsForPlayer(player).stream()
+    public List<DeckStatDTO> getTopSuccessfulDecks(Player player, int minGames, int limit, String groupIds) {
+        List<Integer> groups = parseGroups(groupIds);
+
+        return getDeckStatsForPlayer(player, groups).stream()
                 .filter(dto -> dto.totalGames() >= minGames)
                 .sorted(Comparator.comparing(DeckStatDTO::winRate).reversed())
                 .limit(limit)
                 .toList();
     }
 
-    public List<DeckStatDTO> getDeckStatsForPlayer(Player player) {
+    public List<DeckStatDTO> getDeckStatsForPlayer(Player player, List<Integer> groups) {
+
+        List<GameParticipant> participants;
+
+        if (groups == null || groups.isEmpty()) {
+            participants =
+                    gameParticipantRepository.findByPlayer(player);
+        } else {
+            participants =
+                    gameParticipantRepository
+                            .findByPlayerAndGame_Group_GroupIdIn(player, groups);
+        }
+
         Map<Deck, List<GameParticipant>> byDeck =
-                gameParticipantRepository.findByPlayer(player)
-                        .stream()
+                participants.stream()
                         .collect(Collectors.groupingBy(GameParticipant::getDeck));
 
         return byDeck.entrySet().stream()
                 .map(entry -> {
+
                     Deck deck = entry.getKey();
                     List<GameParticipant> games = entry.getValue();
 
                     int totalGames = games.size();
                     int wins = Utils.countWins(games);
-                    double winRate = totalGames == 0 ? 0 : (double) wins / totalGames;
-                    boolean isRetired = entry.getKey().isRetired();
+                    double winRate = totalGames == 0
+                            ? 0
+                            : (double) wins / totalGames;
 
                     return new DeckStatDTO(
                             deck.getDeckId(),
@@ -383,47 +419,53 @@ public class StatisticService {
                             totalGames,
                             wins,
                             winRate,
-                            isRetired
+                            deck.isRetired()
                     );
                 })
                 .toList();
     }
+    public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(Player player, String groupIds) {
 
-    public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(Player player) {
+        List<Integer> groups = parseGroups(groupIds);
 
-        List<GameParticipant> participants =
-                gameParticipantRepository.findByPlayer(player);
+        List<GameParticipant> participants = gameParticipantRepository.findByPlayer(player);
 
-        Map<Integer, List<GameParticipant>> byTableSize =
-                participants.stream()
-                        .collect(Collectors.groupingBy(
-                                gp -> gp.getGame().getPlayers().size()
-                        ));
+        if (groups != null && !groups.isEmpty()) {
+            System.out.println("groups: " + groups);
+            participants = participants.stream()
+                    .filter(p -> p.getGame().getGroup() != null &&
+                            groups.contains(p.getGame().getGroup().getGroupId()))
+                    .toList();
+        }
 
-        List<TableSizeWinrateDTO> stats =
-                byTableSize.entrySet().stream()
-                        .sorted(Map.Entry.comparingByKey())
-                        .map(entry -> {
-                            int tableSize = entry.getKey();
-                            List<GameParticipant> games = entry.getValue();
+        Map<Integer, List<GameParticipant>> byTableSize = participants.stream()
+                .collect(Collectors.groupingBy(
+                        gp -> gp.getGame().getPlayers().size()
+                ));
 
-                            int totalGames = games.size();
-                            long wins = games.stream()
-                                    .filter(GameParticipant::isWinner)
-                                    .count();
+        List<TableSizeWinrateDTO> stats = byTableSize.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> {
+                    int tableSize = entry.getKey();
+                    List<GameParticipant> games = entry.getValue();
 
-                            double winRate = totalGames == 0
-                                    ? 0.0
-                                    : (double) wins / totalGames;
+                    int totalGames = games.size();
+                    long wins = games.stream()
+                            .filter(GameParticipant::isWinner)
+                            .count();
 
-                            return new TableSizeWinrateDTO(
-                                    tableSize,
-                                    totalGames,
-                                    (int) wins,
-                                    winRate
-                            );
-                        })
-                        .toList();
+                    double winRate = totalGames == 0
+                            ? 0.0
+                            : (double) wins / totalGames;
+
+                    return new TableSizeWinrateDTO(
+                            tableSize,
+                            totalGames,
+                            (int) wins,
+                            winRate
+                    );
+                })
+                .toList();
 
         return new TableSizeWinrateResponseDTO(
                 player.getId(),
@@ -435,16 +477,46 @@ public class StatisticService {
     public WinrateOverTimeDTO getWinrateOverTime(
             Player player,
             Deck deck,
-            int stepSize
+            int stepSize,
+            String groupIds
     ) {
         if (stepSize <= 0) {
             stepSize = 1;
         }
 
-        List<GameParticipant> participants =
-                new ArrayList<>(gameParticipantRepository.findByPlayerAndDeck(player, deck));
+        List<Integer> groups = parseGroups(groupIds);
 
-        participants.sort(Comparator.comparing(gp -> gp.getGame().getId()));
+        List<GameParticipant> participants =
+                new ArrayList<>(
+                        gameParticipantRepository
+                                .findByPlayerAndDeck(player, deck)
+                );
+
+        if (groups != null) {
+            participants = participants.stream()
+                    .filter(p ->
+                            p.getGame().getGroup() != null &&
+                                    groups.contains(p.getGame().getGroup().getGroupId())
+                    )
+                    .collect(Collectors.toList());
+        }
+
+        if (participants.isEmpty()) {
+            return new WinrateOverTimeDTO(
+                    player.getId(),
+                    deck.getDeckId(),
+                    stepSize,
+                    List.of(),
+                    groupIds
+            );
+        }
+
+        participants.sort(
+                Comparator.comparing(
+                        gp -> gp.getGame().getId(),
+                        Comparator.nullsLast(Integer::compareTo)
+                )
+        );
 
         List<WinratePointDTO> points = new ArrayList<>();
 
@@ -452,6 +524,7 @@ public class StatisticService {
         int totalWins = 0;
 
         for (int i = 0; i < participants.size(); i++) {
+
             GameParticipant gp = participants.get(i);
             totalGames++;
 
@@ -463,15 +536,19 @@ public class StatisticService {
             boolean isLastGame = i == participants.size() - 1;
 
             if (isStepBoundary || isLastGame) {
-                double winrate = totalGames == 0
-                        ? 0.0
-                        : (double) totalWins / totalGames;
 
-                points.add(new WinratePointDTO(
-                        totalGames,
-                        totalWins,
-                        winrate
-                ));
+                double winrate =
+                        totalGames == 0
+                                ? 0.0
+                                : (double) totalWins / totalGames;
+
+                points.add(
+                        new WinratePointDTO(
+                                totalGames,
+                                totalWins,
+                                winrate
+                        )
+                );
             }
         }
 
@@ -479,7 +556,8 @@ public class StatisticService {
                 player.getId(),
                 deck.getDeckId(),
                 stepSize,
-                points
+                points,
+                groupIds
         );
     }
 
