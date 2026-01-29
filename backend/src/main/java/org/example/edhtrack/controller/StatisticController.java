@@ -37,9 +37,10 @@ public class StatisticController {
     @GetMapping("/commander-winrate")
     public CommanderWinRateDTO getCommanderWinRate(
             @RequestParam String commanderName,
-            @RequestParam int minGames
+            @RequestParam int minGames,
+            @RequestParam(required = false) String groupIds
     ){
-        return statisticService.getWinRateByCommander(commanderName, minGames);
+        return statisticService.getWinRateByCommander(commanderName, minGames, groupIds);
     }
 
     @GetMapping("/color-winrate")
@@ -66,8 +67,11 @@ public class StatisticController {
     }
 
     @GetMapping("/commander-winrates")
-    public List<CommanderWinRateDTO> getAllCommanderWinrates( @RequestParam int minGames ) {
-        return statisticService.getWinRatesForAllCommanders(minGames);
+    public List<CommanderWinRateDTO> getAllCommanderWinrates(
+            @RequestParam int minGames,
+            @RequestParam(required = false, defaultValue = "1") String groupIds
+    ) {
+        return statisticService.getWinRatesForAllCommanders(minGames, groupIds);
     }
 
     @GetMapping("/player-vs-player-stat")

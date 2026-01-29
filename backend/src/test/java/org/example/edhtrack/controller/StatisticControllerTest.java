@@ -65,7 +65,7 @@ class StatisticControllerTest {
 
     @Test
     void getAllCommanderWinrates_returnsWinrateList() throws Exception {
-        when(statisticService.getWinRatesForAllCommanders(1))
+        when(statisticService.getWinRatesForAllCommanders(1, ""))
                 .thenReturn(List.of(
                         new CommanderWinRateDTO("Atraxa", 10, 6, 0.6)
                 ));

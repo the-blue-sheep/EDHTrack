@@ -44,4 +44,6 @@ public interface GameParticipantRepository extends JpaRepository<GameParticipant
             @Param("player") Player player,
             @Param("groupIds") List<Integer> groupIds
     );
+
+    List<GameParticipant> findByDeck_Commanders_Name(String commanderName);
 }

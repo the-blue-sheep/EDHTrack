@@ -350,7 +350,7 @@ class StatisticServiceTest {
                 .thenReturn(List.of(gp1, gp2, gp3));
 
         List<CommanderWinRateDTO> result =
-                statisticService.getWinRatesForAllCommanders(1);
+                statisticService.getWinRatesForAllCommanders(1, "");
 
         assertEquals(2, result.size());
 
