@@ -119,7 +119,7 @@ export default function PlayerGroupsSettings() {
                         placeholder="New group name"
                         value={newGroupName}
                         onChange={e => setNewGroupName(e.target.value)}
-                        className="border px-3 py-2 rounded-md flex-grow"
+                        className="border w-1/5 px-3 py-2 rounded-md"
                     />
                     <button
                         onClick={handleAddGroup}
