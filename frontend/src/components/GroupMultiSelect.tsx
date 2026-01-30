@@ -45,7 +45,7 @@ export default function GroupMultiSelect({ value, onChange }: Props) {
                 multiple
                 value={value.map(String)}
                 onChange={handleChange}
-                className="border rounded px-2 py-2 min-w-[200px] h-[120px]"
+                className="border rounded px-2 py-2 min-w-[150px] h-[80px]"
             >
                 {groups.map(g => (
                     <option key={g.id} value={g.id}>

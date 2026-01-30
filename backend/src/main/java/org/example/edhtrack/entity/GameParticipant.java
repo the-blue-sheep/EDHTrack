@@ -24,5 +24,8 @@ public class GameParticipant {
     @ManyToOne
     private Deck deck;
 
+    @Column(length = 1000)
+    private String notes;
+
     private boolean isWinner;
 }

@@ -1,14 +1,16 @@
 import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import DeckOptionsForPlayer from '../../components/DeckOptionsForPlayer.tsx'
+import DeckOptionsForPlayer from "../../components/DeckOptionsForPlayer.tsx";
+import PlayerSelect from "../../components/PlayerSelect.tsx";
 import { useNavigate } from "react-router-dom";
-import {usePlayers} from "../../hooks/usePlayers.ts";
+import { usePlayers } from "../../hooks/usePlayers.ts";
 
 interface ParticipantInput {
     playerId?: number;
     deckId?: number;
     isWinner: boolean;
+    notes?: string;
 }
 
 interface PlayerGroup {
@@ -17,13 +19,20 @@ interface PlayerGroup {
 }
 
 export default function AddGamePage() {
+
     const { players } = usePlayers();
+
     const [groups, setGroups] = useState<PlayerGroup[]>([]);
     const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
+
     const [participants, setParticipants] = useState<ParticipantInput[]>([]);
     const [numberOfPlayers, setNumberOfPlayers] = useState<number>(4);
+
     const [comment, setComment] = useState("");
-    const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
+    const [date, setDate] = useState<string>(
+        new Date().toISOString().split("T")[0]
+    );
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -33,24 +42,38 @@ export default function AddGamePage() {
     }, []);
 
     useEffect(() => {
-        if (groups.length > 0 && selectedGroupId === undefined) {
+        if (groups.length > 0 && selectedGroupId === null) {
             setSelectedGroupId(groups[0].id);
         }
     }, [groups]);
 
-    // Array Länge passend zur Spieleranzahl
     useEffect(() => {
         setParticipants(prev => {
             const copy = [...prev];
+
             while (copy.length < numberOfPlayers) {
-                copy.push({ playerId: undefined, deckId: undefined, isWinner: false });
+                copy.push({
+                    playerId: undefined,
+                    deckId: undefined,
+                    isWinner: false,
+                    notes: ""
+                });
             }
-            while (copy.length > numberOfPlayers) {
-                copy.pop();
-            }
-            return copy;
+
+            return copy.slice(0, numberOfPlayers);
         });
     }, [numberOfPlayers]);
+
+    function updateParticipant(
+        index: number,
+        patch: Partial<ParticipantInput>
+    ) {
+        setParticipants(prev => {
+            const copy = [...prev];
+            copy[index] = { ...copy[index], ...patch };
+            return copy;
+        });
+    }
 
     function handleNumberChange(e: ChangeEvent<HTMLInputElement>) {
         const val = Number(e.target.value);
@@ -58,19 +81,14 @@ export default function AddGamePage() {
     }
 
     function handlePlayerChange(index: number, playerId: number) {
-        setParticipants(prev => {
-            const copy = [...prev];
-            copy[index] = { ...copy[index], playerId, deckId: undefined };
-            return copy;
+        updateParticipant(index, {
+            playerId,
+            deckId: undefined
         });
     }
 
     function handleDeckChange(index: number, deckId: number) {
-        setParticipants(prev => {
-            const copy = [...prev];
-            copy[index] = { ...copy[index], deckId };
-            return copy;
-        });
+        updateParticipant(index, { deckId });
     }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -82,8 +100,7 @@ export default function AddGamePage() {
             toast.update(toasty, {
                 render: "Please select player and deck for all participants",
                 type: "error",
-                isLoading: false,
-                autoClose: 3000
+                isLoading: false
             });
             return;
         }
@@ -91,12 +108,13 @@ export default function AddGamePage() {
         const body = {
             date,
             notes: comment,
+            groupId: selectedGroupId,
             participants: participants.map(p => ({
                 playerId: p.playerId!,
                 deckId: p.deckId!,
-                isWinner: p.isWinner
-            })),
-            groupId: selectedGroupId
+                isWinner: p.isWinner,
+                notes: p.notes
+            }))
         };
 
         axios.post("/api/games", body)
@@ -108,15 +126,15 @@ export default function AddGamePage() {
                     autoClose: 1500
                 });
 
-                setTimeout(() => {
-                    navigate("/games");
-                }, 1500);
+                setTimeout(() => navigate("/games"), 1500);
             })
-            .catch(() => toast.update(toasty, {
-                render: "Error saving game",
-                type: "error",
-                isLoading: false
-            }));
+            .catch(() => {
+                toast.update(toasty, {
+                    render: "Error saving game",
+                    type: "error",
+                    isLoading: false
+                });
+            });
     }
 
     return (
@@ -125,9 +143,10 @@ export default function AddGamePage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
 
-                <div className={"flex flex-wrap"}>
+                <div className="flex flex-wrap gap-6">
+
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 mr-10">
+                        <label className="block text-sm font-medium mb-1">
                             Number of Players
                         </label>
                         <input
@@ -140,13 +159,15 @@ export default function AddGamePage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium mb-1">
                             Group played in
                         </label>
                         <select
                             value={selectedGroupId ?? ""}
-                            onChange={(e) => setSelectedGroupId(Number(e.target.value))}
-                            className="border border-gray-300 px-3 py-2 rounded-md"
+                            onChange={e =>
+                                setSelectedGroupId(Number(e.target.value))
+                            }
+                            className="border px-3 py-2 rounded-md"
                         >
                             {groups.map(g => (
                                 <option key={g.id} value={g.id}>
@@ -155,69 +176,85 @@ export default function AddGamePage() {
                             ))}
                         </select>
                     </div>
+
                 </div>
 
-
                 {participants.map((p, idx) => (
-                    <div key={idx} className="flex items-center gap-4 mb-2">
+                    <div key={idx} className="flex gap-4 items-start">
 
-                        <div className="flex items-center w-1/6">
+                        <div className="flex items-center mt-6">
                             <input
                                 type="checkbox"
                                 checked={p.isWinner}
-                                onChange={e => {
-                                    const checked = e.target.checked;
-                                    setParticipants(prev => {
-                                        const copy = [...prev];
-                                        copy[idx] = { ...copy[idx], isWinner: checked };
-                                        return copy;
-                                    });
-                                }}
-                                className="h-4 w-4 text-green-600 border-gray-300 rounded mr-2"
+                                onChange={e =>
+                                    updateParticipant(idx, {
+                                        isWinner: e.target.checked
+                                    })
+                                }
+                                className="mr-2"
                             />
-                            <span className="text-sm font-medium text-gray-700">Winner</span>
+                            Winner
                         </div>
 
                         <div className="w-2/5">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Player {idx + 1}
-                            </label>
-                            <select
-                                value={p.playerId ?? ""}
-                                onChange={e => handlePlayerChange(idx, Number(e.target.value))}
-                                className="border px-2 py-1 rounded w-full"
-                            >
-                                <option value="">-- Select Player --</option>
-                                {players.map(player => (
-                                    <option key={player.id} value={player.id}>
-                                        {player.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <PlayerSelect
+                                players={players}
+                                value={p.playerId}
+                                onChange={id =>
+                                    handlePlayerChange(idx, id!)
+                                }
+                            />
                         </div>
 
                         <div className="w-2/5">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Deck {idx + 1}
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Played Deck
                             </label>
+
                             <select
                                 value={p.deckId ?? ""}
-                                onChange={e => handleDeckChange(idx, Number(e.target.value))}
+                                onChange={e =>
+                                    handleDeckChange(
+                                        idx,
+                                        Number(e.target.value)
+                                    )
+                                }
                                 disabled={!p.playerId}
                                 className="border px-2 py-1 rounded w-full"
                             >
                                 <option value="">-- Select Deck --</option>
-                                {p.playerId ?
-                                    <DeckOptionsForPlayer playerId={p.playerId} />
-                                : null}
+                                {p.playerId &&
+                                    <DeckOptionsForPlayer
+                                        playerId={p.playerId}
+                                    />
+                                }
                             </select>
+                        </div>
+
+                        <div className="w-full">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Notes
+                            </label>
+
+                            <textarea
+                                value={p.notes ?? ""}
+                                onChange={e =>
+                                    updateParticipant(idx, {
+                                        notes: e.target.value
+                                    })
+                                }
+                                className="border px-2 py-1 rounded w-full"
+                                rows={2}
+                                placeholder="Optional notes..."
+                            />
                         </div>
 
                     </div>
                 ))}
 
+                {/* Date */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <label className="block text-sm mb-1">Date</label>
                     <input
                         type="date"
                         value={date}
@@ -227,7 +264,9 @@ export default function AddGamePage() {
                 </div>
 
                 <div>
-                    <label className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500">Comment</label>
+                    <label className="block text-sm mb-1">
+                        Game Comment
+                    </label>
                     <textarea
                         value={comment}
                         onChange={e => setComment(e.target.value)}
@@ -238,7 +277,7 @@ export default function AddGamePage() {
 
                 <button
                     type="submit"
-                    className="px-6 py-2 bg-purple-700 text-white font-semibold rounded-md hover:bg-purple-800"
+                    className="px-6 py-2 bg-purple-700 text-white rounded hover:bg-purple-800"
                 >
                     Add Game
                 </button>

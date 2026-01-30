@@ -56,8 +56,8 @@ class GameServiceTest {
                 date,
                 "Holiday Game",
                 List.of(
-                        new GameParticipantDTO(1, 10, true),
-                        new GameParticipantDTO(2, 20, false)
+                        new GameParticipantDTO(1, 10, "", true),
+                        new GameParticipantDTO(2, 20, "", false)
                 ),
                 1
         );
@@ -162,7 +162,7 @@ class GameServiceTest {
         CreateGameDTO dto = new CreateGameDTO(
                 null,
                 "Notes",
-                List.of(new GameParticipantDTO(1, 10, true)),
+                List.of(new GameParticipantDTO(1, 10, "", true)),
                 1
         );
 
@@ -257,7 +257,7 @@ class GameServiceTest {
         when(playerRepository.findById(10)).thenReturn(Optional.of(player));
         when(deckRepository.findById(20)).thenReturn(Optional.of(deck));
 
-        GameParticipantDTO participantDTO = new GameParticipantDTO(10, 20, true);
+        GameParticipantDTO participantDTO = new GameParticipantDTO(10, 20, "", true);
 
         GameEditDTO dto = new GameEditDTO(
                 LocalDate.of(2025, 5, 5),

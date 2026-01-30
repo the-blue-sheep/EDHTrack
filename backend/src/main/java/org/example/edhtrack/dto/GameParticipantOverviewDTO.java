@@ -8,5 +8,6 @@ public record GameParticipantOverviewDTO(
         int deckId,
         Set<String> commanders,
         String deckName,
+        String notes,
         boolean isWinner
 ) {}

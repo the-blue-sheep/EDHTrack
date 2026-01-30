@@ -61,6 +61,7 @@ public class GameService {
                     gp.setGame(savedGame);
                     gp.setPlayer(playerRepository.findById(p.playerId()).orElseThrow());
                     gp.setDeck(deckRepository.findById(p.deckId()).orElseThrow());
+                    gp.setNotes(p.notes());
                     gp.setWinner(p.isWinner());
                     return gp;
                 })
@@ -98,6 +99,7 @@ public class GameService {
                                         .map(Commander::getName)
                                         .collect(Collectors.toSet()),
                                 p.getDeck().getDeckName(),
+                                p.getNotes(),
                                 p.isWinner()
                         ))
                         .toList(),
@@ -172,6 +174,7 @@ public class GameService {
             gp.setPlayer(player);
             gp.setDeck(deck);
             gp.setWinner(p.isWinner());
+            gp.setNotes(p.notes());
 
             game.getPlayers().add(gp);
         }

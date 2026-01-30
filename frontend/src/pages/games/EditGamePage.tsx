@@ -20,6 +20,7 @@ interface ParticipantInput {
     commander: string;
     deckName?: string;
     isWinner: boolean;
+    notes?: string;
 }
 
 interface PlayerGroup {
@@ -114,10 +115,12 @@ export default function EditGamePage() {
             <form onSubmit={handleSubmit} className="space-y-4">
 
                 {game.participants.map((p, idx) => (
-                    <div key={idx} className="flex items-center gap-4 mb-2">
-
-                        <div className="flex items-center w-1/6">
-                            <input
+                    <div
+                        key={idx}
+                        className="flex gap-4 items-start"
+                    >
+                    <div className="flex items-center mt-6">
+                        <input
                                 type="checkbox"
                                 checked={p.isWinner}
                                 onChange={e => toggleWinner(idx, e.target.checked)}
@@ -154,7 +157,7 @@ export default function EditGamePage() {
 
                         <div className="w-2/5">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Deck {idx + 1}
+                                Deck
                             </label>
                             <select
                                 value={p.deckId ?? ""}
@@ -176,6 +179,26 @@ export default function EditGamePage() {
                                     <DeckOptionsForPlayer playerId={p.playerId} />
                                     : null}
                             </select>
+                        </div>
+                        <div className="w-full">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Notes
+                            </label>
+                            <textarea
+                                value={p.notes ?? ""}
+                                onChange={e => {
+                                    const notes = e.target.value;
+                                    setGame(prev => {
+                                        if (!prev) return prev;
+                                        const copy = [...prev.participants];
+                                        copy[idx] = { ...copy[idx], notes };
+                                        return { ...prev, participants: copy };
+                                    });
+                                }}
+                                className="border rounded px-2 py-1 w-full"
+                                rows={2}
+                                placeholder="Optional notes..."
+                            />
                         </div>
 
                     </div>
