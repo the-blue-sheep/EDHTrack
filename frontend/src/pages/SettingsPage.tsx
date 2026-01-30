@@ -108,12 +108,11 @@ export default function PlayerGroupsSettings() {
 
     return (
         <div className="p-6">
-            <h3 className="text-xl font-semibold text-purple-800 mb-4">Settings</h3>
+            <h1 className="text-2xl font-bold text-purple-800 mb-4">Settings</h1>
 
             <div>
-                <h1 className="text-2xl font-bold text-purple-900 mb-6">Player Groups</h1>
+                <h3 className="text-xl font-semibold text-purple-800 mb-6">Player Groups</h3>
 
-                {/* Add new group */}
                 <div className="flex gap-2 mb-6 items-center">
                     <input
                         type="text"
