@@ -141,7 +141,8 @@ export default function AddGamePage() {
             toast.update(toasty, {
                 render: "Turn order must be either all 0 or all unique numbers",
                 type: "error",
-                isLoading: false
+                isLoading: false,
+                autoClose: 3000
             });
             return;
         }
