@@ -60,7 +60,7 @@ public class DeckService {
         Deck deck = new Deck();
         deck.setPlayer(player);
         deck.setDeckName(createDeckDTO.deckName());
-        Utils.Bracket.valueOf(deck.getBracket().getDisplayName());
+        deck.setBracket(createDeckDTO.bracket());
         deck.setColors(createDeckDTO.colors());
 
         Set<Commander> commanders = createDeckDTO.commanders().stream()

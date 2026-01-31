@@ -23,6 +23,9 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -456,9 +459,9 @@ class StatisticServiceTest {
         DeckStatDTO deck3 = new DeckStatDTO(3, "Yuriko", 20, 10, 0.5, false);
 
         StatisticService spyService = org.mockito.Mockito.spy(statisticService);
-
-        org.mockito.Mockito.doReturn(List.of(deck1, deck2, deck3))
-                .when(spyService).getDeckStatsForPlayer(player, new ArrayList<>());
+        doReturn(List.of(deck1, deck2, deck3))
+                .when(spyService)
+                .getDeckStatsForPlayer(eq(player), any());
 
         List<DeckStatDTO> result = spyService.getTopPlayedDecks(player, 3, 2, "");
 
@@ -481,7 +484,7 @@ class StatisticServiceTest {
 
         StatisticService spyService = org.mockito.Mockito.spy(statisticService);
 
-        org.mockito.Mockito.doReturn(List.of(deck1, deck2, deck3, deck4))
+        doReturn(List.of(deck1, deck2, deck3, deck4))
                 .when(spyService).getDeckStatsForPlayer(player, new ArrayList<>());
 
         List<DeckStatDTO> result = spyService.getTopSuccessfulDecks(player, 3, 2, "");

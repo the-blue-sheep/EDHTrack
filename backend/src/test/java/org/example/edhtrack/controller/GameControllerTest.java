@@ -66,13 +66,22 @@ class GameControllerTest {
                 1
         );
 
-        when(gameService.getGames(1, 10, 0, "", "1")).thenReturn(page);
+        when(gameService.getGames(
+                anyInt(),
+                anyInt(),
+                any(),
+                any(),
+                any()
+        )).thenReturn(page);
 
         mockMvc.perform(get("/api/games")
                         .param("page", "1")
                         .param("size", "10")
                         .param("playerId", "0")
                         .param("commander", "")
+                        .param("groupIds", "")
+                        .param("firstKillTurn", "0")
+                        .param("lastTurn", "0")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())

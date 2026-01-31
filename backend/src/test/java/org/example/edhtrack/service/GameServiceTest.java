@@ -82,6 +82,10 @@ class GameServiceTest {
         d2.setDeckName("DeckB");
         d2.setCommanders(new HashSet<>());
 
+        PlayerGroup group = new PlayerGroup();
+        group.setGroupId(1);
+        when(playerGroupRepository.findById(1)).thenReturn(Optional.of(group));
+
         when(playerRepository.findById(1)).thenReturn(Optional.of(p1));
         when(playerRepository.findById(2)).thenReturn(Optional.of(p2));
 
@@ -92,6 +96,7 @@ class GameServiceTest {
         savedGame.setId(55);
         savedGame.setDate(date);
         savedGame.setNotes("Holiday Game");
+        savedGame.setGroup(group);
 
         when(gameRepository.save(any(Game.class))).thenReturn(savedGame);
 
@@ -132,7 +137,11 @@ class GameServiceTest {
         g1.setPlayers(List.of(gp1));
 
         Page<Game> page = new PageImpl<>(List.of(g1));
+        PlayerGroup group = new PlayerGroup();
+        group.setGroupId(1);
+        g1.setGroup(group);
 
+        when(playerGroupRepository.findById(1)).thenReturn(Optional.of(group));
         when(gameRepository.findByFilters(
                 any(),
                 any(),
@@ -178,9 +187,12 @@ class GameServiceTest {
         d1.setDeckName("Alpha");
         d1.setCommanders(new HashSet<>());
 
+        PlayerGroup group = new PlayerGroup();
+        group.setGroupId(1);
+
         when(playerRepository.findById(1)).thenReturn(Optional.of(p1));
         when(deckRepository.findById(10)).thenReturn(Optional.of(d1));
-
+        when(playerGroupRepository.findById(1)).thenReturn(Optional.of(group));
         when(gameRepository.save(any(Game.class))).thenAnswer(invocation -> {
             Game g = invocation.getArgument(0);
             g.setId(500);
@@ -216,7 +228,11 @@ class GameServiceTest {
         gp.setWinner(true);
 
         game.setPlayers(List.of(gp));
+        PlayerGroup group = new PlayerGroup();
+        group.setGroupId(1);
+        game.setGroup(group);
 
+        when(playerGroupRepository.findById(1)).thenReturn(Optional.of(group));
         when(gameRepository.findById(1)).thenReturn(Optional.of(game));
 
         GameOverviewDTO dto = gameService.getGameById(1);
