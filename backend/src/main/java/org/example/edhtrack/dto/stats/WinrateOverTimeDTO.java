@@ -6,5 +6,6 @@ public record WinrateOverTimeDTO(
         int playerId,
         int deckId,
         int stepSize,
-        List<WinratePointDTO> points
+        List<WinratePointDTO> points,
+        String groupIds
 ) {}

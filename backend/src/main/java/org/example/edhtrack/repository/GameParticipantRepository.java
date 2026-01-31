@@ -28,4 +28,22 @@ public interface GameParticipantRepository extends JpaRepository<GameParticipant
         where gp.deck.deckId = :deckId
     """)
     boolean isDeckUsed(@Param("deckId") int deckId);
+
+    List<GameParticipant> findByPlayerAndGame_Group_GroupIdIn(Player player, List<Integer> groups);
+
+    @Query("""
+        SELECT gp
+        FROM GameParticipant gp
+        JOIN gp.game g
+        LEFT JOIN g.group grp
+        WHERE gp.player = :player
+        AND (:groupIds IS NULL OR grp.groupId IN :groupIds)
+        ORDER BY g.date ASC
+    """)
+    List<GameParticipant> findByPlayerAndGroups(
+            @Param("player") Player player,
+            @Param("groupIds") List<Integer> groupIds
+    );
+
+    List<GameParticipant> findByDeck_Commanders_Name(String commanderName);
 }

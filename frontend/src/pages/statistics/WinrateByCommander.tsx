@@ -3,6 +3,7 @@ import axios from "axios";
 import {toast} from "react-toastify";
 import MinGamesInput from "../../components/MinGamesInput.tsx";
 import {useCommanders} from "../../hooks/useCommanders.ts";
+import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
 
 
 interface CommanderWinRateDTO {
@@ -17,10 +18,9 @@ export default function WinrateByCommander() {
     const [data, setData] = useState<CommanderWinRateDTO | null>(null);
     const [loading, setLoading] = useState(false);
     const [allData, setAllData] = useState<CommanderWinRateDTO[]>([]);
-    // const [allCommanders, setAllCommanders] = useState<string[]>([]);
     const [minGames, setMinGames] = useState<number>(1);
     const { commanders: allCommanders, loading: commandersLoading } = useCommanders();
-
+    const [groupIds, setGroupIds] = useState<number[]>([]);
 
     useEffect(() => {
         if (!commanderName) {
@@ -37,7 +37,7 @@ export default function WinrateByCommander() {
 
         axios.get<CommanderWinRateDTO>(
             "/api/stats/commander-winrate",
-            { params: { commanderName, minGames } }
+            { params: { commanderName, minGames, groupIds } }
         )
             .then(res => {
                 setData(res.data);
@@ -62,13 +62,13 @@ export default function WinrateByCommander() {
                 setLoading(false);
             });
 
-    }, [commanderName, allCommanders]);
+    }, [commanderName, allCommanders, groupIds]);
 
     function loadAll() {
         const toasty = toast.loading("Loading all commander winrates...");
         setLoading(true);
 
-        axios.get<CommanderWinRateDTO[]>("/api/stats/commander-winrates", { params: { minGames } })
+        axios.get<CommanderWinRateDTO[]>("/api/stats/commander-winrates", { params: { minGames, groupIds } })
             .then(res => {
                 setAllData(res.data);
                 toast.update(toasty, {
@@ -107,6 +107,12 @@ export default function WinrateByCommander() {
                         <option key={name} value={name} />
                     ))}
                 </datalist>
+
+                <GroupMultiSelect
+                    value={groupIds}
+                    onChange={setGroupIds}
+                />
+
                 <MinGamesInput
                     value={minGames}
                     onChange={setMinGames}

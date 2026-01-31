@@ -25,4 +25,10 @@ public class Game {
     @EqualsAndHashCode.Exclude
     private List<GameParticipant> players;
 
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private PlayerGroup group;
+
+    private Integer firstKillTurn;
+    private Integer lastTurn;
 }

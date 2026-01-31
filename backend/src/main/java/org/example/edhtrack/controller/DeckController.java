@@ -1,5 +1,6 @@
 package org.example.edhtrack.controller;
 
+import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.deck.CreateDeckDTO;
 import org.example.edhtrack.dto.deck.DeckDTO;
 import org.example.edhtrack.dto.deck.RetireDeckDTO;
@@ -8,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/decks")
@@ -47,5 +50,15 @@ public class DeckController {
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
+    }
+
+    @GetMapping("/brackets")
+    public List<Map<String, String>> getAllBracketNames() {
+        return Arrays.stream(Utils.Bracket.values())
+                .map(b -> Map.of(
+                        "name", b.name(),
+                        "displayName", b.getDisplayName()
+                ))
+                .toList();
     }
 }

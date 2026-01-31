@@ -1,5 +1,6 @@
 import { useState } from "react";
 import MinGamesInput from "../../components/MinGamesInput.tsx";
+import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
 
 type DeterminedType = "PLAYER" | "COMMANDER" | "COLOR";
 
@@ -16,7 +17,7 @@ export default function LeaderboardPage() {
     const [hideRetiredPlayers, setHideRetiredPlayers] = useState<boolean>(false);
     const [hideRetiredDecks, setHideRetiredDecks] = useState<boolean>(false);
     const [tableSizes, setTableSizes] = useState<number[]>([3, 4, 5, 6]);
-
+    const [groupIds, setGroupIds] = useState<number[]>([]);
     const [data, setData] = useState<LeaderboardEntryDTO[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -33,7 +34,8 @@ export default function LeaderboardPage() {
             minGames: String(minGames),
             hideRetiredPlayers: String(hideRetiredPlayers),
             hideRetiredDecks: String(hideRetiredDecks),
-            tableSizes: tableSizes.join(",")
+            tableSizes: tableSizes.join(","),
+            groupIds: groupIds.join(",")
         });
 
         const res = await fetch(`/api/stats/leaderboard?${params.toString()}`);
@@ -85,7 +87,7 @@ export default function LeaderboardPage() {
                 </div>
             </div>
 
-            <div className="flex flex-col gap-2 mb-6">
+            <div className="flex gap-2 mb-6">
                 <label className="text-purple-900 font-bold">Table size</label>
                 <div className="flex gap-4">
                     {[3, 4, 5, 6].map(size => (
@@ -104,6 +106,13 @@ export default function LeaderboardPage() {
                             {size} Players
                         </label>
                     ))}
+                </div>
+
+                <div className="flex ml-6 gap-4">
+                    <GroupMultiSelect
+                        value={groupIds}
+                        onChange={setGroupIds}
+                    />
                 </div>
             </div>
 

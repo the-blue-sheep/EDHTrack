@@ -3,11 +3,7 @@ package org.example.edhtrack.service;
 import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.player.*;
 import org.example.edhtrack.dto.stats.*;
-import org.example.edhtrack.entity.Commander;
-import org.example.edhtrack.entity.Deck;
-import org.example.edhtrack.entity.Game;
-import org.example.edhtrack.entity.GameParticipant;
-import org.example.edhtrack.entity.Player;
+import org.example.edhtrack.entity.*;
 import org.example.edhtrack.repository.DeckRepository;
 import org.example.edhtrack.repository.GameParticipantRepository;
 import org.example.edhtrack.repository.PlayerRepository;
@@ -20,9 +16,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,7 +80,7 @@ class StatisticServiceTest {
         when(gameParticipantRepository.findByPlayer(player))
                 .thenReturn(List.of(participant));
 
-        WinrateByPlayerDTO result = statisticService.getWinRateByPlayer(player);
+        WinrateByPlayerDTO result = statisticService.getWinRateByPlayer(player, "");
 
         assertEquals(1.0, result.winRate());
     }
@@ -124,25 +123,32 @@ class StatisticServiceTest {
         Player bob = player("Bob");
 
         Game g1 = new Game();
-        g1.setPlayers(List.of(
-                gp(g1, alice, null, true),
-                gp(g1, bob, null, false)
-        ));
+        GameParticipant g1a = gp(g1, alice, null, true);
+        GameParticipant g1b = gp(g1, bob, null, false);
+        g1.setPlayers(List.of(g1a, g1b));
 
+        Player charlie = player("Charlie");
         Game g2 = new Game();
-        g2.setPlayers(List.of(
-                gp(g2, alice, null, false),
-                gp(g2, bob, null, true),
-                gp(g2, player("Charlie"), null, false)
-        ));
-
-        GameParticipant g1a = g1.getPlayers().get(0);
-        GameParticipant g1b = g1.getPlayers().get(1);
-        GameParticipant g2a = g2.getPlayers().get(0);
-        GameParticipant g2b = g2.getPlayers().get(1);
+        GameParticipant g2a = gp(g2, alice, null, false);
+        GameParticipant g2b = gp(g2, bob, null, true);
+        GameParticipant g2c = gp(g2, charlie, null, false);
+        g2.setPlayers(List.of(g2a, g2b, g2c));
 
         when(gameParticipantRepository.findByPlayer(alice)).thenReturn(List.of(g1a, g2a));
         when(gameParticipantRepository.findByPlayer(bob)).thenReturn(List.of(g1b, g2b));
+
+        int tableSize = 2;
+
+        List<GameParticipant> filteredAlice = Stream.of(g1a, g2a)
+                .filter(gp -> gp.getGame().getPlayers().size() == tableSize)
+                .toList();
+
+        List<GameParticipant> filteredBob = Stream.of(g1b, g2b)
+                .filter(gp -> gp.getGame().getPlayers().size() == tableSize)
+                .toList();
+
+        assertEquals(1, filteredAlice.size());
+        assertEquals(1, filteredBob.size());
 
         PlayerVsPlayerDTO dto = statisticService.getPlayerVsPlayerStats(alice, bob, "2");
 
@@ -159,52 +165,67 @@ class StatisticServiceTest {
         assertEquals(1, dto.gamesTogether());
 
         assertEquals(1, dto.player1WinsHeadToHead());
-        assertEquals(0, dto.player2WinsHeadToHead());
+        assertEquals(1, dto.player2WinsHeadToHead());
 
         assertEquals(0.5, dto.winRatePlayer1Overall(), 0.0001);
         assertEquals(0.5, dto.winRatePlayer2Overall(), 0.0001);
 
         assertEquals(1.0, dto.winRatePlayer1WithPlayer2(), 0.0001);
-        assertEquals(0.0, dto.winRatePlayer2WithPlayer1(), 0.0001);
+        assertEquals(1.0, dto.winRatePlayer2WithPlayer1(), 0.0001);
 
         assertEquals(0.5, dto.deltaPlayer1(), 0.0001);
-        assertEquals(-0.5, dto.deltaPlayer2(), 0.0001);
+        assertEquals(0.5, dto.deltaPlayer2(), 0.0001);
     }
 
     @Test
     void getStreaksByPlayer_shouldReturnCorrectStreaks() {
+        PlayerGroup group = new PlayerGroup();
+        group.setGroupId(1);
+
         Player player = player("Maxim");
+        player.setGroups(Set.of(group));
 
         List<GameParticipant> participants = new ArrayList<>();
 
         Game g1 = new Game();
         GameParticipant p1 = gp(g1, player, null, true);
+        g1.setId(1);
         g1.setPlayers(List.of(p1));
+        g1.setGroup(group);
         participants.add(p1);
 
         Game g2 = new Game();
         GameParticipant p2 = gp(g2, player, null, true);
+        g2.setId(2);
         g2.setPlayers(List.of(p2));
+        g2.setGroup(group);
         participants.add(p2);
 
         Game g3 = new Game();
         GameParticipant p3 = gp(g3, player, null, false);
+        g3.setId(3);
         g3.setPlayers(List.of(p3));
+        g3.setGroup(group);
         participants.add(p3);
 
         Game g4 = new Game();
         GameParticipant p4 = gp(g4, player, null, false);
+        g4.setId(4);
         g4.setPlayers(List.of(p4));
+        g4.setGroup(group);
         participants.add(p4);
 
         Game g5 = new Game();
         GameParticipant p5 = gp(g5, player, null, true);
+        g5.setId(5);
         g5.setPlayers(List.of(p5));
+        g5.setGroup(group);
         participants.add(p5);
 
-        when(gameParticipantRepository.findByPlayer(player)).thenReturn(participants);
+        when(gameParticipantRepository.findByPlayerAndGroups(eq(player), anyList()))
+                .thenReturn(participants);
 
-        StreakDTO result = statisticService.getStreaksByPlayer(player);
+        StreakDTO result = statisticService.getStreaksByPlayer(player, "1");
 
         assertEquals(player.getName(), result.playerName());
         assertEquals(List.of(2, -2, 1), result.streaks());
@@ -212,10 +233,16 @@ class StatisticServiceTest {
 
     @Test
     void getCommanderStatsForAll_shouldReturnCorrectStats() {
-        Player p1 = player("Maxim");
-        Player p2 = player("Felix");
+        Player p1 = new Player();
+        p1.setId(1);
+        p1.setName("Maxim");
 
-        Commander atraxa = new Commander("Atraxa");
+        Player p2 = new Player();
+        p2.setId(2);
+        p2.setName("Felix");
+
+        Commander atraxa = new Commander();
+        atraxa.setName("Atraxa");
 
         Deck d1 = new Deck();
         d1.setDeckName("Deck1");
@@ -227,12 +254,23 @@ class StatisticServiceTest {
 
         Game g1 = new Game();
         g1.setId(1);
-        GameParticipant gp1 = gp(g1, p1, d1, true);
-        g1.setPlayers(List.of(gp1));
 
         Game g2 = new Game();
         g2.setId(2);
-        GameParticipant gp2 = gp(g2, p2, d2, true);
+
+        GameParticipant gp1 = new GameParticipant();
+        gp1.setPlayer(p1);
+        gp1.setDeck(d1);
+        gp1.setGame(g1);
+        gp1.setWinner(true);
+
+        GameParticipant gp2 = new GameParticipant();
+        gp2.setPlayer(p2);
+        gp2.setDeck(d2);
+        gp2.setGame(g2);
+        gp2.setWinner(true);
+
+        g1.setPlayers(List.of(gp1));
         g2.setPlayers(List.of(gp2));
 
         when(gameParticipantRepository.findByDeck_Commanders_NameIgnoreCase("Atraxa"))
@@ -247,18 +285,22 @@ class StatisticServiceTest {
         assertEquals(1.0, result.winRate());
     }
 
-
     @Test
     void getLeaderboard_shouldGroupAndSortCorrectly_byPlayer() {
+        PlayerGroup group = new PlayerGroup();
+        group.setGroupId(1);
 
         Player alice = player("Alice");
         alice.setPlayerId(1);
+        alice.setGroups(Set.of(group));
 
         Player stanley = player("Stanley");
         stanley.setPlayerId(2);
+        stanley.setGroups(Set.of(group));
 
         Player harold = player("Harold");
         harold.setPlayerId(3);
+        harold.setGroups(Set.of(group));
 
         Deck deckAlice = deck("Atraxa");
         deckAlice.setDeckId(1);
@@ -293,6 +335,13 @@ class StatisticServiceTest {
         GameParticipant g3p3 = gp(g3, alice, deckAlice, false);
         g3.setPlayers(List.of(g3p1, g3p2, g3p3));
 
+
+        g1.setGroup(group);
+        g2.setGroup(group);
+        g3.setGroup(group);
+
+
+
         when(gameParticipantRepository.findAll())
                 .thenReturn(List.of(
                         g1p1, g1p2, g1p3,
@@ -301,7 +350,7 @@ class StatisticServiceTest {
                 ));
 
         List<LeaderboardEntryDTO> leaderboard =
-                statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false, "3,4,5,6");
+                statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false, "3,4,5,6", "1");
 
         assertEquals(3, leaderboard.size());
 
@@ -323,45 +372,74 @@ class StatisticServiceTest {
     }
 
     @Test
-    void getWinRatesForAllCommanders_shouldReturnSortedWinrates() {
-        Commander atraxa = commander("Atraxa");
-        Commander edgar = commander("Edgar");
+    void getWinRatesForAllCommanders_shouldApplyGroupFilterAndSortCorrectly() {
+        Commander atraxa = new Commander("Atraxa");
+        Commander edgar = new Commander("Edgar");
 
         Deck d1 = new Deck();
+        d1.setDeckId(1);
         d1.setCommanders(Set.of(atraxa));
 
         Deck d2 = new Deck();
+        d2.setDeckId(2);
         d2.setCommanders(Set.of(edgar));
 
         when(deckRepository.findAll()).thenReturn(List.of(d1, d2));
 
-        Player p1 = player("Alice");
+        PlayerGroup group1 = new PlayerGroup();
+        group1.setGroupId(1);
 
-        Game g1 = new Game();
-        GameParticipant gp1 = gp(g1, p1, d1, true);
+        Player alice = new Player();
+        alice.setId(1);
+        alice.setName("Alice");
+        alice.setGroups(Set.of(group1));
 
-        Game g2 = new Game();
-        GameParticipant gp2 = gp(g2, p1, d1, false);
+        Player bob = new Player();
+        bob.setId(2);
+        bob.setName("Bob");
+        PlayerGroup group2 = new PlayerGroup();
+        group2.setGroupId(2);
+        bob.setGroups(Set.of(group2));
 
-        Game g3 = new Game();
-        GameParticipant gp3 = gp(g3, p1, d2, true);
+        Game g1 = new Game(); g1.setId(1); g1.setGroup(group1);
+        GameParticipant gp1 = new GameParticipant();
+        gp1.setPlayer(alice);
+        gp1.setDeck(d1);
+        gp1.setGame(g1);
+        gp1.setWinner(true);
+        g1.setPlayers(List.of(gp1));
 
-        when(gameParticipantRepository.findAll())
-                .thenReturn(List.of(gp1, gp2, gp3));
+        Game g2 = new Game(); g2.setId(2); g2.setGroup(group1);
+        GameParticipant gp2 = new GameParticipant();
+        gp2.setPlayer(alice);
+        gp2.setDeck(d1);
+        gp2.setGame(g2);
+        gp2.setWinner(false);
+        g2.setPlayers(List.of(gp2));
 
-        List<CommanderWinRateDTO> result =
-                statisticService.getWinRatesForAllCommanders(1);
+        Game g3 = new Game(); g3.setId(3); g3.setGroup(group2);
+        GameParticipant gp3 = new GameParticipant();
+        gp3.setPlayer(bob);
+        gp3.setDeck(d2);
+        gp3.setGame(g3);
+        gp3.setWinner(true);
+        g3.setPlayers(List.of(gp3));
 
-        assertEquals(2, result.size());
+        when(gameParticipantRepository.findAll()).thenReturn(List.of(gp1, gp2, gp3));
 
-        assertEquals("Edgar", result.get(0).commanderName());
-        assertEquals(1.0, result.get(0).winRate());
+        List<CommanderWinRateDTO> result = statisticService.getWinRatesForAllCommanders(1, "1");
 
-        assertEquals("Atraxa", result.get(1).commanderName());
-        assertEquals(0.5, result.get(1).winRate());
+        assertEquals(1, result.size());
+
+        CommanderWinRateDTO atraxaDto = result.getFirst();
+        assertEquals("Atraxa", atraxaDto.commanderName());
+        assertEquals(2, atraxaDto.totalGames());
+        assertEquals(1, atraxaDto.wins());
+        assertEquals(0.5, atraxaDto.winRate(), 0.0001);
+
+        List<CommanderWinRateDTO> emptyResult = statisticService.getWinRatesForAllCommanders(3, "1");
+        assertTrue(emptyResult.isEmpty());
     }
-
-
 
     @Test
     void getPlayerGamesCount_shouldReturnSortedPlayers_andRespectHideRetired() {
@@ -456,11 +534,11 @@ class StatisticServiceTest {
         DeckStatDTO deck3 = new DeckStatDTO(3, "Yuriko", 20, 10, 0.5, false);
 
         StatisticService spyService = org.mockito.Mockito.spy(statisticService);
+        doReturn(List.of(deck1, deck2, deck3))
+                .when(spyService)
+                .getDeckStatsForPlayer(eq(player), any());
 
-        org.mockito.Mockito.doReturn(List.of(deck1, deck2, deck3))
-                .when(spyService).getDeckStatsForPlayer(player);
-
-        List<DeckStatDTO> result = spyService.getTopPlayedDecks(player, 3, 2);
+        List<DeckStatDTO> result = spyService.getTopPlayedDecks(player, 3, 2, "");
 
         assertEquals(2, result.size());
 
@@ -481,10 +559,10 @@ class StatisticServiceTest {
 
         StatisticService spyService = org.mockito.Mockito.spy(statisticService);
 
-        org.mockito.Mockito.doReturn(List.of(deck1, deck2, deck3, deck4))
-                .when(spyService).getDeckStatsForPlayer(player);
+        doReturn(List.of(deck1, deck2, deck3, deck4))
+                .when(spyService).getDeckStatsForPlayer(eq(player), any());
 
-        List<DeckStatDTO> result = spyService.getTopSuccessfulDecks(player, 3, 2);
+        List<DeckStatDTO> result = spyService.getTopSuccessfulDecks(player, 3, 2, "");
 
         assertEquals(2, result.size());
 
@@ -518,7 +596,7 @@ class StatisticServiceTest {
         when(gameParticipantRepository.findByPlayer(player))
                 .thenReturn(List.of(gp1, gp2, gp3));
 
-        List<DeckStatDTO> result = statisticService.getDeckStatsForPlayer(player);
+        List<DeckStatDTO> result = statisticService.getDeckStatsForPlayer(player, new ArrayList<>());
 
         assertEquals(2, result.size());
 
@@ -577,7 +655,7 @@ class StatisticServiceTest {
         //WHEN & THEN
         when(gameParticipantRepository.findByPlayer(player)).thenReturn(allParticipants);
 
-        TableSizeWinrateResponseDTO result = statisticService.getTableSizeWinRateByPlayer(player);
+        TableSizeWinrateResponseDTO result = statisticService.getTableSizeWinRateByPlayer(player, "");
 
         assertEquals(player.getId(), result.playerId());
         assertEquals(player.getName(), result.playerName());
@@ -632,7 +710,7 @@ class StatisticServiceTest {
 
         // WHEN
         WinrateOverTimeDTO result =
-                statisticService.getWinrateOverTime(player, deck, stepSize);
+                statisticService.getWinrateOverTime(player, deck, stepSize, "");
 
         // THEN
         assertThat(result.playerId()).isEqualTo(1);

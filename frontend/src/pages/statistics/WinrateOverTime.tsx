@@ -3,12 +3,8 @@ import {toast} from "react-toastify";
 import axios from "axios";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import DeckOptionsForPlayer from "../../components/DeckOptionsForPlayer.tsx";
-
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
+import {usePlayers} from "../../hooks/usePlayers.ts";
+import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
 
 interface WinratePointDTO {
     gamesPlayed: number;
@@ -26,43 +22,28 @@ interface WinrateOverTimeDTO {
 }
 
 export default function WinrateOverTime() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>();
     const [selectedDeckId, setSelectedDeckId] = useState<number | undefined>();
     const [stepSize, setStepSize] = useState<number>(3);
     const [winrate, setWinrate] = useState<WinrateOverTimeDTO | null>(null);
+    const [groupIds, setGroupIds] = useState<number[]>([]);
 
     useEffect(() => {
-        const toasty = toast.loading("Please wait...");
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(response.data ?? []);
-                toast.update(toasty, {
-                    render: "Player updated",
-                    type: "success",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-            })
-            .catch(error => {
-                console.error("Error while loading players:", error);
-                toast.update(toasty, {
-                    render: "Error",
-                    type: "error",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-            });
-    }, []);
-
-    useEffect(() => {
-        if (!selectedPlayerId || !selectedDeckId) return;
+        if (!selectedPlayerId || !selectedDeckId || stepSize < 1) return;
 
         const toasty = toast.loading("Loading statistics...");
 
         axios.get<WinrateOverTimeDTO>(
             `/api/stats/players/${selectedPlayerId}/decks/${selectedDeckId}/winrate-over-time`,
-            { params: { stepSize } }
+            {
+                params: {
+                    stepSize,
+                    groupIds: groupIds.length > 0
+                        ? groupIds.join(",")
+                        : null
+                }
+            }
         )
             .then(res => {
                 setWinrate(res.data);
@@ -80,17 +61,8 @@ export default function WinrateOverTime() {
                     isLoading: false
                 });
             });
-    }, [selectedPlayerId, selectedDeckId, stepSize]);
 
-    useEffect(() => {
-        if (!selectedPlayerId || !selectedDeckId || stepSize < 1) return;
-
-        axios.get<WinrateOverTimeDTO>(
-            `/api/stats/players/${selectedPlayerId}/decks/${selectedDeckId}/winrate-over-time`,
-            { params: { stepSize } }
-        ).then(res => setWinrate(res.data));
-    }, [selectedPlayerId, selectedDeckId, stepSize]);
-
+    }, [selectedPlayerId, selectedDeckId, stepSize, groupIds]);
 
     function onChangeHandlerPlayer(playerId?: number) {
         setSelectedPlayerId(playerId);
@@ -130,20 +102,27 @@ export default function WinrateOverTime() {
                         )}
                     </select>
                 </div>
-            </div>
-
-            <div className="w-48">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Games per step
-                </label>
-                <input
-                    type="number"
-                    min={1}
-                    max={50}
-                    value={stepSize}
-                    onChange={e => setStepSize(Number(e.target.value))}
-                    className="w-full border px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500"
-                />
+                <div className="flex flex-col">
+                    <div className="mb-6">
+                        <GroupMultiSelect
+                            value={groupIds}
+                            onChange={setGroupIds}
+                        />
+                    </div>
+                </div>
+                <div className="w-48">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Games per step
+                    </label>
+                    <input
+                        type="number"
+                        min={1}
+                        max={50}
+                        value={stepSize}
+                        onChange={e => setStepSize(Number(e.target.value))}
+                        className="w-full border px-3 py-2 rounded-md focus:ring-2 focus:ring-purple-500"
+                    />
+                </div>
             </div>
 
             {winrate && winrate.points ?

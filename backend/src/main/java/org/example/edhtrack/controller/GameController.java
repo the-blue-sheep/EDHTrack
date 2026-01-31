@@ -24,9 +24,25 @@ public class GameController {
             @RequestParam(defaultValue = "10") int size,
             //int kann kein "nicht gesetzt" Darstellen wenn selectedPlayerId undefined ist
             @RequestParam(required = false) Integer playerId,
-            @RequestParam(required = false) String commander
+            @RequestParam(required = false) String commander,
+            @RequestParam(required = false) String groupIds
     ) {
-        return gameService.getGames(page, size, playerId, commander);
+
+        if (playerId != null && playerId == 0) {
+            playerId = null;
+        }
+
+        if (commander != null && commander.isBlank()) {
+            commander = null;
+        }
+
+        if (groupIds != null && groupIds.isBlank()) {
+            groupIds = null;
+        }
+
+        System.out.println("GroupIds: " + groupIds);
+
+        return gameService.getGames(page, size, playerId, commander, groupIds);
     }
 
     @GetMapping("/{id}")

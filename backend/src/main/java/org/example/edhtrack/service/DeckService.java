@@ -46,6 +46,7 @@ public class DeckService {
                                 .collect(Collectors.toSet()),
                         deck.getDeckName(),
                         deck.getColors(),
+                        deck.getBracket(),
                         deck.isRetired()
                 ))
                 .collect(Collectors.toSet());
@@ -59,6 +60,7 @@ public class DeckService {
         Deck deck = new Deck();
         deck.setPlayer(player);
         deck.setDeckName(createDeckDTO.deckName());
+        deck.setBracket(createDeckDTO.bracket());
         deck.setColors(createDeckDTO.colors());
 
         Set<Commander> commanders = createDeckDTO.commanders().stream()
@@ -119,6 +121,7 @@ public class DeckService {
 
         deck.setDeckName(dto.deckName());
         deck.setColors(dto.colors());
+        deck.setBracket(dto.bracket());
         deck.setRetired(dto.retired());
 
         Set<String> commanderNames = dto.commanders();

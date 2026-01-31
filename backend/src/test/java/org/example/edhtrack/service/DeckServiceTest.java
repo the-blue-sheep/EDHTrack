@@ -1,5 +1,6 @@
 package org.example.edhtrack.service;
 
+import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.deck.CreateDeckDTO;
 import org.example.edhtrack.dto.deck.DeckDTO;
 import org.example.edhtrack.dto.deck.RetireDeckDTO;
@@ -87,6 +88,7 @@ class DeckServiceTest {
                 2,
                 Set.of("Hylda", "Zethi"),
                 "Ice Ice Baby",
+                Utils.Bracket.BRACKET2,
                 "WU"
         );
 
@@ -178,6 +180,7 @@ class DeckServiceTest {
                 Set.of("Reyhan"),
                 "+1/+1 counter",
                 "BG",
+                Utils.Bracket.BRACKET2,
                 true
         );
 

@@ -1,9 +1,9 @@
 package org.example.edhtrack.controller;
 
+import org.example.edhtrack.Utils;
 import org.example.edhtrack.dto.deck.CreateDeckDTO;
 import org.example.edhtrack.dto.deck.DeckDTO;
 import org.example.edhtrack.dto.deck.RetireDeckDTO;
-import org.example.edhtrack.dto.stats.CommanderWinRateDTO;
 import org.example.edhtrack.service.DeckService;
 import org.example.edhtrack.service.StatisticService;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -42,7 +41,7 @@ class DeckControllerTest {
     @Test
     void createDeck_shouldReturnDeck() throws Exception {
 
-        DeckDTO response = new DeckDTO(1, Set.of("Keen"), "Hey Arnold!", "WUBR", false);
+        DeckDTO response = new DeckDTO(1, Set.of("Keen"), "Hey Arnold!", "WUBR", Utils.Bracket.BRACKET2, false);
 
         //When
         when(deckService.createDeck(any(CreateDeckDTO.class)))
@@ -73,7 +72,7 @@ class DeckControllerTest {
 
     @Test
     void setRetiredDeckStatus_shouldReturnDifferentRetiredStatus() throws Exception {
-        DeckDTO response = new DeckDTO(1, Set.of("Keen"), "Hey Arnold!", "WUBR", true);
+        DeckDTO response = new DeckDTO(1, Set.of("Keen"), "Hey Arnold!", "WUBR", Utils.Bracket.BRACKET2, true);
 
         when(deckService.setRetiredDeckStatus(any())).thenReturn(response);
 
@@ -96,7 +95,7 @@ class DeckControllerTest {
 
     @Test
     void updateDeck_shouldReturnUpdatedDeck() throws Exception {
-        DeckDTO response = new DeckDTO(1, Set.of("Keen"), "Hey Arnold!", "WUBR", false);
+        DeckDTO response = new DeckDTO(1, Set.of("Keen"), "Hey Arnold!", "WUBR", Utils.Bracket.BRACKET2, false);
 
         when(deckService.setRetiredDeckStatus(any())).thenReturn(response);
 

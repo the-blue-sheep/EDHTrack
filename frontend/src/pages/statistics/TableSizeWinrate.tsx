@@ -1,13 +1,9 @@
 import PlayerSelect from "../../components/PlayerSelect.tsx";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import {toast} from "react-toastify";
-
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
+import { toast } from "react-toastify";
+import { usePlayers } from "../../hooks/usePlayers.ts";
+import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
 
 interface TableSizeWinrateDTO {
     tableSize: number;
@@ -15,6 +11,7 @@ interface TableSizeWinrateDTO {
     wins: number;
     winRate: number;
 }
+
 interface TableSizeWinrateResponseDTO {
     playerId: number;
     playerName: string;
@@ -22,39 +19,27 @@ interface TableSizeWinrateResponseDTO {
 }
 
 export default function TableSizeWinrate() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [tableSizeWinrate, setTableSizeWinrate] = useState<TableSizeWinrateResponseDTO | undefined>(undefined);
-
-    useEffect(() => {
-        const toasty = toast.loading("Please wait...");
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(Array.isArray(response.data) ? response.data : []);
-                toast.update(toasty, {
-                    render: "Player updated",
-                    type: "success",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-            })
-            .catch(error => {
-                console.error("Error while loading players:", error);
-                toast.update(toasty, {
-                    render: "Error",
-                    type: "error",
-                    isLoading: false,
-                    autoClose: 3000
-                });
-            });
-    }, []);
+    const [groupIds, setGroupIds] = useState<number[]>([]);
 
     useEffect(() => {
         if (!selectedPlayerId) return;
+
         const toasty = toast.loading("Please wait...");
-        axios.get<TableSizeWinrateResponseDTO>(`/api/stats/players/${selectedPlayerId}/table-size-winrate`)
+
+        const params: Record<string, any> = {
+            playerId: selectedPlayerId,
+        };
+        if (groupIds.length > 0) {
+            params.groupIds = groupIds.join(",");
+        }
+
+        axios.get<TableSizeWinrateResponseDTO>(`/api/stats/players/${selectedPlayerId}/table-size-winrate`, { params })
             .then(res => {
-                setTableSizeWinrate(res.data)
+                setTableSizeWinrate(res.data);
+
                 toast.update(toasty, {
                     render: "Player updated",
                     type: "success",
@@ -64,32 +49,36 @@ export default function TableSizeWinrate() {
             })
             .catch(error => {
                 console.error("Error while loading winrates:", error);
+                setTableSizeWinrate(undefined);
+
                 toast.update(toasty, {
-                    render: "Error",
+                    render: "Error loading data",
                     type: "error",
                     isLoading: false,
                     autoClose: 3000
                 });
             });
-    }, [selectedPlayerId]);
-
-    function onChangeHandlerPlayer(playerId?: number) {
-        setSelectedPlayerId(playerId);
-    }
+    }, [selectedPlayerId, groupIds]);
 
     return (
-
         <div className="p-6">
-            <h3 className="text-xl font-semibold text-purple-800 space-x-6">Table size winrate</h3>
-            <div className="mb-6">
+            <h3 className="text-xl font-semibold text-purple-800 mb-4">Table Size Winrate</h3>
+
+            <div className="flex flex-wrap gap-3 mb-6">
                 <PlayerSelect
                     players={players}
                     value={selectedPlayerId}
-                    onChange={onChangeHandlerPlayer}
+                    onChange={setSelectedPlayerId}
+                />
+
+                <GroupMultiSelect
+                    value={groupIds}
+                    onChange={setGroupIds}
                 />
             </div>
+
             <div className="grid grid-cols-1 gap-6">
-                {tableSizeWinrate?.stats?.length ?
+                {tableSizeWinrate?.stats?.length ? (
                     <table className="w-full table-auto border-collapse text-sm">
                         <thead>
                         <tr className="border-b bg-gray-100">
@@ -115,8 +104,10 @@ export default function TableSizeWinrate() {
                         ))}
                         </tbody>
                     </table>
-                :null}
+                ) : (
+                    <p className="text-gray-500">No data available for selected player/group.</p>
+                )}
             </div>
         </div>
-    )
+    );
 }

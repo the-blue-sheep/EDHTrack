@@ -2,49 +2,32 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
+import {usePlayers} from "../../hooks/usePlayers.ts";
+import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
 
 interface StreakDTO {
     playerName: string;
     streaks: number[];
 }
 
-interface Player {
-    id: number;
-    name: string;
-    isRetired: boolean;
-}
-
 export default function StreaksPage() {
-    const [players, setPlayers] = useState<Player[]>([]);
+    const { players } = usePlayers();
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>(undefined);
     const [data, setData] = useState<StreakDTO | null>(null);
     const [loading] = useState(false);
+    const [groupIds, setGroupIds] = useState<number[]>([]);
 
     useEffect(() => {
-        axios.get<Player[]>("/api/players")
-            .then(response => {
-                setPlayers(Array.isArray(response.data) ? response.data : []);
-            })
-            .catch(error => {
-                console.error("Error while loading players:", error);
-            });
-    }, []);
-
-    function onChangeHandlerPlayer(playerId?: number) {
-        const val = playerId;
-
-        if (!val) {
-            setSelectedPlayerId(undefined);
-            setData(null);
-            return;
-        }
-
-        const id = Number(val);
-        setSelectedPlayerId(id);
+        if (!selectedPlayerId) return;
 
         const toastId = toast.loading("Loading streaks...");
 
-        axios.get<StreakDTO>(`/api/stats/streaks?playerId=${id}`)
+        axios.get<StreakDTO>("/api/stats/streaks", {
+            params: {
+                playerId: selectedPlayerId,
+                groupIds: groupIds.length > 0 ? groupIds.join(",") : null
+            }
+        })
             .then(response => {
                 setData(response.data);
 
@@ -66,6 +49,17 @@ export default function StreaksPage() {
                     autoClose: 3000
                 });
             });
+
+    }, [selectedPlayerId, groupIds]);
+
+
+    function onChangeHandlerPlayer(playerId?: number) {
+        if (!playerId) {
+            setSelectedPlayerId(undefined);
+            setData(null);
+            return;
+        }
+        setSelectedPlayerId(Number(playerId));
     }
 
     return (
@@ -80,6 +74,10 @@ export default function StreaksPage() {
                         onChange={onChangeHandlerPlayer}
                     />
                 </div>
+                <GroupMultiSelect
+                    value={groupIds}
+                    onChange={setGroupIds}
+                />
             </div>
 
             {loading ? <p>Loading...</p> : null}
@@ -91,22 +89,19 @@ export default function StreaksPage() {
                     </h2>
 
                     <div className="flex flex-wrap gap-2">
-                        {data.streaks.map((streak, index) => (
+                        {data?.streaks?.map((streak, index) => (
                             <div
                                 key={index}
                                 className={`
-                  px-3 py-1 rounded text-white font-semibold
-                  ${streak > 0
-                                    ? "bg-green-600"
-                                    : "bg-red-600"}
-                `}
+                                px-3 py-1 rounded text-white font-semibold
+                                ${streak > 0 ? "bg-green-600" : "bg-red-600"}
+                              `}
                             >
-                                {streak > 0
-                                    ? `+${streak} Wins`
-                                    : `${Math.abs(streak)} Losses`}
+                                {streak > 0 ? `+${streak} Wins` : `${Math.abs(streak)} Losses`}
                             </div>
-                        ))}
+                        )) ?? <p>No streaks available</p>}
                     </div>
+
                 </div>
             :null}
         </div>

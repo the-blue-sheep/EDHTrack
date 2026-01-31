@@ -36,12 +36,15 @@ class GameServiceTest {
     @Mock
     DeckRepository deckRepository;
 
+    @Mock
+    PlayerGroupRepository playerGroupRepository;
+
     GameService gameService;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
-        gameService = new GameService(gameRepository, gameParticipantRepository, playerRepository, deckRepository);
+        gameService = new GameService(gameRepository, gameParticipantRepository, playerRepository, deckRepository, playerGroupRepository);
     }
 
     @Test
@@ -53,9 +56,12 @@ class GameServiceTest {
                 date,
                 "Holiday Game",
                 List.of(
-                        new GameParticipantDTO(1, 10, true),
-                        new GameParticipantDTO(2, 20, false)
-                )
+                        new GameParticipantDTO(1, 10, "", true, 1),
+                        new GameParticipantDTO(2, 20, "", false, 2)
+                ),
+                1,
+                0,
+                0
         );
 
         Player p1 = new Player();
@@ -76,6 +82,10 @@ class GameServiceTest {
         d2.setDeckName("DeckB");
         d2.setCommanders(new HashSet<>());
 
+        PlayerGroup group = new PlayerGroup();
+        group.setGroupId(1);
+        when(playerGroupRepository.findById(1)).thenReturn(Optional.of(group));
+
         when(playerRepository.findById(1)).thenReturn(Optional.of(p1));
         when(playerRepository.findById(2)).thenReturn(Optional.of(p2));
 
@@ -86,6 +96,7 @@ class GameServiceTest {
         savedGame.setId(55);
         savedGame.setDate(date);
         savedGame.setNotes("Holiday Game");
+        savedGame.setGroup(group);
 
         when(gameRepository.save(any(Game.class))).thenReturn(savedGame);
 
@@ -126,14 +137,19 @@ class GameServiceTest {
         g1.setPlayers(List.of(gp1));
 
         Page<Game> page = new PageImpl<>(List.of(g1));
+        PlayerGroup group = new PlayerGroup();
+        group.setGroupId(1);
+        g1.setGroup(group);
 
+        when(playerGroupRepository.findById(1)).thenReturn(Optional.of(group));
         when(gameRepository.findByFilters(
+                any(),
                 any(),
                 any(),
                 any(Pageable.class)
         )).thenReturn(page);
 
-        Page<GameOverviewDTO> result = gameService.getGames(0, 10, 0, "");
+        Page<GameOverviewDTO> result = gameService.getGames(0, 10, 0, "", "1");
 
         assertThat(result.getContent()).hasSize(1);
 
@@ -149,7 +165,7 @@ class GameServiceTest {
         assertThat(partDto.deckName()).isEqualTo("DeckC");
         assertThat(partDto.isWinner()).isTrue();
 
-        verify(gameRepository).findByFilters(any(), any(), any(Pageable.class));
+        verify(gameRepository).findByFilters(any(), any(), any(), any(Pageable.class));
     }
 
     @Test
@@ -157,7 +173,10 @@ class GameServiceTest {
         CreateGameDTO dto = new CreateGameDTO(
                 null,
                 "Notes",
-                List.of(new GameParticipantDTO(1, 10, true))
+                List.of(new GameParticipantDTO(1, 10, "", true, 0)),
+                1,
+                0,
+                0
         );
 
         Player p1 = new Player();
@@ -168,9 +187,12 @@ class GameServiceTest {
         d1.setDeckName("Alpha");
         d1.setCommanders(new HashSet<>());
 
+        PlayerGroup group = new PlayerGroup();
+        group.setGroupId(1);
+
         when(playerRepository.findById(1)).thenReturn(Optional.of(p1));
         when(deckRepository.findById(10)).thenReturn(Optional.of(d1));
-
+        when(playerGroupRepository.findById(1)).thenReturn(Optional.of(group));
         when(gameRepository.save(any(Game.class))).thenAnswer(invocation -> {
             Game g = invocation.getArgument(0);
             g.setId(500);
@@ -206,7 +228,11 @@ class GameServiceTest {
         gp.setWinner(true);
 
         game.setPlayers(List.of(gp));
+        PlayerGroup group = new PlayerGroup();
+        group.setGroupId(1);
+        game.setGroup(group);
 
+        when(playerGroupRepository.findById(1)).thenReturn(Optional.of(group));
         when(gameRepository.findById(1)).thenReturn(Optional.of(game));
 
         GameOverviewDTO dto = gameService.getGameById(1);
@@ -251,12 +277,15 @@ class GameServiceTest {
         when(playerRepository.findById(10)).thenReturn(Optional.of(player));
         when(deckRepository.findById(20)).thenReturn(Optional.of(deck));
 
-        GameParticipantDTO participantDTO = new GameParticipantDTO(10, 20, true);
+        GameParticipantDTO participantDTO = new GameParticipantDTO(10, 20, "", true, 0 );
 
         GameEditDTO dto = new GameEditDTO(
                 LocalDate.of(2025, 5, 5),
                 "Updated",
-                List.of(participantDTO)
+                List.of(participantDTO),
+                1,
+                0,
+                0
         );
 
         // when

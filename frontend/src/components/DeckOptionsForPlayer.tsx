@@ -20,14 +20,16 @@ export default function DeckOptionsForPlayer({ playerId }: { playerId: number })
 
     return (
         <>
-            {decks.map(deck => (
-                <option key={deck.deckId} value={deck.deckId}>
-                    {Array.isArray(deck.commanders)
-                        ? deck.commanders.join(", ")
-                        : deck.commanders}{" "}
-                    – {deck.deckName}
-                </option>
-            ))}
+            {decks
+                .filter(deck => !deck.retired)
+                .map(deck => (
+                    <option key={deck.deckId} value={deck.deckId}>
+                        {Array.isArray(deck.commanders)
+                            ? deck.commanders.join(", ")
+                            : deck.commanders}{" "}
+                        – {deck.deckName}
+                    </option>
+                ))}
         </>
     );
 }

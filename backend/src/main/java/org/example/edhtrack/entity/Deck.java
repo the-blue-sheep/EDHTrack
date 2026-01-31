@@ -2,6 +2,7 @@ package org.example.edhtrack.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.example.edhtrack.Utils;
 
 import java.util.Set;
 
@@ -15,7 +16,10 @@ public class Deck {
 
     private String colors;
     private String deckName;
-    private String bracket;
+
+    @Enumerated(EnumType.STRING)
+    private Utils.Bracket bracket;
+
     public boolean isRetired = false;
 
     @ManyToOne
