@@ -68,25 +68,16 @@ public class StatisticService {
         List<Integer> groups = parseGroups(groupIds);
 
         List<GameParticipant> participants =
-                gameParticipantRepository
-                        .findByDeck_Commanders_Name(commanderName)
-                        .stream()
-                        .filter(p ->
-                                p.getDeck() != null &&
-                                        p.getDeck().getCommanders()
-                                                .stream()
-                                                .anyMatch(c -> c.getName().equals(commanderName))
-                        )
+                gameParticipantRepository.findAll().stream()
+                        .filter(p -> p.getDeck() != null &&
+                                p.getDeck().getCommanders().stream()
+                                        .anyMatch(c -> c.getName().equals(commanderName)))
                         .toList();
 
         if (groups != null) {
             participants = participants.stream()
-                    .filter(p ->
-                            p.getGame().getGroup() != null &&
-                                    groups.contains(
-                                            p.getGame().getGroup().getGroupId()
-                                    )
-                    )
+                    .filter(p -> p.getGame().getGroup() != null &&
+                            groups.contains(p.getGame().getGroup().getGroupId()))
                     .toList();
         }
 
@@ -124,7 +115,6 @@ public class StatisticService {
                 winRate
         );
     }
-
 
 
     public ColorStatDTO getWinrateByColor(String colors) {
