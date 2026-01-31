@@ -1,6 +1,7 @@
 package org.example.edhtrack;
 
 import lombok.Getter;
+import org.example.edhtrack.dto.GameParticipantDTO;
 import org.example.edhtrack.dto.deck.DeckDTO;
 import org.example.edhtrack.dto.player.PlayerResultDTO;
 import org.example.edhtrack.entity.Commander;
@@ -135,5 +136,25 @@ public final class Utils {
                 .map(Integer::parseInt)
                 .toList();
     }
+
+    public static void validateTurnOrder(List<GameParticipantDTO> parts) {
+
+        List<Integer> values = parts.stream()
+                .map(p -> p.turnOrder() == null ? 0 : p.turnOrder())
+                .toList();
+
+        List<Integer> nonZero = values.stream()
+                .filter(v -> v != 0)
+                .toList();
+
+        if (nonZero.isEmpty()) return;
+
+        if (values.contains(0))
+            throw new IllegalArgumentException("Mixed turn order");
+
+        if (nonZero.size() != new HashSet<>(nonZero).size())
+            throw new IllegalArgumentException("Duplicate turn order");
+    }
+
 
 }

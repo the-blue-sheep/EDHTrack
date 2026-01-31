@@ -4,5 +4,6 @@ public record GameParticipantDTO(
         int playerId,
         int deckId,
         String notes,
-        boolean isWinner
+        boolean isWinner,
+        Integer turnOrder
 ) {}

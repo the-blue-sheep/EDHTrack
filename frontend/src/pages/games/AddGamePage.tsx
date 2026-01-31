@@ -11,6 +11,7 @@ interface ParticipantInput {
     deckId?: number;
     isWinner: boolean;
     notes?: string;
+    turnOrder: number;
 }
 
 interface PlayerGroup {
@@ -27,7 +28,8 @@ export default function AddGamePage() {
 
     const [participants, setParticipants] = useState<ParticipantInput[]>([]);
     const [numberOfPlayers, setNumberOfPlayers] = useState<number>(4);
-
+    const [firstKillTurn, setFirstKillTurn] = useState<number>(0);
+    const [lastTurn, setLastTurn] = useState<number>(0);
     const [comment, setComment] = useState("");
     const [date, setDate] = useState<string>(
         new Date().toISOString().split("T")[0]
@@ -56,13 +58,34 @@ export default function AddGamePage() {
                     playerId: undefined,
                     deckId: undefined,
                     isWinner: false,
-                    notes: ""
+                    notes: "",
+                    turnOrder: 0
                 });
             }
 
             return copy.slice(0, numberOfPlayers);
         });
     }, [numberOfPlayers]);
+
+    function isDuplicateTurnOrder(value: number, index: number) {
+        if (value === 0) return false;
+
+        return participants.some(
+            (p, i) => i !== index && p.turnOrder === value
+        );
+    }
+    function validateTurnOrder(): boolean {
+        const values = participants.map(p => p.turnOrder ?? 0);
+
+        const nonZero = values.filter(v => v !== 0);
+
+        if (nonZero.length === 0) return true;
+
+        if (values.some(v => v === 0)) return false;
+
+        const unique = new Set(nonZero);
+        return unique.size === nonZero.length;
+    }
 
     function updateParticipant(
         index: number,
@@ -78,6 +101,16 @@ export default function AddGamePage() {
     function handleNumberChange(e: ChangeEvent<HTMLInputElement>) {
         const val = Number(e.target.value);
         if (val >= 1) setNumberOfPlayers(val);
+    }
+
+    function handleFirstTurnKillChange(e: ChangeEvent<HTMLInputElement>) {
+        const val = Number(e.target.value);
+        if (val >= 0) setFirstKillTurn(val);
+    }
+
+    function handleLastTurnChange(e: ChangeEvent<HTMLInputElement>) {
+        const val = Number(e.target.value);
+        if (val >= 0) setLastTurn(val);
     }
 
     function handlePlayerChange(index: number, playerId: number) {
@@ -104,6 +137,14 @@ export default function AddGamePage() {
             });
             return;
         }
+        if (!validateTurnOrder()) {
+            toast.update(toasty, {
+                render: "Turn order must be either all 0 or all unique numbers",
+                type: "error",
+                isLoading: false
+            });
+            return;
+        }
 
         const body = {
             date,
@@ -113,8 +154,11 @@ export default function AddGamePage() {
                 playerId: p.playerId!,
                 deckId: p.deckId!,
                 isWinner: p.isWinner,
-                notes: p.notes
-            }))
+                notes: p.notes,
+                turnOrder: p.turnOrder
+            })),
+            firstKillTurn: firstKillTurn,
+            lastTurn: lastTurn
         };
 
         axios.post("/api/games", body)
@@ -151,13 +195,12 @@ export default function AddGamePage() {
                         </label>
                         <input
                             type="number"
-                            min={1}
+                            min={2}
                             value={numberOfPlayers}
                             onChange={handleNumberChange}
                             className="border px-2 py-1 rounded w-20"
                         />
                     </div>
-
                     <div>
                         <label className="block text-sm font-medium mb-1">
                             Group played in
@@ -181,7 +224,28 @@ export default function AddGamePage() {
 
                 {participants.map((p, idx) => (
                     <div key={idx} className="flex gap-4 items-start">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                Turn Order
+                            </label>
+                            <input
+                                type="number"
+                                min={0}
+                                max={numberOfPlayers}
+                                value={p.turnOrder ?? 0}
+                                onChange={e =>
+                                    updateParticipant(idx, {
+                                        turnOrder: Number(e.target.value)
+                                    })
+                                }
+                                className={`border px-2 py-1 rounded w-20 ${
+                                    isDuplicateTurnOrder(p.turnOrder ?? 0, idx)
+                                        ? "border-red-500 border-4"
+                                        : ""
+                                }`}
 
+                            />
+                        </div>
                         <div className="flex items-center mt-6">
                             <input
                                 type="checkbox"
@@ -252,8 +316,7 @@ export default function AddGamePage() {
                     </div>
                 ))}
 
-                {/* Date */}
-                <div>
+                <div className="flex flex-wrap gap-6">
                     <label className="block text-sm mb-1">Date</label>
                     <input
                         type="date"
@@ -261,6 +324,25 @@ export default function AddGamePage() {
                         onChange={e => setDate(e.target.value)}
                         className="border px-2 py-1 rounded"
                     />
+
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Turn of first kill</label>
+                    <input
+                        type="number"
+                        min={0}
+                        value={firstKillTurn}
+                        onChange={handleFirstTurnKillChange}
+                        className="border px-2 py-1 rounded w-20"
+                    />
+
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Last turn</label>
+                    <input
+                        type="number"
+                        min={0}
+                        value={lastTurn}
+                        onChange={handleLastTurnChange}
+                        className="border px-2 py-1 rounded w-20"
+                    />
+                    0 means not recorded
                 </div>
 
                 <div>

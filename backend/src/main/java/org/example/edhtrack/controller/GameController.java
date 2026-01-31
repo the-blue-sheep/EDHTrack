@@ -28,7 +28,7 @@ public class GameController {
             @RequestParam(required = false) String groupIds
     ) {
 
-        if (playerId != null && playerId.intValue() == 0) {
+        if (playerId != null && playerId == 0) {
             playerId = null;
         }
 

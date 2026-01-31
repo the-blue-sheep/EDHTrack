@@ -43,6 +43,8 @@ public class GameService {
         Game game = new Game();
         game.setDate(dto.date() == null ? LocalDate.now() : dto.date());
         game.setNotes(dto.notes());
+        game.setFirstKillTurn(dto.firstKillTurn());
+        game.setLastTurn(dto.lastTurn());
 
         PlayerGroup group;
         if (dto.groupId() == null) {
@@ -63,6 +65,7 @@ public class GameService {
                     gp.setDeck(deckRepository.findById(p.deckId()).orElseThrow());
                     gp.setNotes(p.notes());
                     gp.setWinner(p.isWinner());
+                    gp.setTurnOrder(p.turnOrder());
                     return gp;
                 })
                 .toList();
@@ -100,10 +103,13 @@ public class GameService {
                                         .collect(Collectors.toSet()),
                                 p.getDeck().getDeckName(),
                                 p.getNotes(),
-                                p.isWinner()
+                                p.isWinner(),
+                                p.getTurnOrder()
                         ))
                         .toList(),
-                game.getGroup().getGroupId()
+                game.getGroup().getGroupId(),
+                game.getFirstKillTurn(),
+                game.getLastTurn()
         );
     }
 
@@ -158,6 +164,8 @@ public class GameService {
 
         game.setDate(dto.date());
         game.setNotes(dto.notes());
+        game.setFirstKillTurn(dto.firstKillTurn());
+        game.setLastTurn(dto.lastTurn());
 
         game.getPlayers().clear();
 
@@ -175,9 +183,11 @@ public class GameService {
             gp.setDeck(deck);
             gp.setWinner(p.isWinner());
             gp.setNotes(p.notes());
+            gp.setTurnOrder(p.turnOrder());
 
             game.getPlayers().add(gp);
         }
+        Utils.validateTurnOrder(dto.participants());
 
         gameRepository.save(game);
     }

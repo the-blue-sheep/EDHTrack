@@ -18,6 +18,9 @@ interface GameOverviewDTO {
     date: string;
     notes: string;
     participants: GameParticipant[];
+    groupId: number;
+    firstKillTurn: number;
+    lastTurn: number;
 }
 
 interface PageResponse<T> {
@@ -32,24 +35,20 @@ export default function GameOverviewPage() {
     const { players } = usePlayers();
     const { commanders: allCommanders, loading: commandersLoading } = useCommanders();
 
-    // --- Input States ---
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | undefined>();
     const [commanderInput, setCommanderInput] = useState("");
     const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
 
-    // --- Filter States (Anwendung der Filter) ---
     const [playerFilterId, setPlayerFilterId] = useState<number | null>(null);
     const [commanderFilter, setCommanderFilter] = useState<string | null>(null);
     const [groupFilterIds, setGroupFilterIds] = useState<number[] | null>(null);
 
-    // --- Table / Pagination ---
     const [games, setGames] = useState<GameOverviewDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [hasLoaded, setHasLoaded] = useState(false);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
-    // --- Fetch Games ---
     useEffect(() => {
         setLoading(true);
 
@@ -60,6 +59,8 @@ export default function GameOverviewPage() {
                 playerId: playerFilterId,
                 commander: commanderFilter,
                 groupIds: groupFilterIds ? groupFilterIds.join(",") : null,
+                firstKillTurn: 0,
+                lastTurn: 0,
             },
         })
             .then(resp => {
@@ -70,7 +71,6 @@ export default function GameOverviewPage() {
             .finally(() => setLoading(false));
     }, [page, playerFilterId, commanderFilter, groupFilterIds]);
 
-    // --- Apply / Reset Handler ---
     const handleApply = () => {
         setPage(0);
         setPlayerFilterId(selectedPlayerId ?? null);
@@ -143,10 +143,8 @@ export default function GameOverviewPage() {
                 </button>
             </div>
 
-            {/* EMPTY STATE */}
             {hasLoaded && games.length === 0 && <p>No games found</p>}
 
-            {/* TABLE */}
             <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full border-collapse border border-gray-300">
                     <thead className="bg-gray-100">
@@ -192,7 +190,6 @@ export default function GameOverviewPage() {
                 </table>
             </div>
 
-            {/* MOBILE CARDS */}
             <div className="md:hidden space-y-4">
                 {games.map(game => (
                     <div key={game.gameId} className="border rounded-lg p-4 shadow-sm">
@@ -230,7 +227,6 @@ export default function GameOverviewPage() {
                 ))}
             </div>
 
-            {/* PAGINATION */}
             <div className="flex justify-between items-center mt-6">
                 <button
                     disabled={page === 0}

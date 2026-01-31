@@ -1,15 +1,16 @@
 import {useParams} from "react-router-dom";
-import {type FormEvent, useEffect, useState} from "react";
+import {type ChangeEvent, type FormEvent, useEffect, useState} from "react";
 import DeckOptionsForPlayer from "../../components/DeckOptionsForPlayer.tsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {toast} from "react-toastify";
 
-
 class GameEditDTO {
     gameId: number = 0;
     date: string = new Date().toISOString().split("T")[0];
     notes: string = "";
+    firstKillTurn: number = 0;
+    lastTurn: number = 0;
     participants: ParticipantInput[] = [];
 }
 
@@ -21,6 +22,7 @@ interface ParticipantInput {
     deckName?: string;
     isWinner: boolean;
     notes?: string;
+    turnOrder: number;
 }
 
 interface PlayerGroup {
@@ -33,6 +35,7 @@ export default function EditGamePage() {
     const [groups, setGroups] = useState<PlayerGroup[]>([]);
     const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
     const [game, setGame] = useState<GameEditDTO>(new GameEditDTO());
+    const [numberOfPlayers] = useState<number>();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -59,9 +62,63 @@ export default function EditGamePage() {
         });
     }
 
+    function handleFirstKillTurnChange(e: ChangeEvent<HTMLInputElement>) {
+        setGame(prev => ({
+            ...prev,
+            firstKillTurn: Number(e.target.value)
+        }));
+    }
+
+    function handleLastTurnChange(e: ChangeEvent<HTMLInputElement>) {
+        setGame(prev => ({
+            ...prev,
+            lastTurn: Number(e.target.value)
+        }));
+    }
+    function isDuplicateTurnOrder(value: number, index: number) {
+        if (value === 0) return false;
+
+        return game.participants.some(
+            (p, i) => i !== index && p.turnOrder === value
+        );
+    }
+    function validateTurnOrder(): boolean {
+        const values = game.participants.map(p => p.turnOrder ?? 0);
+
+        const nonZero = values.filter(v => v !== 0);
+
+        if (nonZero.length === 0) return true;
+
+        if (values.some(v => v === 0)) return false;
+
+        const unique = new Set(nonZero);
+        return unique.size === nonZero.length;
+    }
+    function updateParticipant(
+        index: number,
+        patch: Partial<ParticipantInput>
+    ) {
+        setGame(prev => {
+            if (!prev) return prev;
+
+            const copy = [...prev.participants];
+            copy[index] = { ...copy[index], ...patch };
+
+            return { ...prev, participants: copy };
+        });
+    }
+
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const toasty = toast.loading("Submitting game...");
+        if (!validateTurnOrder()) {
+            toast.update(toasty, {
+                render: "Turn order must be either all 0 or all unique numbers",
+                type: "error",
+                isLoading: false
+            });
+            return;
+        }
         await axios.put(`/api/games/${id}`, game)
             .then(() => {
                 toast.update(toasty, {
@@ -86,7 +143,6 @@ export default function EditGamePage() {
         if (!window.confirm("Are you sure you want to delete this game?")) return;
         const toasty = toast.loading("Submitting game...");
 
-
         axios.delete(`/api/games`, {params: {id: game.gameId}})
             .then(() => {
                 toast.update(toasty, {
@@ -105,7 +161,6 @@ export default function EditGamePage() {
                 type: "error",
                 isLoading: false
             }));
-
     }
 
     return (
@@ -115,12 +170,35 @@ export default function EditGamePage() {
             <form onSubmit={handleSubmit} className="space-y-4">
 
                 {game.participants.map((p, idx) => (
+
                     <div
                         key={idx}
                         className="flex gap-4 items-start"
                     >
-                    <div className="flex items-center mt-6">
-                        <input
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                Turn Order
+                            </label>
+                            <input
+                                type="number"
+                                min={0}
+                                max={numberOfPlayers}
+                                value={p.turnOrder ?? 0}
+                                onChange={e =>
+                                    updateParticipant(idx, {
+                                        turnOrder: Number(e.target.value) || 0
+                                    })
+                                }
+                                className={`border px-2 py-1 rounded w-20 ${
+                                    isDuplicateTurnOrder(p.turnOrder ?? 0, idx)
+                                        ? "border-red-500 border-4"
+                                        : ""
+                                }`}
+
+                            />
+                        </div>
+                        <div className="flex items-center mt-6">
+                            <input
                                 type="checkbox"
                                 checked={p.isWinner}
                                 onChange={e => toggleWinner(idx, e.target.checked)}
@@ -180,6 +258,7 @@ export default function EditGamePage() {
                                     : null}
                             </select>
                         </div>
+
                         <div className="w-full">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Notes
@@ -204,7 +283,7 @@ export default function EditGamePage() {
                     </div>
                 ))}
 
-                <div>
+                <div className="flex flex-wrap gap-6">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                     <input
                         type="date"
@@ -212,10 +291,31 @@ export default function EditGamePage() {
                         onChange={e => setGame(prev => prev && { ...prev, date: e.target.value })}
                         className="border px-2 py-1 rounded"
                     />
+
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Turn of first kill</label>
+                    <input
+                        type="number"
+                        min={0}
+                        value={game.firstKillTurn ?? 0}
+                        onChange={handleFirstKillTurnChange}
+                        className="border px-2 py-1 rounded w-20"
+                    />
+
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Last turn</label>
+                    <input
+                        type="number"
+                        min={0}
+                        value={game.lastTurn ?? 0}
+                        onChange={handleLastTurnChange}
+                        className="border px-2 py-1 rounded w-20"
+                    />
+                    0 means not recorded
                 </div>
 
                 <div>
-                    <label className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md  focus:ring-purple-500 focus:border-purple-500">Comment</label>
+                    <label className="min-w-[320px] max-w-2xl border border-gray-300 px-3 py-2 rounded-md  focus:ring-purple-500 focus:border-purple-500">
+                        Comment
+                    </label>
                     <textarea
                         value={game.notes ?? ""}
                         onChange={e => setGame(prev => prev && { ...prev, notes: e.target.value })}

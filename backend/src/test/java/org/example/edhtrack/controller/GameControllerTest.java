@@ -46,16 +46,18 @@ class GameControllerTest {
     @Test
     void getGames_returnsPagedGames() throws Exception {
         GameParticipantOverviewDTO p1 =
-                new GameParticipantOverviewDTO(1, "Alice", 11, Set.of("Mrs. Bumbleflower"), "Bribe Control", "", true);
+                new GameParticipantOverviewDTO(1, "Alice", 11, Set.of("Mrs. Bumbleflower"), "Bribe Control", "", true, 0);
         GameParticipantOverviewDTO p2 =
-                new GameParticipantOverviewDTO(2, "Bob", 22, Set.of("Hazezon, Shaper of Sands"), "Midrange", "", false);
+                new GameParticipantOverviewDTO(2, "Bob", 22, Set.of("Hazezon, Shaper of Sands"), "Midrange", "", false, 0);
 
         GameOverviewDTO game1 = new GameOverviewDTO(
                 100,
                 LocalDate.of(2025, 12, 1),
                 "Fun game",
                 List.of(p1, p2),
-                1
+                1,
+                0,
+                0
         );
 
         Page<GameOverviewDTO> page = new PageImpl<>(

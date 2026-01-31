@@ -28,4 +28,5 @@ public class GameParticipant {
     private String notes;
 
     private boolean isWinner;
+    private Integer turnOrder;
 }

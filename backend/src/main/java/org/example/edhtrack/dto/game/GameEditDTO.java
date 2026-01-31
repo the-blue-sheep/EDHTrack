@@ -9,5 +9,7 @@ public record GameEditDTO(
         LocalDate date,
         String notes,
         List<GameParticipantDTO> participants,
-        int groupId
+        int groupId,
+        int firstKillTurn,
+        int lastTurn
 ) {}

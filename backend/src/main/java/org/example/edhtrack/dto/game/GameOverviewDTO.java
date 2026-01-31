@@ -10,5 +10,7 @@ public record GameOverviewDTO(
         LocalDate date,
         String notes,
         List<GameParticipantOverviewDTO> participants,
-        int groupId
+        int groupId,
+        Integer firstKillTurn,
+        Integer lastTurn
 ) {}

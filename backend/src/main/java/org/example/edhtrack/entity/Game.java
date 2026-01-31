@@ -28,4 +28,7 @@ public class Game {
     @ManyToOne
     @JoinColumn(name = "group_id")
     private PlayerGroup group;
+
+    private Integer firstKillTurn;
+    private Integer lastTurn;
 }
