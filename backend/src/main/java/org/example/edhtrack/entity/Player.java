@@ -23,8 +23,14 @@ public class Player {
 
     public boolean isRetired = false;
 
-    @ManyToMany(mappedBy = "players")
+    @ManyToMany
+    @JoinTable(
+            name = "player_group_membership",
+            joinColumns = @JoinColumn(name = "player_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id")
+    )
     private Set<PlayerGroup> groups = new HashSet<>();
+
 
     @Override
     public boolean equals(Object o) {
