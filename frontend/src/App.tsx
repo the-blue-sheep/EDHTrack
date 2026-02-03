@@ -24,6 +24,7 @@ import EditGamePage from "./pages/games/EditGamePage.tsx";
 import TableSizeWinrate from "./pages/statistics/TableSizeWinrate.tsx";
 import WinrateOverTime from "./pages/statistics/WinrateOverTime.tsx";
 import DeletePage from "./pages/player/DeletePage.tsx";
+import "./api/axiosConfig.ts";
 
 function App() {
 

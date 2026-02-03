@@ -4,7 +4,7 @@ import org.example.edhtrack.Utils;
 
 public record LoginResponse(
         String username,
-        Utils.Role role,
+        String userUsername, Utils.Role role,
         Integer playerId
 ) {}
 
