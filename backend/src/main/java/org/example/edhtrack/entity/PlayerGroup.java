@@ -20,12 +20,7 @@ public class PlayerGroup {
     @Column(nullable = false)
     private boolean isDefault;
 
-    @ManyToMany
-    @JoinTable(
-            name = "player_group_membership",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "player_id")
-    )
+    @ManyToMany(mappedBy = "groups")
     private Set<Player> players = new HashSet<>();
 
     @Override
