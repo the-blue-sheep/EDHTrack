@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 
 export interface Player {
     id: number;
@@ -13,7 +13,7 @@ export function usePlayers() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        axios.get<Player[]>("/api/players")
+        api.get<Player[]>("/api/players")
             .then(res => {
                 setPlayers(Array.isArray(res.data) ? res.data : []);
             })

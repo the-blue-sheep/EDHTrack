@@ -1,10 +1,10 @@
 
 import { createContext } from "react";
-import type {AuthUser} from "./useAuth";
+import type {LoginResponse} from "./useAuth.ts";
 
 export interface AuthContextType {
-    user: AuthUser | null;
-    login: (user: AuthUser) => void;
+    user: LoginResponse  | null;
+    login: (user: LoginResponse) => void;
     logout: () => void;
 }
 

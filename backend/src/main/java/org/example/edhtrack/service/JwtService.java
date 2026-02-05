@@ -41,4 +41,26 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public boolean isTokenValid(String token, User user) {
+
+        String username = extractUsername(token);
+
+        return username.equals(user.getUsername())
+                && !isTokenExpired(token);
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractClaims(token)
+                .getExpiration()
+                .before(new Date());
+    }
+
+    private Claims extractClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
 }

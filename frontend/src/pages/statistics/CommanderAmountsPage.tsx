@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "@/api/axiosConfig";
 
 interface CommanderAmountStatDTO {
     commander: string;
@@ -15,8 +16,8 @@ export default function CommanderAmountsPage() {
 
     async function load() {
         setLoading(true);
-        const res = await fetch("/api/stats/commander-amounts");
-        setData(await res.json());
+        const res = await api.get("/api/stats/commander-amounts");
+        setData(res.data);
         setLoading(false);
     }
 

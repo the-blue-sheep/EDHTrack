@@ -4,6 +4,7 @@ import org.example.edhtrack.dto.group.CreateGroupDTO;
 import org.example.edhtrack.dto.group.PlayerGroupDTO;
 import org.example.edhtrack.dto.group.UpdateGroupDTO;
 import org.example.edhtrack.service.PlayerGroupService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,11 +24,13 @@ public class GroupController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPERUSER','ADMIN')")
     public PlayerGroupDTO create(@RequestBody CreateGroupDTO dto) {
         return playerGroupService.save(dto);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ADMIN')")
     public void rename(
             @PathVariable int id,
             @RequestBody UpdateGroupDTO dto
@@ -36,6 +39,7 @@ public class GroupController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ADMIN')")
     public void delete(@PathVariable int id) {
         System.out.println("Controller deleting group with id: " + id);
         playerGroupService.deleteById(id);

@@ -7,6 +7,7 @@ import org.example.edhtrack.dto.deck.RetireDeckDTO;
 import org.example.edhtrack.service.DeckService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -23,16 +24,19 @@ public class DeckController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('USER','SUPERUSER','ADMIN')")
     public DeckDTO createDeck(@RequestBody CreateDeckDTO createDeckDTO) {
         return deckService.createDeck(createDeckDTO);
     }
 
     @PostMapping("/retire")
+    @PreAuthorize("hasAnyRole('USER','SUPERUSER','ADMIN')")
     public DeckDTO setRetiredDeckStatus(@RequestBody RetireDeckDTO retireDeckDTO) {
         return deckService.setRetiredDeckStatus(retireDeckDTO);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','SUPERUSER','ADMIN')")
     public DeckDTO updateDeck(@PathVariable int id, @RequestBody DeckDTO dto) {
         return deckService.updateDeck(id, dto);
     }
@@ -43,6 +47,7 @@ public class DeckController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','SUPERUSER','ADMIN')")
     public ResponseEntity<Object> deleteDeck(@PathVariable int id) {
         try {
             deckService.deleteDeck(id);

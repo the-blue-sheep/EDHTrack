@@ -1,10 +1,9 @@
-package org.example.edhtrack.component;
+package org.example.edhtrack.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.edhtrack.entity.User;
 import org.example.edhtrack.repository.UserRepository;
 import org.example.edhtrack.service.JwtService;
 import org.springframework.lang.NonNull;
@@ -48,21 +47,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = header.substring(7);
         String username = jwtService.extractUsername(token);
 
-        User user = userRepository
-                .findByUsername(username)
-                .orElseThrow();
+        if (username != null
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(
-                        user.getUsername(),
-                        null,
-                        List.of(new SimpleGrantedAuthority(
-                                "ROLE_" + user.getRole().name()
-                        ))
-                );
+            userRepository.findByUsername(username).ifPresent(user -> {
+                if (jwtService.isTokenValid(token, user)) {
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(
+                                    user.getUsername(),
+                                    null,
+                                    List.of(new SimpleGrantedAuthority(
+                                            "ROLE_" + user.getRole().name()
+                                    ))
+                            );
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        System.out.println("AUTH SET FOR " + username);
+                    SecurityContextHolder
+                            .getContext()
+                            .setAuthentication(auth);
+                }
+            });
+        }
 
         filterChain.doFilter(request, response);
     }

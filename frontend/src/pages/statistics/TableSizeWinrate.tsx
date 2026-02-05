@@ -1,6 +1,6 @@
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import { toast } from "react-toastify";
 import { usePlayers } from "../../hooks/usePlayers.ts";
 import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
@@ -36,7 +36,7 @@ export default function TableSizeWinrate() {
             params.groupIds = groupIds.join(",");
         }
 
-        axios.get<TableSizeWinrateResponseDTO>(`/api/stats/players/${selectedPlayerId}/table-size-winrate`, { params })
+        api.get<TableSizeWinrateResponseDTO>(`/api/stats/players/${selectedPlayerId}/table-size-winrate`, { params })
             .then(res => {
                 setTableSizeWinrate(res.data);
 

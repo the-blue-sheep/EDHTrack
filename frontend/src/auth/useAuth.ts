@@ -1,9 +1,10 @@
 import { useContext } from "react";
 import { AuthContext } from "./AuthContext";
 
-export interface AuthUser {
+export interface LoginResponse {
+    token: string;
     username: string;
-    role: "USER" | "ADMIN";
+    role: "USER" | "SUPERUSER" | "ADMIN";
     playerId?: number;
 }
 

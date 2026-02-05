@@ -1,6 +1,11 @@
 import axios from "axios";
 
-axios.interceptors.request.use(config => {
+const api = axios.create({
+    baseURL: "/",
+    validateStatus: status => status < 400
+});
+
+api.interceptors.request.use(config => {
     const token = localStorage.getItem("jwt");
 
     if (token) {
@@ -9,3 +14,5 @@ axios.interceptors.request.use(config => {
 
     return config;
 });
+
+export default api;

@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import {useState, useEffect, type ChangeEvent, type FormEvent} from "react";
 import { computeColorsFromCommanders } from "../../services/scryfall.ts";
 import { toast } from "react-toastify";
@@ -33,7 +33,7 @@ export default function AddDeckPage() {
     const [brackets, setBrackets] = useState<BracketDTO[]>([]);
 
     useEffect(() => {
-        axios.get<BracketDTO[]>("/api/decks/brackets")
+        api.get<BracketDTO[]>("/api/decks/brackets")
             .then(res => setBrackets(res.data))
             .catch(() => console.error("Failed to load brackets"));
     }, []);
@@ -86,7 +86,7 @@ export default function AddDeckPage() {
             colors: computedColors
         };
 
-        axios.post("/api/decks", finalDTO)
+        api.post("/api/decks", finalDTO)
             .then(() => {toast.update(toasty, {render: "All is good", type: "success", isLoading: false, autoClose: 3000})
                 setFormData({
                     playerId: 0,

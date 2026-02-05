@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import {useState, useEffect} from "react";
 
 export function useAutocomplete(input: string) {
@@ -18,7 +18,7 @@ export function useAutocomplete(input: string) {
             setResults([]);
             return;
         }
-        axios.get("https://api.scryfall.com/cards/autocomplete", {
+        api.get("https://api.scryfall.com/cards/autocomplete", {
             params: { q: debouncedInput },
             headers: { Accept: "*/*", "User-Agent": "EDHTrack/0.4" }
         })

@@ -4,7 +4,10 @@ import org.example.edhtrack.dto.login.ChangePasswordRequest;
 import org.example.edhtrack.dto.login.LoginRequest;
 import org.example.edhtrack.dto.login.LoginResponse;
 import org.example.edhtrack.service.AuthService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 
@@ -21,9 +24,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest req) {
-        return authService.login(req);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
+        try {
+            LoginResponse resp = authService.login(req);
+            return ResponseEntity.ok(resp);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(null);
+        }
     }
+
 
     @PostMapping("/change-password")
     public void changePassword(

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import { toast } from "react-toastify";
 import { computeColorsFromCommanders } from "../../services/scryfall.ts";
 import { AutocompleteInput } from "../../components/AutocompleteInput.tsx";
@@ -54,12 +54,12 @@ export default function UpdatePlayerAndDecksPage() {
     const [brackets, setBrackets] = useState<BracketDTO[]>([]);
 
     useEffect(() => {
-        axios.get<Player[]>("/api/players")
+        api.get<Player[]>("/api/players")
             .then(response => {
                 setPlayers(Array.isArray(response.data) ? response.data : []);
             });
 
-        axios.get<BracketDTO[]>("/api/decks/brackets")
+        api.get<BracketDTO[]>("/api/decks/brackets")
             .then(res => setBrackets(res.data))
             .catch(() => console.error("Failed to load brackets"));
     }, []);
@@ -71,7 +71,7 @@ export default function UpdatePlayerAndDecksPage() {
         }
 
         const toasty = toast.loading("Loading decks...");
-        axios.get(`/api/players/${selectedPlayer.id}/decks`)
+        api.get(`/api/players/${selectedPlayer.id}/decks`)
             .then(response => {
                 toast.update(toasty, {
                     render: "Decks loaded",
@@ -98,7 +98,7 @@ export default function UpdatePlayerAndDecksPage() {
         }
 
         const toasty = toast.loading("Loading player...");
-        axios.get<Player>(`/api/players/${selectedPlayerId}`)
+        api.get<Player>(`/api/players/${selectedPlayerId}`)
             .then(response => {
                 setSelectedPlayer(response.data);
                 toast.update(toasty, {
@@ -132,7 +132,7 @@ export default function UpdatePlayerAndDecksPage() {
 
             const toasty = toast.loading("Please wait...");
 
-            axios.post('/api/decks/retire', retireDeckDTO)
+            api.post('/api/decks/retire', retireDeckDTO)
                 .then(res => {
                     const updatedDeck = res.data;
                     setDecks(prev =>
@@ -154,7 +154,7 @@ export default function UpdatePlayerAndDecksPage() {
         };
 
         const toasty = toast.loading("Updating player...");
-        axios.post('/api/players/update', playerUpdateDTO)
+        api.post('/api/players/update', playerUpdateDTO)
             .then(response => {
                 toast.update(toasty, {
                     render: "Player updated",
@@ -211,7 +211,7 @@ export default function UpdatePlayerAndDecksPage() {
         };
 
         const toasty = toast.loading("Saving deck...");
-        axios.put(`/api/decks/${deckId}`, dto)
+        api.put(`/api/decks/${deckId}`, dto)
             .then(response => {
                 toast.update(toasty, {
                     render: "Deck updated",

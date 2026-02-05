@@ -2,7 +2,7 @@
 
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import { toast } from "react-toastify";
 import DeckStatsTable from "../../components/DeckStatsTable.tsx";
 import MinGamesInput from "../../components/MinGamesInput.tsx";
@@ -66,7 +66,7 @@ export default function PlayerDetailPage() {
         if (!id) return;
         const toasty = toast.loading("Loading details...");
 
-        axios.get<DeckStatDTO[]>(`/api/stats/players/${id}/top-played-decks`)
+        api.get<DeckStatDTO[]>(`/api/stats/players/${id}/top-played-decks`)
             .then(res => {
                 setTopPlayed(res.data)
                 toast.update(toasty, {
@@ -77,7 +77,7 @@ export default function PlayerDetailPage() {
                 });
             });
 
-        axios.get<DeckStatDTO[]>(`/api/stats/players/${id}/top-successful-decks`, {params: { minGames: minGames } })
+        api.get<DeckStatDTO[]>(`/api/stats/players/${id}/top-successful-decks`, {params: { minGames: minGames } })
             .then(res => {
                 setTopSuccessful(res.data)
                 toast.update(toasty, {
@@ -100,7 +100,7 @@ export default function PlayerDetailPage() {
         if (!id) return;
 
         const toasty = toast.loading("Loading player details...");
-        axios.get<PlayerDetailDTO>(`/api/stats/players/${id}/detail`)
+        api.get<PlayerDetailDTO>(`/api/stats/players/${id}/detail`)
             .then(res => {
                 setData(res.data);
                 toast.update(toasty, {

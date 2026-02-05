@@ -1,5 +1,5 @@
 import {toast} from "react-toastify";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import {useNavigate} from "react-router-dom";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import {useEffect, useState} from "react";
@@ -26,7 +26,7 @@ export default function DeletePage() {
 
         const toasty = toast.loading("Loading decks...");
 
-        axios.get(`/api/players/${selectedPlayerId}/decks`)
+        api.get(`/api/players/${selectedPlayerId}/decks`)
             .then(response => {
                 const data = response.data;
                 const decksArray = Array.isArray(data) ? data : Object.values(data);
@@ -61,7 +61,7 @@ export default function DeletePage() {
         const toasty = toast.loading("Deleting game...");
 
 
-        axios.delete(`/api/players/${selectedPlayerId}`)
+        api.delete(`/api/players/${selectedPlayerId}`)
             .then(() => {
                 toast.update(toasty, {
                     render: "Player deleted!",
@@ -85,7 +85,7 @@ export default function DeletePage() {
     async function handleDeleteDeck( deckId: number) {
         if (!window.confirm("Are you sure you want to delete this deck?")) return;
         const toasty = toast.loading("Deleting deck...");
-        axios.delete(`/api/decks/${deckId}`)
+        api.delete(`/api/decks/${deckId}`)
             .then(() => {
                 toast.update(toasty, {
                     render: "Deleting deck!",

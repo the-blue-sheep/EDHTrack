@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -27,7 +27,7 @@ export default function PlayerGroupsSettings() {
     const [editingNames, setEditingNames] = useState<{ [key: number]: string }>({});
 
     const loadGroups = () => {
-        axios.get<PlayerGroupDTO[]>("/api/groups")
+        api.get<PlayerGroupDTO[]>("/api/groups")
             .then(res => setGroups(res.data))
             .catch(() => toast.error("Failed to load groups"));
     };
@@ -41,7 +41,7 @@ export default function PlayerGroupsSettings() {
 
         const dto: CreateGroupDTO = { name: newGroupName.trim() };
         const toasty = toast.loading("Adding group...");
-        axios.post("/api/groups", dto)
+        api.post("/api/groups", dto)
             .then(() => {
                 toast.update(toasty, { render: "Group added", type: "success", isLoading: false, autoClose: 2000 });
                 setNewGroupName("");
@@ -56,7 +56,7 @@ export default function PlayerGroupsSettings() {
 
         const dto: UpdateGroupDTO = { name: newName };
         const toasty = toast.loading("Renaming group...");
-        axios.put(`/api/groups/${groupId}`, dto)
+        api.put(`/api/groups/${groupId}`, dto)
             .then(() => {
                 toast.update(toasty, { render: "Group renamed", type: "success", isLoading: false, autoClose: 2000 });
                 setEditingGroupId(null);
@@ -79,7 +79,7 @@ export default function PlayerGroupsSettings() {
         if (!window.confirm(`Are you sure you want to delete the group "${group.name}"?`)) return;
 
         const toasty = toast.loading("Deleting group...");
-        axios.delete(`/api/groups/${group.id}`)
+        api.delete(`/api/groups/${group.id}`)
             .then(() => {
                 toast.update(toasty, { render: "Group deleted", type: "success", isLoading: false, autoClose: 2000 });
                 setGroups(prev => prev.filter(g => g.id !== group.id));
@@ -91,7 +91,7 @@ export default function PlayerGroupsSettings() {
         e.preventDefault();
         setSaving(true);
 
-        axios.post("/api/auth/change-password", {
+        api.post("/api/auth/change-password", {
             currentPassword,
             newPassword
         })

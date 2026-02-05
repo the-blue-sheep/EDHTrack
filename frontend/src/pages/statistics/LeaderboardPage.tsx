@@ -1,6 +1,7 @@
 import { useState } from "react";
 import MinGamesInput from "../../components/MinGamesInput.tsx";
 import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
+import api from "@/api/axiosConfig";
 
 type DeterminedType = "PLAYER" | "COMMANDER" | "COLOR";
 
@@ -38,8 +39,8 @@ export default function LeaderboardPage() {
             groupIds: groupIds.join(",")
         });
 
-        const res = await fetch(`/api/stats/leaderboard?${params.toString()}`);
-        setData(await res.json());
+        const res = await api.get(`/api/stats/leaderboard?${params.toString()}`);
+        setData(res.data);
         setLoading(false);
     }
 

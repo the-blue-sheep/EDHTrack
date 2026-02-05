@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import {toast} from "react-toastify";
 import DeckStatsTable from "../../components/DeckStatsTable.tsx";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
@@ -68,21 +68,21 @@ export default function PlayerWinratePage() {
         const groupParam =
             groupIds.length > 0 ? groupIds.join(",") : null;
 
-        axios.get<DeckStatDTO[]>(
+        api.get<DeckStatDTO[]>(
             `/api/stats/players/${selectedPlayerId}/top-played-decks`,
             { params: { limit: 100, groupIds: groupParam } }
         ).then(res => {
             setTopPlayed(res.data);
         });
 
-        axios.get<DeckStatDTO[]>(
+        api.get<DeckStatDTO[]>(
             `/api/stats/players/${selectedPlayerId}/top-successful-decks`,
             { params: { limit: 100, minGames, groupIds: groupParam } }
         ).then(res => {
             setTopSuccessful(res.data);
         });
 
-        axios.get<WinrateByPlayerDTO>(
+        api.get<WinrateByPlayerDTO>(
             `/api/stats/player-winrate`,
             { params: { playerId: selectedPlayerId, groupIds: groupParam } }
         ).then(response => {
