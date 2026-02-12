@@ -36,7 +36,7 @@ export default function Navbar() {
 
                     {user ? (
                         <div className="hidden md:flex gap-3 items-center text-lg font-medium text-white">
-                            <span>({user.role})</span>
+                            <span> {user.username} ({user.role})</span>
                             <button onClick={logout}>Logout</button>
                         </div>
                     ) : (
@@ -79,7 +79,7 @@ export default function Navbar() {
                     {user ? (
                         <>
                             <span className="text-sm text-gray-500">
-                                ({user.role})
+                                {user.username} ({user.role})
                             </span>
                             <button
                                 onClick={() => {
