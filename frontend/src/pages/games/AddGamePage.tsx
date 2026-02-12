@@ -1,5 +1,5 @@
 import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import { toast } from "react-toastify";
 import DeckOptionsForPlayer from "../../components/DeckOptionsForPlayer.tsx";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
@@ -38,7 +38,7 @@ export default function AddGamePage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get<PlayerGroup[]>("/api/groups")
+        api.get<PlayerGroup[]>("/api/groups")
             .then(res => setGroups(res.data))
             .catch(err => console.error("Error loading groups:", err));
     }, []);
@@ -162,7 +162,7 @@ export default function AddGamePage() {
             lastTurn: lastTurn
         };
 
-        axios.post("/api/games", body)
+        api.post("/api/games", body)
             .then(() => {
                 toast.update(toasty, {
                     render: "Game added!",

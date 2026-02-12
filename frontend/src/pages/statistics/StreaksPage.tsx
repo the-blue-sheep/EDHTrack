@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import {toast} from "react-toastify";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import {usePlayers} from "../../hooks/usePlayers.ts";
@@ -22,7 +22,7 @@ export default function StreaksPage() {
 
         const toastId = toast.loading("Loading streaks...");
 
-        axios.get<StreakDTO>("/api/stats/streaks", {
+        api.get<StreakDTO>("/api/stats/streaks", {
             params: {
                 playerId: selectedPlayerId,
                 groupIds: groupIds.length > 0 ? groupIds.join(",") : null

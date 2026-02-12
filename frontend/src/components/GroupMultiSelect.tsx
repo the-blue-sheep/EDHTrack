@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import * as React from "react";
 
 interface PlayerGroupDTO {
@@ -17,7 +17,7 @@ export default function GroupMultiSelect({ value, onChange }: Props) {
     const [groups, setGroups] = useState<PlayerGroupDTO[]>([]);
 
     useEffect(() => {
-        axios.get<PlayerGroupDTO[]>("/api/groups")
+        api.get<PlayerGroupDTO[]>("/api/groups")
             .then(res => setGroups(res.data))
             .catch(() => console.error("Failed to load groups"));
     }, []);

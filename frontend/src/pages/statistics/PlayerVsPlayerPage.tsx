@@ -1,5 +1,5 @@
 import {type ChangeEvent, useState} from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import { toast } from "react-toastify";
 import {usePlayers} from "../../hooks/usePlayers.ts";
 
@@ -40,7 +40,7 @@ export default function PlayerVsPlayerPage() {
         setLoading(true);
         const toasty = toast.loading("Loading statistics...");
 
-        axios.get<PlayerVsPlayerDTO>(
+        api.get<PlayerVsPlayerDTO>(
             "/api/stats/player-vs-player-stat",
             {
                 params: {

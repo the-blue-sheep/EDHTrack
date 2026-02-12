@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import {toast} from "react-toastify";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import {BRACKET_LABELS} from "../../utils.ts";
@@ -41,7 +41,7 @@ export default function decksPage() {
 
         const toasty = toast.loading("Loading decks...");
 
-        axios.get(`/api/players/${selectedPlayerId}/decks`)
+        api.get(`/api/players/${selectedPlayerId}/decks`)
             .then(response => {
                 const data = response.data;
                 const decksArray = Array.isArray(data) ? data : Object.values(data);
@@ -74,7 +74,7 @@ export default function decksPage() {
             return;
         }
 
-        axios.get(`/api/players/${id}`)
+        api.get(`/api/players/${id}`)
             .then(res => {
                 setSelectedPlayer(res.data);
             })
@@ -96,7 +96,7 @@ export default function decksPage() {
             isRetired: !selectedPlayer?.isRetired
         };
 
-        axios.post('/api/players/retire', dto)
+        api.post('/api/players/retire', dto)
             .then(res => {
                 const updated = res.data as Player;
 
@@ -128,7 +128,7 @@ export default function decksPage() {
 
             const toasty = toast.loading("Please wait...");
 
-            axios.post('/api/decks/retire', retireDeckDTO)
+            api.post('/api/decks/retire', retireDeckDTO)
                 .then(res => {
                     const updatedDeck = res.data;
                     setDecks(prev =>

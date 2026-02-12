@@ -1,5 +1,5 @@
 import {type ChangeEvent, type FormEvent, useState} from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import {toast} from "react-toastify";
 
 interface PlayerCreateDTO {
@@ -24,7 +24,7 @@ export default function addPlayerPage() {
         const playerCreateDTO: PlayerCreateDTO = {
             name: formData.name
         };
-        axios.post("/api/players", playerCreateDTO)
+        api.post("/api/players", playerCreateDTO)
             .then(() => {toast.update(toasty, {render: "All is good", type: "success", isLoading: false, autoClose: 3000 })
                 setFormData({
                     name: ""

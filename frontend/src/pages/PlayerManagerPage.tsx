@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import { toast } from "react-toastify";
 
 interface PlayerGamesCountDTO {
@@ -20,7 +20,7 @@ export default function PlayerManagerPage() {
         const toasty = toast.loading("Loading players...");
         setLoading(true);
 
-        axios
+        api
             .get<PlayerGamesCountDTO[]>(`/api/stats/players/game-count?hideRetired=${hideRetired}`)
             .then(res => {
                 setData(res.data);
@@ -50,7 +50,7 @@ export default function PlayerManagerPage() {
 
         const toasty = toast.loading("Please wait...");
 
-        axios
+        api
             .post("/api/players/retire", {
                 id: player.playerId,
                 isRetired: !player.isRetired

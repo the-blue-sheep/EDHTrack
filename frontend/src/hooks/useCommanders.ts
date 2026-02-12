@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import { toast } from "react-toastify";
 
 export function useCommanders() {
@@ -9,7 +9,7 @@ export function useCommanders() {
     useEffect(() => {
         const toasty = toast.loading("Loading commanders...");
 
-        axios.get<string[]>("/api/decks/commanders")
+        api.get<string[]>("/api/decks/commanders")
             .then(res => {
                 setCommanders(res.data);
                 toast.update(toasty, {

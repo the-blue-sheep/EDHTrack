@@ -1,12 +1,13 @@
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import * as React from "react";
 import {useAuth} from "../auth/useAuth.ts";
 
-interface AuthUser {
+interface LoginResponse {
+    token: string;
     username: string;
-    role: "USER" | "ADMIN";
+    role: "USER" | "SUPERUSER" | "ADMIN";
     playerId?: number;
 }
 
@@ -21,17 +22,23 @@ export default function LoginPage() {
     function doLogin(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        axios.post<AuthUser>("/api/auth/login", {
-            username,
-            password
-        }).then(res => {
-            login(res.data);
-            navigate("/");
-        }).catch(() => {
-            alert("Invalid credentials");
-        });
-
+        api.post<LoginResponse>("/api/auth/login", { username, password })
+            .then(res => {
+                console.log(res.data);
+                localStorage.setItem("jwt", res.data.token);
+                login(res.data);
+                navigate("/");
+            })
+            .catch(err => {
+                if (err.response && err.response.status === 401) {
+                    alert("Invalid credentials");
+                } else {
+                    console.error("Login error", err);
+                    alert("Something went wrong");
+                }
+            });
     }
+
 
     return (
         <div className="p-6 max-w-md mx-auto">

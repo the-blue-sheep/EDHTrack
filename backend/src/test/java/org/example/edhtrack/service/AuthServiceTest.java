@@ -21,12 +21,13 @@ class AuthServiceTest {
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
     private AuthService authService;
+    private JwtService jwtService;
 
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
-        authService = new AuthService(userRepository, passwordEncoder);
+        authService = new AuthService(userRepository, passwordEncoder, jwtService);
     }
 
     @Test

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import { Link } from "react-router-dom";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import { useCommanders } from "../../hooks/useCommanders";
@@ -52,7 +52,7 @@ export default function GameOverviewPage() {
     useEffect(() => {
         setLoading(true);
 
-        axios.get<PageResponse<GameOverviewDTO>>("/api/games", {
+        api.get<PageResponse<GameOverviewDTO>>("/api/games", {
             params: {
                 page,
                 size: 20,

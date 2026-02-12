@@ -1,11 +1,11 @@
-import axios from "axios";
+import api from "@/api/axiosConfig";
 
 const WUBRG = ["W", "U", "B", "R", "G"];
 
 export async function getColorsForCommander(name: string): Promise<string> {
     if (name === "") return "";
     try {
-        const resp = await axios.get(`https://api.scryfall.com/cards/named`, {
+        const resp = await api.get(`https://api.scryfall.com/cards/named`, {
             params: { exact: name },
             headers: {
                 "Accept": "application/json",

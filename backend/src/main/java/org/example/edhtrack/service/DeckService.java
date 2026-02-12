@@ -52,7 +52,6 @@ public class DeckService {
                 .collect(Collectors.toSet());
     }
 
-
     public DeckDTO createDeck(CreateDeckDTO createDeckDTO) {
         Player player = playerRepository.findById(createDeckDTO.playerId())
                 .orElseThrow( () -> new RuntimeException("Player not found"));

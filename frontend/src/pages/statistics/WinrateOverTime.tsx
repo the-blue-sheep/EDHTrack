@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {toast} from "react-toastify";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import PlayerSelect from "../../components/PlayerSelect.tsx";
 import DeckOptionsForPlayer from "../../components/DeckOptionsForPlayer.tsx";
 import {usePlayers} from "../../hooks/usePlayers.ts";
@@ -34,7 +34,7 @@ export default function WinrateOverTime() {
 
         const toasty = toast.loading("Loading statistics...");
 
-        axios.get<WinrateOverTimeDTO>(
+        api.get<WinrateOverTimeDTO>(
             `/api/stats/players/${selectedPlayerId}/decks/${selectedDeckId}/winrate-over-time`,
             {
                 params: {

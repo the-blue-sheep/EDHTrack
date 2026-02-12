@@ -1,7 +1,7 @@
 import {useParams} from "react-router-dom";
 import {type ChangeEvent, type FormEvent, useEffect, useState} from "react";
 import DeckOptionsForPlayer from "../../components/DeckOptionsForPlayer.tsx";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import {toast} from "react-toastify";
 
@@ -39,10 +39,10 @@ export default function EditGamePage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get(`/api/games/${id}`)
+        api.get(`/api/games/${id}`)
             .then(r => setGame(r.data));
 
-        axios.get<PlayerGroup[]>("/api/groups")
+        api.get<PlayerGroup[]>("/api/groups")
             .then(res => setGroups(res.data))
             .catch(err => console.error("Error loading groups:", err));
     }, [id]);
@@ -120,7 +120,7 @@ export default function EditGamePage() {
             });
             return;
         }
-        await axios.put(`/api/games/${id}`, game)
+        await api.put(`/api/games/${id}`, game)
             .then(() => {
                 toast.update(toasty, {
                     render: "Game edited!",
@@ -144,7 +144,7 @@ export default function EditGamePage() {
         if (!window.confirm("Are you sure you want to delete this game?")) return;
         const toasty = toast.loading("Submitting game...");
 
-        axios.delete(`/api/games`, {params: {id: game.gameId}})
+        api.delete(`/api/games`, {params: {id: game.gameId}})
             .then(() => {
                 toast.update(toasty, {
                     render: "Game deleted!",

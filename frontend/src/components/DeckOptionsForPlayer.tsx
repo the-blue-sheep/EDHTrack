@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 
 interface DeckDTO {
     deckId: number;
@@ -13,7 +13,7 @@ export default function DeckOptionsForPlayer({ playerId }: { playerId: number })
     const [decks, setDecks] = useState<DeckDTO[]>([]);
 
     useEffect(() => {
-        axios.get<DeckDTO[]>(`/api/players/${playerId}/decks`)
+        api.get<DeckDTO[]>(`/api/players/${playerId}/decks`)
             .then(res => setDecks(res.data))
             .catch(err => console.error("Error loading decks:", err));
     }, [playerId]);

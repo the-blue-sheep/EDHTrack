@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import axios from "axios";
+import api from "@/api/axiosConfig";
 import {toast} from "react-toastify";
 import MinGamesInput from "../../components/MinGamesInput.tsx";
 import {useCommanders} from "../../hooks/useCommanders.ts";
@@ -35,7 +35,7 @@ export default function WinrateByCommander() {
         const toasty = toast.loading("Loading statistics...");
         setLoading(true);
 
-        axios.get<CommanderWinRateDTO>(
+        api.get<CommanderWinRateDTO>(
             "/api/stats/commander-winrate",
             { params: { commanderName, minGames, groupIds } }
         )
@@ -68,7 +68,7 @@ export default function WinrateByCommander() {
         const toasty = toast.loading("Loading all commander winrates...");
         setLoading(true);
 
-        axios.get<CommanderWinRateDTO[]>("/api/stats/commander-winrates", { params: { minGames, groupIds } })
+        api.get<CommanderWinRateDTO[]>("/api/stats/commander-winrates", { params: { minGames, groupIds } })
             .then(res => {
                 setAllData(res.data);
                 toast.update(toasty, {
