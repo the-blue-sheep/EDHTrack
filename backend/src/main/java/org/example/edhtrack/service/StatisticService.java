@@ -286,6 +286,17 @@ public class StatisticService {
                 })
                 .toList();
 
+        participants = participants.stream()
+                .collect(Collectors.toMap(
+                        p -> p.getPlayer().getId() + "-" + p.getGame().getId(),
+                        p -> p,
+                        (a, b) -> a
+                ))
+                .values()
+                .stream()
+                .toList();
+
+
         if (groupIdList != null && !groupIdList.isEmpty()) {
             List<Integer> finalGroupIdList = groupIdList;
 
