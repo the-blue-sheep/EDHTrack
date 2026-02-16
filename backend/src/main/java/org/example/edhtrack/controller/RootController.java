@@ -1,12 +1,16 @@
 package org.example.edhtrack.controller;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Controller
 public class RootController {
 
-    @GetMapping(value = { "/", "/{path:[^\\.]*}" })
+    @GetMapping(value = {
+            "/",
+            "/{path:[^\\.]*}",
+            "/**/{path:[^\\.]*}"
+    })
     public String forward() {
         return "forward:/index.html";
     }

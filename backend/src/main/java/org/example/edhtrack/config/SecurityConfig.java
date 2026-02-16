@@ -33,18 +33,16 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
                                 "/index.html",
-                                "/static/**",
                                 "/assets/**",
+                                "/static/**",
                                 "/*.js",
                                 "/*.css",
-                                "/*.json",
-                                "/*.ico",
-                                "/*.png"
+                                "/*.png",
+                                "/*.ico"
                         ).permitAll()
 
                         .requestMatchers("/api/auth/**").permitAll()
@@ -52,7 +50,6 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated()
                 )
-
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
