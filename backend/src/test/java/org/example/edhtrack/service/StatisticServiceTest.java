@@ -287,9 +287,11 @@ class StatisticServiceTest {
 
     @Test
     void getLeaderboard_shouldGroupAndSortCorrectly_byPlayer() {
+
         PlayerGroup group = new PlayerGroup();
         group.setGroupId(1);
 
+        // --- Players ---
         Player alice = player("Alice");
         alice.setPlayerId(1);
         alice.setGroups(Set.of(group));
@@ -302,45 +304,48 @@ class StatisticServiceTest {
         harold.setPlayerId(3);
         harold.setGroups(Set.of(group));
 
+        // --- Decks ---
         Deck deckAlice = deck("Atraxa");
         deckAlice.setDeckId(101);
-        deckAlice.setColors("WUBG");
         deckAlice.setPlayer(alice);
 
         Deck deckStanley = deck("Atraxa");
         deckStanley.setDeckId(102);
-        deckStanley.setColors("WUBG");
         deckStanley.setPlayer(stanley);
 
         Deck deckHarold = deck("Atraxa");
         deckHarold.setDeckId(103);
-        deckHarold.setColors("WUBG");
         deckHarold.setPlayer(harold);
 
+        // --- Games ---
         Game g1 = new Game();
+        g1.setId(1);
+        g1.setGroup(group);
+
+        Game g2 = new Game();
+        g2.setId(2);
+        g2.setGroup(group);
+
+        Game g3 = new Game();
+        g3.setId(3);
+        g3.setGroup(group);
+
+        // --- Participants ---
         GameParticipant g1p1 = gp(g1, alice, deckAlice, true);
         GameParticipant g1p2 = gp(g1, stanley, deckStanley, false);
         GameParticipant g1p3 = gp(g1, harold, deckHarold, false);
-        g1.setPlayers(List.of(g1p1, g1p2, g1p3));
 
-        Game g2 = new Game();
         GameParticipant g2p1 = gp(g2, alice, deckAlice, true);
         GameParticipant g2p2 = gp(g2, stanley, deckStanley, false);
         GameParticipant g2p3 = gp(g2, harold, deckHarold, false);
-        g2.setPlayers(List.of(g2p1, g2p2, g2p3));
 
-        Game g3 = new Game();
         GameParticipant g3p1 = gp(g3, harold, deckHarold, false);
         GameParticipant g3p2 = gp(g3, stanley, deckStanley, true);
         GameParticipant g3p3 = gp(g3, alice, deckAlice, false);
+
+        g1.setPlayers(List.of(g1p1, g1p2, g1p3));
+        g2.setPlayers(List.of(g2p1, g2p2, g2p3));
         g3.setPlayers(List.of(g3p1, g3p2, g3p3));
-
-
-        g1.setGroup(group);
-        g2.setGroup(group);
-        g3.setGroup(group);
-
-
 
         when(gameParticipantRepository.findAll())
                 .thenReturn(List.of(
@@ -349,26 +354,37 @@ class StatisticServiceTest {
                         g3p1, g3p2, g3p3
                 ));
 
+        // --- Act ---
         List<LeaderboardEntryDTO> leaderboard =
-                statisticService.getLeaderboard(Utils.DeterminedType.PLAYER, 0, false, false, "3,4,5,6", "1");
+                statisticService.getLeaderboard(
+                        Utils.DeterminedType.PLAYER,
+                        0,
+                        false,
+                        false,
+                        "3,4,5,6",
+                        "1"
+                );
 
+        // --- Assert ---
         assertEquals(3, leaderboard.size());
 
-        LeaderboardEntryDTO first = leaderboard.get(0);
-        LeaderboardEntryDTO second = leaderboard.get(1);
-        LeaderboardEntryDTO third = leaderboard.get(2);
+        LeaderboardEntryDTO aliceEntry =
+                leaderboard.stream().filter(e -> e.playerName().equals("Alice")).findFirst().orElseThrow();
 
-        assertEquals("Alice", first.playerName());
-        assertEquals(3, first.totalGames());
-        assertEquals(2, first.wins());
+        LeaderboardEntryDTO stanleyEntry =
+                leaderboard.stream().filter(e -> e.playerName().equals("Stanley")).findFirst().orElseThrow();
 
-        assertEquals("Stanley", second.playerName());
-        assertEquals(3, second.totalGames());
-        assertEquals(1, second.wins());
+        LeaderboardEntryDTO haroldEntry =
+                leaderboard.stream().filter(e -> e.playerName().equals("Harold")).findFirst().orElseThrow();
 
-        assertEquals("Harold", third.playerName());
-        assertEquals(3, third.totalGames());
-        assertEquals(0, third.wins());
+        assertEquals(3, aliceEntry.totalGames());
+        assertEquals(2, aliceEntry.wins());
+
+        assertEquals(3, stanleyEntry.totalGames());
+        assertEquals(1, stanleyEntry.wins());
+
+        assertEquals(3, haroldEntry.totalGames());
+        assertEquals(0, haroldEntry.wins());
     }
 
     @Test
