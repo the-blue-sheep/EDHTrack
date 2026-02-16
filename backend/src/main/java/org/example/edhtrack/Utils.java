@@ -137,6 +137,17 @@ public final class Utils {
                 .toList();
     }
 
+    public static List<Integer> parseTableSizes(String tableSizes) {
+        if (tableSizes == null || tableSizes.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays.stream(tableSizes.split(","))
+                .map(String::trim)
+                .map(Integer::parseInt)
+                .toList();
+    }
+
     public static void validateTurnOrder(List<GameParticipantDTO> parts) {
 
         List<Integer> values = parts.stream()

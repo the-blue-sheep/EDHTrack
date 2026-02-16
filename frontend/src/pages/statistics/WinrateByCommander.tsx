@@ -5,7 +5,6 @@ import MinGamesInput from "../../components/MinGamesInput.tsx";
 import {useCommanders} from "../../hooks/useCommanders.ts";
 import GroupMultiSelect from "../../components/GroupMultiSelect.tsx";
 
-
 interface CommanderWinRateDTO {
     commanderName: string;
     totalGames: number;
@@ -22,6 +21,8 @@ export default function WinrateByCommander() {
     const { commanders: allCommanders, loading: commandersLoading } = useCommanders();
     const [groupIds, setGroupIds] = useState<number[]>([]);
 
+    const [tableSizes, setTableSizes] = useState<number[]>([3, 4, 5, 6]);
+
     useEffect(() => {
         if (!commanderName) {
             setData(null);
@@ -35,9 +36,17 @@ export default function WinrateByCommander() {
         const toasty = toast.loading("Loading statistics...");
         setLoading(true);
 
+        const groupParam = groupIds.length > 0 ? groupIds.join(",") : null;
+        const tableSizeParam = tableSizes.length > 0 ? tableSizes.join(",") : null;
+
         api.get<CommanderWinRateDTO>(
             "/api/stats/commander-winrate",
-            { params: { commanderName, minGames, groupIds } }
+            { params: {
+                    commanderName,
+                    minGames,
+                    groupIds: groupParam,
+                    tableSizes: tableSizeParam
+                } }
         )
             .then(res => {
                 setData(res.data);
@@ -62,13 +71,22 @@ export default function WinrateByCommander() {
                 setLoading(false);
             });
 
-    }, [commanderName, allCommanders, groupIds]);
+    }, [commanderName, allCommanders, groupIds, tableSizes, minGames]);
 
     function loadAll() {
         const toasty = toast.loading("Loading all commander winrates...");
         setLoading(true);
 
-        api.get<CommanderWinRateDTO[]>("/api/stats/commander-winrates", { params: { minGames, groupIds } })
+        const groupParam = groupIds.length > 0 ? groupIds.join(",") : null;
+        const tableSizeParam = tableSizes.length > 0 ? tableSizes.join(",") : null;
+
+        api.get<CommanderWinRateDTO[]>("/api/stats/commander-winrates", {
+            params: {
+                minGames,
+                groupIds: groupParam,
+                tableSizes: tableSizeParam
+            }
+        })
             .then(res => {
                 setAllData(res.data);
                 toast.update(toasty, {
@@ -92,31 +110,49 @@ export default function WinrateByCommander() {
     return (
         <div className="flex flex-col gap-4">
             <h3 className="text-xl font-semibold text-purple-800 space-x-6">Winrate by Commander</h3>
-            <div className="flex items-center gap-2">
-                <label className="text-purple-900 font-bold">Commander</label>
-                <input
-                    list="commanders"
-                    value={commanderName}
-                    disabled={commandersLoading}
-                    placeholder={commandersLoading ? "Loading commanders…" : "Commander name"}
-                    onChange={e => setCommanderName(e.target.value)}
-                    className="border rounded px-2 py-1"
-                />
-                <datalist id="commanders">
-                    {allCommanders.map(name => (
-                        <option key={name} value={name} />
-                    ))}
-                </datalist>
 
-                <GroupMultiSelect
-                    value={groupIds}
-                    onChange={setGroupIds}
-                />
+            <div className="flex flex-wrap items-center gap-4 bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2">
+                    <label className="text-purple-900 font-bold">Commander</label>
+                    <input
+                        list="commanders"
+                        value={commanderName}
+                        disabled={commandersLoading}
+                        placeholder={commandersLoading ? "Loading commanders…" : "Commander name"}
+                        onChange={e => setCommanderName(e.target.value)}
+                        className="border rounded px-2 py-1"
+                    />
+                    <datalist id="commanders">
+                        {allCommanders.map(name => (
+                            <option key={name} value={name} />
+                        ))}
+                    </datalist>
+                </div>
 
-                <MinGamesInput
-                    value={minGames}
-                    onChange={setMinGames}
-                />
+                <GroupMultiSelect value={groupIds} onChange={setGroupIds} />
+                <MinGamesInput value={minGames} onChange={setMinGames} />
+
+                <div className="flex flex-col border-l pl-4 border-gray-300">
+                    <label className="text-purple-900 font-bold text-xs">Table Size</label>
+                    <div className="flex gap-2">
+                        {[3, 4, 5, 6].map(size => (
+                            <label key={size} className="flex items-center gap-1 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={tableSizes.includes(size)}
+                                    onChange={e => {
+                                        setTableSizes(prev =>
+                                            e.target.checked
+                                                ? [...prev, size]
+                                                : prev.filter(s => s !== size)
+                                        );
+                                    }}
+                                />
+                                {size}
+                            </label>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             <div className="flex gap-4 items-center mt-4">
@@ -128,7 +164,7 @@ export default function WinrateByCommander() {
                 </button>
             </div>
 
-            {!loading && data ?
+            {!loading && data && (
                 <table className="mt-6 w-full border-collapse">
                     <thead>
                     <tr className="border-b">
@@ -147,34 +183,32 @@ export default function WinrateByCommander() {
                     </tr>
                     </tbody>
                 </table>
-            : null}
-            <div className="flex items-center gap-2">
-                {!loading && allData.length > 0 ?
-                    <table className="mt-6 w-full border-collapse">
-                        <thead>
-                        <tr className="border-b">
-                            <th className="px-3 py-2 text-left">#</th>
-                            <th className="px-3 py-2 text-left">Commander</th>
-                            <th className="px-3 py-2 text-left">Games</th>
-                            <th className="px-3 py-2 text-left">Wins</th>
-                            <th className="px-3 py-2 text-left">Winrate</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {allData.map((c, idx) => (
-                            <tr key={c.commanderName} className="border-b">
-                                <td>{idx + 1}</td>
-                                <td>{c.commanderName}</td>
-                                <td>{c.totalGames}</td>
-                                <td>{c.wins}</td>
-                                <td>{(c.winRate * 100).toFixed(1)}%</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                : null}
-            </div>
-        </div>
+            )}
 
-    )
+            {!loading && allData.length > 0 && (
+                <table className="mt-6 w-full border-collapse">
+                    <thead>
+                    <tr className="border-b">
+                        <th className="px-3 py-2 text-left">#</th>
+                        <th className="px-3 py-2 text-left">Commander</th>
+                        <th className="px-3 py-2 text-left">Games</th>
+                        <th className="px-3 py-2 text-left">Wins</th>
+                        <th className="px-3 py-2 text-left">Winrate</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {allData.map((c, idx) => (
+                        <tr key={c.commanderName} className="border-b">
+                            <td>{idx + 1}</td>
+                            <td>{c.commanderName}</td>
+                            <td>{c.totalGames}</td>
+                            <td>{c.wins}</td>
+                            <td>{(c.winRate * 100).toFixed(1)}%</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            )}
+        </div>
+    );
 }

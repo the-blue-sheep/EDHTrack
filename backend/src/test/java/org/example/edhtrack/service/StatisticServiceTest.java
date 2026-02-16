@@ -443,7 +443,7 @@ class StatisticServiceTest {
 
         when(gameParticipantRepository.findAll()).thenReturn(List.of(gp1, gp2, gp3));
 
-        List<CommanderWinRateDTO> result = statisticService.getWinRatesForAllCommanders(1, "1");
+        List<CommanderWinRateDTO> result = statisticService.getWinRatesForAllCommanders(1, "1", null);
 
         assertEquals(1, result.size());
 
@@ -453,7 +453,7 @@ class StatisticServiceTest {
         assertEquals(1, atraxaDto.wins());
         assertEquals(0.5, atraxaDto.winRate(), 0.0001);
 
-        List<CommanderWinRateDTO> emptyResult = statisticService.getWinRatesForAllCommanders(3, "1");
+        List<CommanderWinRateDTO> emptyResult = statisticService.getWinRatesForAllCommanders(3, "1", null);
         assertTrue(emptyResult.isEmpty());
     }
 
@@ -545,16 +545,16 @@ class StatisticServiceTest {
 
         Player player = player("Hans");
 
-        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 10, 5, 0.5, false);
-        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 30, 15, 0.5, false);
-        DeckStatDTO deck3 = new DeckStatDTO(3, "Yuriko", 20, 10, 0.5, false);
+        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 10, 5, 0.5, null, false);
+        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 30, 15, 0.5, null, false);
+        DeckStatDTO deck3 = new DeckStatDTO(3, "Yuriko", 20, 10, 0.5, null, false);
 
         StatisticService spyService = org.mockito.Mockito.spy(statisticService);
         doReturn(List.of(deck1, deck2, deck3))
                 .when(spyService)
-                .getDeckStatsForPlayer(eq(player), any());
+                .getDeckStatsForPlayer(eq(player), any(), any());
 
-        List<DeckStatDTO> result = spyService.getTopPlayedDecks(player, 3, 2, "");
+        List<DeckStatDTO> result = spyService.getTopPlayedDecks(player, 3, 2, "", null);
 
         assertEquals(2, result.size());
 
@@ -568,17 +568,17 @@ class StatisticServiceTest {
 
         Player player = player("Hans");
 
-        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 10, 5, 0.5, false);
-        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 2, 2, 1.0, false);
-        DeckStatDTO deck3 = new DeckStatDTO(3, "Yuriko", 8, 6, 0.75, false);
-        DeckStatDTO deck4 = new DeckStatDTO(4, "Krenko", 5, 1, 0.2, false);
+        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 10, 5, 0.5, null, false);
+        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 2, 2, 1.0, null, false);
+        DeckStatDTO deck3 = new DeckStatDTO(3, "Yuriko", 8, 6, 0.75, null, false);
+        DeckStatDTO deck4 = new DeckStatDTO(4, "Krenko", 5, 1, 0.2, null, false);
 
         StatisticService spyService = org.mockito.Mockito.spy(statisticService);
 
         doReturn(List.of(deck1, deck2, deck3, deck4))
-                .when(spyService).getDeckStatsForPlayer(eq(player), any());
+                .when(spyService).getDeckStatsForPlayer(eq(player), any(), any());
 
-        List<DeckStatDTO> result = spyService.getTopSuccessfulDecks(player, 3, 2, "");
+        List<DeckStatDTO> result = spyService.getTopSuccessfulDecks(player, 3, 2, "", "");
 
         assertEquals(2, result.size());
 
@@ -602,17 +602,20 @@ class StatisticServiceTest {
 
         Game g1 = new Game();
         GameParticipant gp1 = gp(g1, player, deck1, true);
+        g1.setPlayers(List.of(gp1));
 
         Game g2 = new Game();
         GameParticipant gp2 = gp(g2, player, deck1, false);
+        g2.setPlayers(List.of(gp2));
 
         Game g3 = new Game();
         GameParticipant gp3 = gp(g3, player, deck2, true);
+        g3.setPlayers(List.of(gp3));
 
         when(gameParticipantRepository.findByPlayer(player))
                 .thenReturn(List.of(gp1, gp2, gp3));
 
-        List<DeckStatDTO> result = statisticService.getDeckStatsForPlayer(player, new ArrayList<>());
+        List<DeckStatDTO> result = statisticService.getDeckStatsForPlayer(player, new ArrayList<>(), null);
 
         assertEquals(2, result.size());
 
@@ -671,7 +674,7 @@ class StatisticServiceTest {
         //WHEN & THEN
         when(gameParticipantRepository.findByPlayer(player)).thenReturn(allParticipants);
 
-        TableSizeWinrateResponseDTO result = statisticService.getTableSizeWinRateByPlayer(player, "");
+        TableSizeWinrateResponseDTO result = statisticService.getTableSizeWinRateByPlayer(player, "", "");
 
         assertEquals(player.getId(), result.playerId());
         assertEquals(player.getName(), result.playerName());

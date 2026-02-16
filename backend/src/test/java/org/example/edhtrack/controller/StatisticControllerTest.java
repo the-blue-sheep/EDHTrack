@@ -69,6 +69,7 @@ class StatisticControllerTest {
     void getAllCommanderWinrates_returnsWinrateList() throws Exception {
         when(statisticService.getWinRatesForAllCommanders(
                 anyInt(),
+                any(),
                 any()
         )).thenReturn(List.of(
                 new CommanderWinRateDTO("Atraxa", 10, 6, 0.6)
@@ -132,12 +133,12 @@ class StatisticControllerTest {
         player.setRetired(false);
 
 
-        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 100, 25, 0.25, false);
-        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 10, 5, 0.50, false);
-        DeckStatDTO deck3 = new DeckStatDTO(3, "Y'shtola", 50, 25, 0.50, false);
+        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 100, 25, 0.25, null, false);
+        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 10, 5, 0.50, null, false);
+        DeckStatDTO deck3 = new DeckStatDTO(3, "Y'shtola", 50, 25, 0.50, null, false);
 
         when(playerService.getPlayerById(1)).thenReturn(player);
-        when(statisticService.getTopPlayedDecks(player, 3, 3, null))
+        when(statisticService.getTopPlayedDecks(player, 3, 3, null, null))
                 .thenReturn(List.of(deck1, deck2, deck3));
 
         mockMvc.perform(get("/api/stats/players/1/top-played-decks")
@@ -171,12 +172,12 @@ class StatisticControllerTest {
         player.setRetired(false);
 
 
-        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 100, 25, 0.25, false);
-        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 10, 5, 0.50, false);
-        DeckStatDTO deck3 = new DeckStatDTO(3, "Y'shtola", 50, 25, 0.50, false);
+        DeckStatDTO deck1 = new DeckStatDTO(1, "Atraxa", 100, 25, 0.25, null, false);
+        DeckStatDTO deck2 = new DeckStatDTO(2, "Edgar", 10, 5, 0.50, null, false);
+        DeckStatDTO deck3 = new DeckStatDTO(3, "Y'shtola", 50, 25, 0.50, null, false);
 
         when(playerService.getPlayerById(1)).thenReturn(player);
-        when(statisticService.getTopSuccessfulDecks(player, 3, 3, null))
+        when(statisticService.getTopSuccessfulDecks(player, 3, 3, null, null))
                 .thenReturn(List.of(deck1, deck2, deck3));
 
         mockMvc.perform(get("/api/stats/players/1/top-successful-decks")
@@ -213,7 +214,7 @@ class StatisticControllerTest {
                 new TableSizeWinrateResponseDTO(1, "Alice", List.of(dto3, dto4));
 
         when(playerService.getPlayerById(1)).thenReturn(player);
-        when(statisticService.getTableSizeWinRateByPlayer(player, null)).thenReturn(responseDTO);
+        when(statisticService.getTableSizeWinRateByPlayer(player, null, null)).thenReturn(responseDTO);
 
         mockMvc.perform(get("/api/stats/players/1/table-size-winrate"))
                 .andExpect(status().isOk())
