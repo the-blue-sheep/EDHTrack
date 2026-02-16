@@ -141,11 +141,10 @@ public class StatisticController {
     @GetMapping("/players/{id}/table-size-winrate")
     public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(
             @PathVariable int id,
-            @RequestParam(required = false) String groupIds,
-            @RequestParam(required = false) String tableSizes
+            @RequestParam(required = false) String groupIds
     ) {
         Player player = playerService.getPlayerById(id);
-        return statisticService.getTableSizeWinRateByPlayer(player, groupIds, tableSizes);
+        return statisticService.getTableSizeWinRateByPlayer(player, groupIds);
     }
 
     @GetMapping("/players/{playerId}/decks/{deckId}/winrate-over-time")

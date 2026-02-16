@@ -214,7 +214,7 @@ class StatisticControllerTest {
                 new TableSizeWinrateResponseDTO(1, "Alice", List.of(dto3, dto4));
 
         when(playerService.getPlayerById(1)).thenReturn(player);
-        when(statisticService.getTableSizeWinRateByPlayer(player, null, null)).thenReturn(responseDTO);
+        when(statisticService.getTableSizeWinRateByPlayer(player, null)).thenReturn(responseDTO);
 
         mockMvc.perform(get("/api/stats/players/1/table-size-winrate"))
                 .andExpect(status().isOk())

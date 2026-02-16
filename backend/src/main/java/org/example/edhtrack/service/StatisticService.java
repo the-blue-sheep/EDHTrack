@@ -467,7 +467,7 @@ public class StatisticService {
                 .toList();
     }
 
-    public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(Player player, String groupIds, String tableSizes) {
+    public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(Player player, String groupIds) {
 
         List<Integer> groups = parseGroups(groupIds);
 

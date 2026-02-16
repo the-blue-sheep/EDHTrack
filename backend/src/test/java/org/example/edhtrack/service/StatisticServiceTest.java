@@ -674,7 +674,7 @@ class StatisticServiceTest {
         //WHEN & THEN
         when(gameParticipantRepository.findByPlayer(player)).thenReturn(allParticipants);
 
-        TableSizeWinrateResponseDTO result = statisticService.getTableSizeWinRateByPlayer(player, "", "");
+        TableSizeWinrateResponseDTO result = statisticService.getTableSizeWinRateByPlayer(player, "");
 
         assertEquals(player.getId(), result.playerId());
         assertEquals(player.getName(), result.playerName());
