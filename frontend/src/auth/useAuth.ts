@@ -7,7 +7,14 @@ export interface LoginResponse {
     role: "USER" | "SUPERUSER" | "ADMIN";
     playerId?: number;
 }
+export type Role = "USER" | "SUPERUSER" | "ADMIN";
 
+export interface AuthUser {
+    token: string;
+    username: string;
+    role: Role;
+    playerId?: number | null;
+}
 
 export function useAuth() {
     const ctx = useContext(AuthContext);

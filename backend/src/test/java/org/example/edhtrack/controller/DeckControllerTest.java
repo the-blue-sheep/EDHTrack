@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -39,6 +40,7 @@ class DeckControllerTest {
     StatisticService statisticService;
 
     @Test
+    @WithMockUser(roles = "USER")
     void createDeck_shouldReturnDeck() throws Exception {
 
         DeckDTO response = new DeckDTO(1, Set.of("Keen"), "Hey Arnold!", "WUBR", Utils.Bracket.BRACKET2, false);
@@ -71,6 +73,7 @@ class DeckControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void setRetiredDeckStatus_shouldReturnDifferentRetiredStatus() throws Exception {
         DeckDTO response = new DeckDTO(1, Set.of("Keen"), "Hey Arnold!", "WUBR", Utils.Bracket.BRACKET2, true);
 
@@ -94,6 +97,7 @@ class DeckControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void updateDeck_shouldReturnUpdatedDeck() throws Exception {
         DeckDTO response = new DeckDTO(1, Set.of("Keen"), "Hey Arnold!", "WUBR", Utils.Bracket.BRACKET2, false);
 
