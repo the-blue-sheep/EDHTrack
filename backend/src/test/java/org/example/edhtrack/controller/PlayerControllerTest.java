@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
@@ -65,6 +66,7 @@ class PlayerControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void createPlayer_shouldCreatePlayer_whenCalled() throws Exception {
         // GIVEN
         PlayerResponseDTO response = new PlayerResponseDTO(1, "Harald", false);
@@ -93,6 +95,7 @@ class PlayerControllerTest {
 
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updatePlayer_shouldUpdatePlayerName_andReturnChangedName() throws Exception {
         PlayerUpdateDTO dto = new PlayerUpdateDTO(1, "Harlad", true);
         PlayerResponseDTO response = new PlayerResponseDTO(1, "Harald", false);
@@ -114,6 +117,7 @@ class PlayerControllerTest {
         }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void retirePlayer_shouldChangeRetiredStatus() throws Exception {
         PlayerResponseDTO response = new PlayerResponseDTO(1, "Stephen", true);
 
@@ -136,6 +140,7 @@ class PlayerControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deletePlayer_shouldDeletePlayer() throws Exception {
         //GIVEN
         int playerId = 14;

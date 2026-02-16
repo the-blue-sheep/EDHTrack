@@ -9,7 +9,9 @@ import org.example.edhtrack.dto.game.GameEditDTO;
 import org.example.edhtrack.dto.game.GameOverviewDTO;
 import org.example.edhtrack.dto.player.PlayerResultDTO;
 import org.example.edhtrack.entity.*;
+import org.example.edhtrack.repository.UserRepository;
 import org.example.edhtrack.service.GameService;
+import org.example.edhtrack.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -42,6 +45,12 @@ class GameControllerTest {
 
     @MockitoBean
     private GameService gameService;
+
+    @MockitoBean
+    private UserRepository userRepository;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     @Test
     void getGames_returnsPagedGames() throws Exception {
@@ -165,6 +174,7 @@ class GameControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteGame_returnsNoContent() throws Exception {
 
         mockMvc.perform(delete("/api/games")
@@ -175,6 +185,7 @@ class GameControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateGame_returnsNoContent() throws Exception {
 
         String json = """

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.Optional;
 
@@ -27,10 +28,12 @@ class AuthServiceTest {
     void setUp() {
         userRepository = mock(UserRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
+        jwtService = mock(JwtService.class);
         authService = new AuthService(userRepository, passwordEncoder, jwtService);
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void login_withValidCredentials_returnsLoginResponse() {
         User user = new User();
         user.setUsername("alice");
@@ -50,6 +53,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void login_withInvalidUsername_throwsException() {
         when(userRepository.findByUsername("bob")).thenReturn(Optional.empty());
 
@@ -58,10 +62,11 @@ class AuthServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> authService.login(request));
 
-        assertEquals("Invalid credentials", ex.getMessage());
+        assertEquals("401 UNAUTHORIZED \"Invalid credentials\"", ex.getMessage());
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void login_withInvalidPassword_throwsException() {
         User user = new User();
         user.setUsername("alice");
@@ -75,7 +80,7 @@ class AuthServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> authService.login(request));
 
-        assertEquals("Invalid credentials", ex.getMessage());
+        assertEquals("401 UNAUTHORIZED \"Invalid credentials\"", ex.getMessage());
     }
 
     @Test
