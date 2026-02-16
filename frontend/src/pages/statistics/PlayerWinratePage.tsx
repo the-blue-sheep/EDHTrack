@@ -22,6 +22,7 @@ interface DeckStatDTO {
     totalGames: number;
     wins: number;
     winRate: number;
+    tableSize: number[];
     isRetired: boolean;
 }
 
@@ -33,6 +34,7 @@ export default function PlayerWinratePage() {
     const [topPlayed, setTopPlayed] = useState<DeckStatDTO[]>([]);
     const [topSuccessful, setTopSuccessful] = useState<DeckStatDTO[]>([]);
     const [hideRetiredDecks, setHideRetiredDecks] = useState<boolean>(false);
+    const [tableSizes, setTableSizes] = useState<number[]>([3, 4, 5, 6]);
     const [topPlayedFiltered, setTopPlayedFiltered] = useState<DeckStatDTO[]>([]);
     const [topSuccessfulFiltered, setTopSuccessfulFiltered] = useState<DeckStatDTO[]>([]);
     const [minGames, setMinGames] = useState<number>(1);
@@ -56,9 +58,14 @@ export default function PlayerWinratePage() {
     }
 
     useEffect(() => {
-        setTopPlayedFiltered(getTopDecks(topPlayed, hideRetiredDecks));
-        setTopSuccessfulFiltered(getTopDecks(topSuccessful, hideRetiredDecks));
+        const played = getTopDecks(topPlayed, hideRetiredDecks);
+        const successful = getTopDecks(topSuccessful, hideRetiredDecks);
+
+        setTopPlayedFiltered(played);
+        setTopSuccessfulFiltered(successful);
+
     }, [topPlayed, topSuccessful, hideRetiredDecks]);
+
 
     useEffect(() => {
         if (!selectedPlayerId) return;
@@ -68,23 +75,27 @@ export default function PlayerWinratePage() {
         const groupParam =
             groupIds.length > 0 ? groupIds.join(",") : null;
 
+        const tableSizeParam =
+            tableSizes.length > 0 ? tableSizes.join(",") : null;
+
+
         api.get<DeckStatDTO[]>(
             `/api/stats/players/${selectedPlayerId}/top-played-decks`,
-            { params: { limit: 100, groupIds: groupParam } }
+            { params: { limit: 100, minGames, groupIds: groupParam, tableSizes: tableSizeParam } }
         ).then(res => {
             setTopPlayed(res.data);
         });
 
         api.get<DeckStatDTO[]>(
             `/api/stats/players/${selectedPlayerId}/top-successful-decks`,
-            { params: { limit: 100, minGames, groupIds: groupParam } }
+            { params: { limit: 100, minGames, groupIds: groupParam, tableSizes: tableSizeParam } }
         ).then(res => {
             setTopSuccessful(res.data);
         });
 
         api.get<WinrateByPlayerDTO>(
             `/api/stats/player-winrate`,
-            { params: { playerId: selectedPlayerId, groupIds: groupParam } }
+            { params: { playerId: selectedPlayerId, groupIds: groupParam, tableSizes: tableSizeParam } }
         ).then(response => {
             setData(response.data);
 
@@ -104,7 +115,7 @@ export default function PlayerWinratePage() {
             });
         });
 
-    }, [selectedPlayerId, minGames, groupIds]);
+    }, [selectedPlayerId, minGames, groupIds, tableSizes]);
 
 
     function onChangeHandlerPlayer(playerId?: number) {
@@ -142,6 +153,25 @@ export default function PlayerWinratePage() {
                             value={minGames}
                             onChange={setMinGames}
                         />
+                    </div>
+                    <label className="text-purple-900 font-bold">Table size</label>
+                    <div className="flex gap-4">
+                        {[3, 4, 5, 6].map(size => (
+                            <label key={size} className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    checked={tableSizes.includes(size)}
+                                    onChange={e => {
+                                        setTableSizes(prev =>
+                                            e.target.checked
+                                                ? [...prev, size]
+                                                : prev.filter(s => s !== size)
+                                        );
+                                    }}
+                                />
+                                {size} Players
+                            </label>
+                        ))}
                     </div>
                 </div>
             </div>

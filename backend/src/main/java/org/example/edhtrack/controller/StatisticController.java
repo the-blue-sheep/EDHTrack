@@ -38,9 +38,10 @@ public class StatisticController {
     public CommanderWinRateDTO getCommanderWinRate(
             @RequestParam String commanderName,
             @RequestParam int minGames,
-            @RequestParam(required = false) String groupIds
+            @RequestParam(required = false) String groupIds,
+            @RequestParam(required = false) String tableSizes
     ){
-        return statisticService.getWinRateByCommander(commanderName, minGames, groupIds);
+        return statisticService.getWinRateByCommander(commanderName, minGames, groupIds, tableSizes);
     }
 
     @GetMapping("/color-winrate")
@@ -69,9 +70,10 @@ public class StatisticController {
     @GetMapping("/commander-winrates")
     public List<CommanderWinRateDTO> getAllCommanderWinrates(
             @RequestParam int minGames,
-            @RequestParam(required = false, defaultValue = "1") String groupIds
+            @RequestParam(required = false, defaultValue = "1") String groupIds,
+            @RequestParam(required = false, defaultValue = "3,4,5,6") String tableSizes
     ) {
-        return statisticService.getWinRatesForAllCommanders(minGames, groupIds);
+        return statisticService.getWinRatesForAllCommanders(minGames, groupIds, tableSizes);
     }
 
     @GetMapping("/player-vs-player-stat")
@@ -117,11 +119,11 @@ public class StatisticController {
             @PathVariable int id,
             @RequestParam(defaultValue = "0") int minGames,
             @RequestParam(defaultValue = "6") int limit,
-            @RequestParam(required = false) String groupIds
-
+            @RequestParam(required = false) String groupIds,
+            @RequestParam(required = false) String tableSizes
     ) {
         Player player = playerService.getPlayerById(id);
-        return statisticService.getTopPlayedDecks(player, minGames, limit, groupIds);
+        return statisticService.getTopPlayedDecks(player, minGames, limit, groupIds, tableSizes);
     }
 
     @GetMapping("/players/{id}/top-successful-decks")
@@ -129,19 +131,21 @@ public class StatisticController {
             @PathVariable int id,
             @RequestParam(defaultValue = "0") int minGames,
             @RequestParam(defaultValue = "6") int limit,
-            @RequestParam(required = false) String groupIds
+            @RequestParam(required = false) String groupIds,
+            @RequestParam(required = false) String tableSizes
     ) {
         Player player = playerService.getPlayerById(id);
-        return statisticService.getTopSuccessfulDecks(player, minGames, limit, groupIds);
+        return statisticService.getTopSuccessfulDecks(player, minGames, limit, groupIds, tableSizes);
     }
 
     @GetMapping("/players/{id}/table-size-winrate")
     public TableSizeWinrateResponseDTO getTableSizeWinRateByPlayer(
             @PathVariable int id,
-            @RequestParam(required = false) String groupIds
+            @RequestParam(required = false) String groupIds,
+            @RequestParam(required = false) String tableSizes
     ) {
         Player player = playerService.getPlayerById(id);
-        return statisticService.getTableSizeWinRateByPlayer(player, groupIds);
+        return statisticService.getTableSizeWinRateByPlayer(player, groupIds, tableSizes);
     }
 
     @GetMapping("/players/{playerId}/decks/{deckId}/winrate-over-time")
