@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RootController {
 
-    @GetMapping(value = {"/", "/{x:[^\\.]*}", "/**/{x:[^\\.]*}"})
+    @GetMapping(value = { "/", "/{path:[^\\.]*}" })
     public String forward() {
         return "forward:/index.html";
     }
