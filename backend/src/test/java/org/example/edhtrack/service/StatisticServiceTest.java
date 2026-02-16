@@ -303,17 +303,17 @@ class StatisticServiceTest {
         harold.setGroups(Set.of(group));
 
         Deck deckAlice = deck("Atraxa");
-        deckAlice.setDeckId(1);
+        deckAlice.setDeckId(101);
         deckAlice.setColors("WUBG");
         deckAlice.setPlayer(alice);
 
         Deck deckStanley = deck("Atraxa");
-        deckStanley.setDeckId(1);
+        deckStanley.setDeckId(102);
         deckStanley.setColors("WUBG");
         deckStanley.setPlayer(stanley);
 
         Deck deckHarold = deck("Atraxa");
-        deckHarold.setDeckId(2);
+        deckHarold.setDeckId(103);
         deckHarold.setColors("WUBG");
         deckHarold.setPlayer(harold);
 
