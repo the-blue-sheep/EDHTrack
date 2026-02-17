@@ -2,7 +2,6 @@ package org.example.edhtrack.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -31,22 +30,23 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // SonarCloud: CSRF wird deaktiviert, da die Authentifizierung via JWT (Stateless) erfolgt.
+                // JWTs werden im Authorization-Header gesendet, was immun gegen CSRF-Angriffe ist.
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
                                 "/index.html",
-                                "/assets/**",
-                                "/static/**",
                                 "/*.js",
                                 "/*.css",
                                 "/*.png",
-                                "/*.ico"
+                                "/*.ico",
+                                "/assets/**",
+                                "/static/**"
                         ).permitAll()
 
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
 
                         .anyRequest().authenticated()
                 )

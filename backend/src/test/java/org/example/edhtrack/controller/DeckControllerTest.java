@@ -127,6 +127,7 @@ class DeckControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getAllCommanderNames_returnsListOfNames() throws Exception {
         when(deckService.getAllCommanderNames()).thenReturn(
                 List.of("Atraxa", "Edgar", "Yuriko")

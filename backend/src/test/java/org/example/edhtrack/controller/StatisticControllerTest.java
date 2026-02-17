@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -45,6 +46,7 @@ class StatisticControllerTest {
     private DeckService deckService;
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getLeaderboard_shouldReturnOkAndJson() throws Exception {
         // GIVEN
         List<LeaderboardEntryDTO> mockList = List.of(
@@ -66,6 +68,7 @@ class StatisticControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getAllCommanderWinrates_returnsWinrateList() throws Exception {
         when(statisticService.getWinRatesForAllCommanders(
                 anyInt(),
@@ -86,6 +89,7 @@ class StatisticControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getPlayerGameCounts_returnsNumberOfGames() throws Exception {
         when(statisticService.getPlayerGamesCount(false))
                 .thenReturn(List.of(
@@ -101,6 +105,7 @@ class StatisticControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getPlayerDetail_returnsPlayerDetail() throws Exception {
         Player player = new Player();
         player.setId(1);
@@ -126,6 +131,7 @@ class StatisticControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getTopPlayedDecks_returnsTopPlayedDecks() throws Exception {
         Player player = new Player();
         player.setId(1);
@@ -165,6 +171,7 @@ class StatisticControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getTopSuccessfulDecks_returnsNumberOfDecks() throws Exception {
         Player player = new Player();
         player.setId(1);
@@ -204,6 +211,7 @@ class StatisticControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void testGetTableSizeWinRateByPlayer() throws Exception {
         Player player = new Player();
         player.setId(1);
@@ -225,6 +233,7 @@ class StatisticControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getWinrateOverTime_shouldReturnWinrateData() throws Exception {
         // GIVEN
         int playerId = 1;
