@@ -1,121 +1,77 @@
-# EDHTrack
+# EDHTrack 🃏
 
-EDHTrack is a web application for tracking and analyzing Commander (EDH) games.  
-It allows players to record games, manage decks and players, and view statistics such as most played or most successful decks.
-
----
-
-## Features
-
-- Create, edit and delete games
-- Assign players and decks to games
-- Track winners and game notes
-- View player-based deck statistics
-- Analyze top played and top successful decks
-- Responsive web interface
+EDHTrack is a modern web application designed for Magic: The Gathering (MTG) enthusiasts to track and analyze Commander (EDH) games.
 
 ---
 
-## Tech Stack
+## 🚀 Features
 
-### Frontend
-- React (TypeScript)
-- Vite
-- React Router
-- Axios
-- Tailwind CSS
-- React Toastify
+- **Game Management:** Create, edit, and delete games with ease.
+- **Player & Deck Tracking:** Manage your playgroup and their respective decks.
+- **Deep Analytics:** View player-based statistics, win rates, and identify your most successful decks.
+- **Export/Import:** Handle game data via Excel for external backups or sharing.--not yet
+- **Secure:** Integrated JWT-based authentication.
+- **Responsive Design:** Optimized for both desktop and mobile use.
+
+---
+
+## 🛠 Tech Stack
 
 ### Backend
-- Java 21
-- Spring Boot
-- Spring Web
-- Spring Data JPA (Hibernate)
-- Spring Validation
-- Lombok
+- Java 21 with Spring Boot 3.5
+- Spring Security (JWT Authentication)
+- Spring Data JPA (PostgreSQL / H2)
+- SpringDoc OpenAPI (Swagger UI for API documentation)
+- Lombok & Apache POI
 
-### Database
-- PostgreSQL (production)
-- H2 (tests)
-
-### Testing
-- JUnit 5
-- Mockito
-- Spring Boot Test
-
-### Tooling & Infrastructure
-- Maven
-- Vite
-- ESLint
-- JaCoCo (code coverage)
-- Apache POI (Excel export/import)
-- spring-dotenv (environment configuration)
+### Frontend
+- React (TypeScript) with Vite
+- Tailwind CSS & Lucide Icons
+- Axios (API communication)
+- React Toastify (Notifications)
 
 ---
 
-## Getting Started
+## ⚙️ Configuration & Environment
 
-### Prerequisites
+The application uses spring-dotenv. Create a .env file in the backend root or set the following environment variables:
 
-- Java 21
-- Node.js (LTS recommended)
-- PostgreSQL
-- Maven
+APP_JWT_SECRET=your_secret_key_at_least_32_characters_long
+
+# For Production (Render/PostgreSQL)
+SPRING_DATASOURCE_URL=jdbc:postgresql://your-db-host:port/db-name
+SPRING_DATASOURCE_USERNAME=your_user
+SPRING_DATASOURCE_PASSWORD=your_password
 
 ---
 
-## Backend Setup
-Configure database access in `application.yml` or via environment variables.
-   
-### Run the backend:
-```bash
-  mvn spring-boot:run
-```
+## 🛠 Getting Started
 
-### The backend will be available at:
-http://localhost:8080
+### Backend
+1. Navigate to the backend folder.
+2. Build and run:
+   mvn clean spring-boot:run
+3. API Documentation: Once the backend is running, explore the API at:  
+   http://localhost:8080/swagger-ui/index.html
 
+### Frontend
+1. Navigate to the frontend folder.
+2. Install & Start:
+   npm install
+   npm run dev
+3. Open http://localhost:5173 in your browser.
 
+---
 
+## 🧪 Testing & Quality
 
-## Frontend Setup
+- Unit & Integration Tests: Run mvn test
+- Code Coverage: Run mvn verify (Report generated via JaCoCo in target/site/jacoco/index.html)
 
-#### Install dependencies:
-```bash
-npm install
-```
+---
 
-#### Install dependencies:
-```bash
-  npm install
-```
+## 📖 API Highlights
 
-### Start development server:
-```bash
-  npm run dev
-```
-
-### The frontend will be available at:
-http://localhost:5173
-
-
-# API Overview
-- GET /api/games
-- GET /api/games/{id}
-- POST /api/games
-- PUT /api/games/{id}
-- DELETE /api/games?id={id}
-- GET /api/stats/players/{id}/top-played-decks
-- GET /api/stats/players/{id}/top-successful-decks
-
-# Testing
-
-### Run backend tests with:
-```bash
-  mvn test
-```
-
-### Generate code coverage report:
-```bash
-  mvn verify
-```
+- GET /api/games - List all recorded games
+- POST /api/auth/login - Authenticate and receive JWT
+- GET /api/stats/players/{id}/top-played-decks - Analytics for a specific player
