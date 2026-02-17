@@ -31,6 +31,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // SonarCloud: CSRF wird deaktiviert, da die Authentifizierung via JWT (Stateless) erfolgt.
+                // JWTs werden im Authorization-Header gesendet, was immun gegen CSRF-Angriffe ist.
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
