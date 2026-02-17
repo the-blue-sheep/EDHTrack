@@ -45,6 +45,7 @@ class PlayerControllerTest {
     private DeckService deckService;
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getAllPlayers_shouldReturnListOfOnePlayer_whenCalled()  throws Exception {
         //GIVEN
         PlayerResponseDTO response = new PlayerResponseDTO(0, "Günther", false);
@@ -153,6 +154,7 @@ class PlayerControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void findDecks_shouldReturnListOfDecks_whenCalled() throws Exception {
         int playerId = 10;
 
