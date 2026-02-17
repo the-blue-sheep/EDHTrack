@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class RootController {
 
-    @GetMapping(value = { "/", "/{path:[^\\.]*}", "/**/{path:[^\\.]*}" })
+    @GetMapping(value = { "/", "/{path:[^\\.]*}" })
     public String forward(@PathVariable(required = false) String path) {
         return "forward:/index.html";
     }
