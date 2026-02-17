@@ -39,16 +39,15 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/index.html",
-                                "/assets/**",
-                                "/static/**",
                                 "/*.js",
                                 "/*.css",
                                 "/*.png",
-                                "/*.ico"
+                                "/*.ico",
+                                "/assets/**",
+                                "/static/**"
                         ).permitAll()
 
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
