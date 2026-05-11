@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
 
                         .requestMatchers("/api/stats/**").permitAll()
+                        .requestMatchers("/api/groups/**").permitAll()
 
                         .requestMatchers(
                                 "/v3/api-docs/**",
